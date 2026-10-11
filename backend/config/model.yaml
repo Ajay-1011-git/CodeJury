@@ -1,0 +1,6 @@
+model_id: mlx-community/Phi-4-mini-instruct-mlx-4Bit
+model_revision: d848c30f6d5419b9892433cf6b1062626d15340e
+model_dir: null
+adapter_dir: null
+allow_raw: false
+profile: stage1-demo
