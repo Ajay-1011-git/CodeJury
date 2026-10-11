@@ -1,0 +1,16 @@
+{
+  "schema_version": "stage1.v1",
+  "runtime_mode": "fixture",
+  "status": "not_started",
+  "model_id": null,
+  "model_revision": null,
+  "adapter_sha256": null,
+  "train_base_problems": 0,
+  "validation_base_problems": 0,
+  "evaluation_base_problems": 0,
+  "train_records": 0,
+  "steps": 0,
+  "loss_points": [],
+  "evaluation": [],
+  "provenance_note": "Stage 1 baseline: Training not yet started. Metrics awaiting Ajay's backend training pipeline."
+}

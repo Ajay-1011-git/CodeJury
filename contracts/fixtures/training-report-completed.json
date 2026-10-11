@@ -1,0 +1,80 @@
+{
+  "schema_version": "stage1.v1",
+  "runtime_mode": "fixture",
+  "status": "completed",
+  "model_id": "qwen2.5-coder-7b-instruct",
+  "model_revision": "v1.0",
+  "adapter_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "train_base_problems": 140,
+  "validation_base_problems": 30,
+  "evaluation_base_problems": 50,
+  "train_records": 420,
+  "steps": 300,
+  "loss_points": [
+    {
+      "step": 0,
+      "train_loss": 2.45,
+      "validation_loss": 2.51
+    },
+    {
+      "step": 50,
+      "train_loss": 1.82,
+      "validation_loss": 1.95
+    },
+    {
+      "step": 100,
+      "train_loss": 1.34,
+      "validation_loss": 1.48
+    },
+    {
+      "step": 150,
+      "train_loss": 1.02,
+      "validation_loss": 1.21
+    },
+    {
+      "step": 200,
+      "train_loss": 0.78,
+      "validation_loss": 1.05
+    },
+    {
+      "step": 250,
+      "train_loss": 0.61,
+      "validation_loss": 0.94
+    },
+    {
+      "step": 300,
+      "train_loss": 0.49,
+      "validation_loss": 0.88
+    }
+  ],
+  "evaluation": [
+    {
+      "method": "raw_single",
+      "total": 50,
+      "solved": 14,
+      "unresolved": 36,
+      "incorrect_accepted": 0,
+      "mean_elapsed_ms": 1120,
+      "mean_output_tokens": 185
+    },
+    {
+      "method": "trained_a_single",
+      "total": 50,
+      "solved": 28,
+      "unresolved": 22,
+      "incorrect_accepted": 0,
+      "mean_elapsed_ms": 1150,
+      "mean_output_tokens": 192
+    },
+    {
+      "method": "stage1_loop",
+      "total": 50,
+      "solved": 39,
+      "unresolved": 11,
+      "incorrect_accepted": 0,
+      "mean_elapsed_ms": 3480,
+      "mean_output_tokens": 580
+    }
+  ],
+  "provenance_note": "Measured benchmark evaluation on frozen 50-problem test split. Real metrics provided by Ajay's training run."
+}

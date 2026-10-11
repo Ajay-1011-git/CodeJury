@@ -1,0 +1,18 @@
+{
+  "contracts/fixtures/health.json": "Health",
+  "contracts/fixtures/run-create.json": "RunCreate",
+  "contracts/fixtures/examples.json": "Examples",
+  "contracts/fixtures/run-accepted.json": "RunAccepted",
+  "contracts/fixtures/candidate.json": "Candidate",
+  "contracts/fixtures/error.json": "Error",
+  "contracts/fixtures/event-page.json": "EventPage",
+  "contracts/fixtures/run-snapshot-queued.json": "RunSnapshot",
+  "contracts/fixtures/run-snapshot-running.json": "RunSnapshot",
+  "contracts/fixtures/run-snapshot-supported.json": "RunSnapshot",
+  "contracts/fixtures/run-snapshot-unresolved.json": "RunSnapshot",
+  "contracts/fixtures/run-snapshot-invalid-input.json": "RunSnapshot",
+  "contracts/fixtures/run-snapshot-infrastructure-error.json": "RunSnapshot",
+  "contracts/fixtures/run-snapshot-cancelled.json": "RunSnapshot",
+  "contracts/fixtures/training-report-not-started.json": "TrainingReport",
+  "contracts/fixtures/training-report-completed.json": "TrainingReport"
+}

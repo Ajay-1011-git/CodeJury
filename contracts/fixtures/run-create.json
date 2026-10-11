@@ -1,0 +1,56 @@
+{
+  "schema_version": "stage1.v1",
+  "source": "def sort_ints(items):\n    res = list(items)\n    for i in range(len(res)):\n        for j in range(i + 1, len(res)):\n            if res[i] < res[j]:\n                res[i], res[j] = res[j], res[i]\n    return res\n",
+  "function_name": "sort_ints",
+  "contract_text": "Sort an integer list in non-decreasing order while preserving all input elements and multiplicities.",
+  "input_domain": [
+    {
+      "kind": "list_integer",
+      "min": -100,
+      "max": 100,
+      "min_length": 0,
+      "max_length": 20
+    }
+  ],
+  "supplied_tests": [
+    {
+      "test_id": "test_supplied_1",
+      "args": [
+        [
+          3,
+          1,
+          2
+        ]
+      ],
+      "expected": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "test_id": "test_supplied_2",
+      "args": [
+        []
+      ],
+      "expected": []
+    },
+    {
+      "test_id": "test_supplied_3",
+      "args": [
+        [
+          5,
+          5,
+          2
+        ]
+      ],
+      "expected": [
+        2,
+        5,
+        5
+      ]
+    }
+  ],
+  "approved_property": "sort_ascending_ints",
+  "resource_profile": "stage1-demo"
+}

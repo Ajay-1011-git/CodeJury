@@ -1,0 +1,9 @@
+{
+  "schema_version": "stage1.v1",
+  "service": "codejury-stage1",
+  "runtime_mode": "fixture",
+  "model_ready": true,
+  "sandbox_ready": true,
+  "fixer_a_trained": false,
+  "stage2_enabled": false
+}
