@@ -17,3 +17,7 @@ Tested installed versions: FastAPI 0.143.0, Pydantic 2.14.0, jsonschema 4.26.0, 
 Ajay approved initializing the missing seed from the guides. Schema extraction is byte-for-byte with the required SHA-256 `5f760939e1fbf34cb7613a38f9476595d23a829089e8e557adc015cb0168f0df`. The eight fixtures are newly authored synthetic examples, not recovered originals. The architecture reference is copied byte-for-byte. This is recorded in `contracts/README.md`; subsequent task changes are backend-only.
 
 Pending: real checkpoint load/generate, 10–20-step train/save/reload pilot, isolated VM mounts, ARM64 image digest and execution. A.01 permits these to remain pending. Stage 1 milestones are not complete.
+
+## A.03 installed/runtime follow-up
+
+Installed Colima 0.10.3 and Lima 2.2.1. `colima start --help` confirmed `--mount none`, `--activate=false`, `--ssh-agent=false`, `--ssh-config=false`, `--arch aarch64`, `--vm-type vz`, `--dns`, CPU/memory/disk controls. `docker --context colima-codejury-stage1` is used explicitly; the user's existing default context was preserved. Both effective Lima configuration and guest mount table were inspected. ARM64 Python 3.11.16 image digest and eight actual runner tests are recorded in handoff.md. No Linux MLX/CUDA stack is installed.
