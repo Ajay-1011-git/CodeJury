@@ -1,0 +1,8 @@
+{
+  "schema_version": "stage1.v1",
+  "error": {
+    "code": "fixture_example",
+    "message": "Synthetic error envelope; no live execution.",
+    "field_errors": []
+  }
+}

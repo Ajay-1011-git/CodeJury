@@ -1,0 +1,10 @@
+{
+  "run-create.json": "RunCreate",
+  "error.json": "Error",
+  "health.json": "Health",
+  "examples.json": "Examples",
+  "run-accepted.json": "RunAccepted",
+  "event-page.json": "EventPage",
+  "training-report.json": "TrainingReport",
+  "run-queued.json": "RunSnapshot"
+}
