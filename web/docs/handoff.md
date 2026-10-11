@@ -128,3 +128,48 @@
    ALL SEQUENCES AND SCHEMA VALIDATIONS PASSED PERFECTLY!
    ```
 
+---
+
+## Task Audit: S.03 · Typed Seam Client and Run Lifecycle
+- **Status**: ✅ Complete
+- **Permitted Files Modified**:
+  - `web/src/api.mjs`
+  - `web/src/state.mjs`
+  - `web/src/app.mjs`
+  - `web/tests/api.test.mjs`
+  - `web/tests/state.test.mjs`
+  - `web/docs/handoff.md`
+
+### Verification Commands & Actual Evidence
+1. **Node Test Suite (API Client & State Lifecycle)**:
+   ```
+   $ cd web && npm test
+   > codejury-web@1.0.0 test
+   > node --test tests/*.test.mjs
+
+   Rejected non-localhost api override: evil.cloud.com
+   ✔ resolveApiBase respects strict localhost constraints (0.956084ms)
+   ✔ ApiClient routes execute successfully with exact methods (0.35375ms)
+   ✔ ApiClient throws on wrong schema_version (0.817584ms)
+   ✔ ApiClient handles typed Error envelopes: 404, 409, 422, 503 (0.195042ms)
+   ✔ ApiClient handles inaccessible backend network failures (0.134875ms)
+   ✔ Fixture manifest and all 16 fixtures exist and parse cleanly (2.852375ms)
+   ✔ Candidate fixture has accurate SHA-256 of UTF-8 source bytes (0.366458ms)
+   ✔ Run snapshot fixtures validate terminal rules (0.143166ms)
+   ✔ Training report fixtures reflect factual status (0.112958ms)
+   ✔ AppState prevents duplicate submissions (51.399291ms)
+   ✔ AppState generation token discards stale async polls (0.358167ms)
+   ✔ AppState deduplicates and preserves ordering of events (0.164459ms)
+   ✔ AppState terminates polling and retrieves report upon terminal status (0.111ms)
+   ✔ AppState cancelRun terminates polling cleanly (0.149625ms)
+   ℹ tests 14
+   ℹ suites 0
+   ℹ pass 14
+   ℹ fail 0
+   ℹ cancelled 0
+   ℹ skipped 0
+   ℹ todo 0
+   ℹ duration_ms 94.263125
+   ```
+
+

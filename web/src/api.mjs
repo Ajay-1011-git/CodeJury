@@ -1,94 +1,161 @@
 /**
- * CodeJury API Seam Client (stage1.v1)
- * Adheres strictly to contracts/stage1-api.schema.json
+ * CodeJury Typed API Seam Client (stage1.v1)
+ * Strictly conforms to contracts/stage1-api.schema.json
  */
 
-export function resolveApiBase() {
-  const urlParams = new URLSearchParams(window.location.search);
+export class ApiError extends Error {
+  constructor(message, status, code, fieldErrors = []) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.code = code;
+    this.fieldErrors = fieldErrors;
+  }
+}
+
+export function resolveApiBase(searchStr = null, loc = null) {
+  const search = searchStr !== null ? searchStr : (typeof window !== 'undefined' ? window.location.search : '');
+  const locationObj = loc !== null ? loc : (typeof window !== 'undefined' ? window.location : { port: '8080', origin: 'http://127.0.0.1:8080' });
+
+  const urlParams = new URLSearchParams(search);
   const override = urlParams.get('api');
   if (override) {
     try {
       const parsed = new URL(override);
-      // Strictly enforce localhost URLs
-      if (['localhost', '127.0.0.1'].includes(parsed.hostname)) {
+      // Strict localhost-only requirement
+      const allowedHosts = ['localhost', '127.0.0.1'];
+      if (allowedHosts.includes(parsed.hostname)) {
         return parsed.origin;
       }
+      console.warn(`Rejected non-localhost api override: ${parsed.hostname}`);
     } catch {
-      console.warn('Invalid api override URL, falling back to default');
+      console.warn(`Malformed api override URL: ${override}`);
     }
   }
-  // Default to mock server on port 8001 during standalone dev, or same-origin if not on port 8080
-  if (window.location.port === '8080') {
+
+  // Same-origin default, unless running on dedicated UI dev port 8080
+  if (locationObj.port === '8080') {
     return 'http://127.0.0.1:8001';
   }
-  return window.location.origin;
+  return locationObj.origin || 'http://127.0.0.1:8001';
 }
 
 export class ApiClient {
-  constructor(baseUrl = resolveApiBase()) {
-    this.baseUrl = baseUrl;
+  constructor(baseUrl = null, fetchFn = null) {
+    this.baseUrl = baseUrl || (typeof window !== 'undefined' ? resolveApiBase() : 'http://127.0.0.1:8001');
+    this.fetch = fetchFn || (typeof window !== 'undefined' ? window.fetch.bind(window) : globalThis.fetch);
   }
 
   async getHealth() {
-    return this._fetch('/health');
+    const data = await this._request('/health');
+    this._guardSchemaVersion(data, 'Health');
+    return data;
   }
 
   async getExamples() {
-    return this._fetch('/examples');
+    const data = await this._request('/examples');
+    this._guardSchemaVersion(data, 'Examples');
+    return data;
   }
 
   async createRun(payload) {
-    return this._fetch('/runs', {
+    if (!payload || payload.schema_version !== 'stage1.v1') {
+      throw new ApiError("RunCreate payload must have schema_version 'stage1.v1'", 400, 'CLIENT_VALIDATION_ERROR');
+    }
+    const data = await this._request('/runs', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
+    this._guardSchemaVersion(data, 'RunAccepted');
+    return data;
   }
 
   async getRun(runId) {
-    return this._fetch(`/runs/${encodeURIComponent(runId)}`);
+    const data = await this._request(`/runs/${encodeURIComponent(runId)}`);
+    this._guardSchemaVersion(data, 'RunSnapshot');
+    return data;
   }
 
   async getEvents(runId, after = 0) {
-    return this._fetch(`/runs/${encodeURIComponent(runId)}/events?after=${after}`);
+    const data = await this._request(`/runs/${encodeURIComponent(runId)}/events?after=${encodeURIComponent(after)}`);
+    this._guardSchemaVersion(data, 'EventPage');
+    return data;
   }
 
   async getCandidate(runId, candidateId) {
-    return this._fetch(`/runs/${encodeURIComponent(runId)}/candidates/${encodeURIComponent(candidateId)}`);
+    const data = await this._request(`/runs/${encodeURIComponent(runId)}/candidates/${encodeURIComponent(candidateId)}`);
+    return data;
   }
 
   async cancelRun(runId) {
-    return this._fetch(`/runs/${encodeURIComponent(runId)}/cancel`, {
+    const data = await this._request(`/runs/${encodeURIComponent(runId)}/cancel`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: '{}'
     });
+    this._guardSchemaVersion(data, 'RunSnapshot');
+    return data;
   }
 
   async getReport(runId) {
-    return this._fetch(`/runs/${encodeURIComponent(runId)}/report`);
+    const data = await this._request(`/runs/${encodeURIComponent(runId)}/report`);
+    this._guardSchemaVersion(data, 'RunSnapshot');
+    return data;
   }
 
   async getTrainingReport() {
-    return this._fetch('/stage1/training-report');
+    const data = await this._request('/stage1/training-report');
+    this._guardSchemaVersion(data, 'TrainingReport');
+    return data;
   }
 
-  async _fetch(path, options = {}) {
-    const url = `${this.baseUrl}${path}`;
-    const res = await fetch(url, {
-      ...options,
-      headers: {
-        'Accept': 'application/json',
-        ...(options.headers || {})
+  _guardSchemaVersion(data, endpointName) {
+    if (data && typeof data === 'object' && 'schema_version' in data) {
+      if (data.schema_version !== 'stage1.v1') {
+        throw new ApiError(
+          `Schema version mismatch in ${endpointName}: expected 'stage1.v1', got '${data.schema_version}'`,
+          500,
+          'SCHEMA_VERSION_MISMATCH'
+        );
       }
-    });
-    const data = await res.json().catch(() => null);
-    if (!res.ok) {
-      const err = new Error(data?.error?.message || `HTTP ${res.status}`);
-      err.status = res.status;
-      err.body = data;
-      throw err;
     }
-    return data;
+  }
+
+  async _request(path, options = {}) {
+    const url = `${this.baseUrl}${path}`;
+    const headers = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      ...(options.headers || {})
+    };
+
+    let res;
+    try {
+      res = await this.fetch(url, {
+        ...options,
+        headers
+      });
+    } catch (netErr) {
+      throw new ApiError(`Network connection failed to ${this.baseUrl}: ${netErr.message}`, 0, 'NETWORK_ERROR');
+    }
+
+    let parsedBody = null;
+    const text = await res.text().catch(() => '');
+    if (text) {
+      try {
+        parsedBody = JSON.parse(text);
+      } catch {
+        parsedBody = null;
+      }
+    }
+
+    if (!res.ok) {
+      const errInfo = parsedBody?.error || {};
+      const code = errInfo.code || `HTTP_${res.status}`;
+      const msg = errInfo.message || `Request failed with status ${res.status}`;
+      const fieldErrors = errInfo.field_errors || [];
+      throw new ApiError(msg, res.status, code, fieldErrors);
+    }
+
+    return parsedBody;
   }
 }
