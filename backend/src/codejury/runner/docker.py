@@ -81,6 +81,8 @@ class DockerRunner:
             "create",
             "--name",
             name,
+            "--label",
+            f"codejury.worker-pid={os.getpid()}",
             "--pull",
             "never",
             "--platform",
@@ -110,6 +112,21 @@ class DockerRunner:
             "-i",
             self.image,
         )
+
+    def cleanup_worker(self, pid):
+        """Only our labelled jobs belonging to a terminated native worker."""
+        listed = subprocess.run(
+            self.docker("ps", "-aq", "--filter", f"label=codejury.worker-pid={int(pid)}"),
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=True,
+        )
+        for container in listed.stdout.splitlines():
+            if len(container) == 12 and all(c in "0123456789abcdef" for c in container):
+                subprocess.run(
+                    self.docker("rm", "-f", container), capture_output=True, timeout=10, check=True
+                )
 
     def inspect_job(self, name: str) -> dict:
         inspected = subprocess.run(
@@ -142,14 +159,31 @@ class DockerRunner:
     def execute(
         self, source: str, function_name: str, args: list, cancel: threading.Event | None = None
     ) -> Result:
-        inspect_source(source, function_name, len(args))
-        validate_json(args)
+        return self._execute(source, function_name, [args], cancel, batch=False)[0]
+
+    def execute_many(self, source, function_name, batch_args, cancel=None, *, deadline=None):
+        if not 1 <= len(batch_args) <= 8:
+            raise ValueError("Batch must contain 1–8 invocations")
+        return self._execute(
+            source, function_name, batch_args, cancel, batch=True, deadline=deadline
+        )
+
+    def _execute(self, source, function_name, batch_args, cancel, *, batch, deadline=None):
+        for args in batch_args:
+            inspect_source(source, function_name, len(args))
+            validate_json(args)
         self.ready()
         if cancel is not None and cancel.is_set():
             raise Cancelled("Run cancelled before execution")
+        if deadline is not None and time.monotonic() >= deadline:
+            raise TimeoutError("Episode deadline reached before sandbox job")
         name = "codejury-job-" + uuid.uuid4().hex
         payload = json.dumps(
-            {"source": source, "function_name": function_name, "args": args}
+            {
+                "source": source,
+                "function_name": function_name,
+                ("batch_args" if batch else "args"): batch_args if batch else batch_args[0],
+            }
         ).encode()
         if len(payload) > 65536:
             raise ValueError("Job input too large")
@@ -193,33 +227,48 @@ class DockerRunner:
             while process.poll() is None:
                 if cancel is not None and cancel.is_set():
                     raise Cancelled("Run cancelled during execution")
-                if overflow.is_set() or time.monotonic() - start > 4:
-                    return Result(
-                        None,
-                        "OutputLimitExceeded" if overflow.is_set() else "TimeoutError",
-                        False,
-                        int((time.monotonic() - start) * 1000),
-                        [],
-                        overflow.is_set(),
-                    )
+                if deadline is not None and time.monotonic() >= deadline:
+                    raise TimeoutError("Episode deadline reached during sandbox job")
+                if overflow.is_set() or time.monotonic() - start > (
+                    4 + 3 * len(batch_args) if batch else 4
+                ):
+                    return [
+                        Result(
+                            None,
+                            "OutputLimitExceeded" if overflow.is_set() else "TimeoutError",
+                            False,
+                            int((time.monotonic() - start) * 1000),
+                            [],
+                            overflow.is_set(),
+                        )
+                        for _ in batch_args
+                    ]
                 time.sleep(0.02)
             for reader in readers:
                 reader.join(timeout=1)
             if process.returncode != 0:
                 raise InfrastructureError("Sandbox worker failed; no candidate outcome available")
-            body = json.loads(output)
-            if set(body) != set(Result.__dataclass_fields__):
-                raise ValueError("Invalid worker result envelope")
-            validate_json(body["actual_output"])
-            if type(body["input_mutated"]) is not bool or type(body["duration_ms"]) is not int:
-                raise ValueError("Invalid worker result types")
-            if body["exception_type"] is not None and type(body["exception_type"]) is not str:
-                raise ValueError("Invalid exception type")
-            if type(body["trace"]) is not list or any(type(x) is not str for x in body["trace"]):
-                raise ValueError("Invalid trace")
-            if type(body["trace_truncated"]) is not bool:
-                raise ValueError("Invalid truncation flag")
-            return Result(**body)
+            envelope = json.loads(output)
+            bodies = envelope["results"] if batch else [envelope]
+            if len(bodies) != len(batch_args):
+                raise ValueError("Batch result count mismatch")
+            results = []
+            for body in bodies:
+                if set(body) != set(Result.__dataclass_fields__):
+                    raise ValueError("Invalid worker result envelope")
+                validate_json(body["actual_output"])
+                if type(body["input_mutated"]) is not bool or type(body["duration_ms"]) is not int:
+                    raise ValueError("Invalid worker result types")
+                if body["exception_type"] is not None and type(body["exception_type"]) is not str:
+                    raise ValueError("Invalid exception type")
+                if type(body["trace"]) is not list or any(
+                    type(x) is not str for x in body["trace"]
+                ):
+                    raise ValueError("Invalid trace")
+                if type(body["trace_truncated"]) is not bool:
+                    raise ValueError("Invalid truncation flag")
+                results.append(Result(**body))
+            return results
         except (json.JSONDecodeError, ValueError, BrokenPipeError) as exc:
             raise InfrastructureError("Malformed sandbox output") from exc
         finally:

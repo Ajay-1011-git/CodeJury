@@ -12,7 +12,8 @@ Shared seed base: `c0ef9625f8a7781433d4692222a18cc86a43ae02`. Initial upstream c
 | A.04 | Complete API foundation | 15 fixture-mode lifecycle tests and real HTTP smoke; native model/loop pending A.06/A.07 |
 | A.05 | Complete minimum prototype | 40/10/10 bases, 80 train records, 406 real validation jobs, 13 CPU tests |
 | A.06 | Complete | Real seeded 10/300 steps, validation selection, correct sum smoke and A/raw/A hashes |
-| A.07–A.09 | Not started | Loop and measured assessment pending |
+| A.07 | Complete | Bounded policy, real supported sum and unresolved unique episodes, live HTTP acceptance/report |
+| A.08–A.09 | Not started | Measured assessment and final handoff pending |
 
 ## A.01 actual verification
 
@@ -137,3 +138,30 @@ candidate_valid=true switch_verified=true actual_output=5
 A first/reloaded=62ad79b24257fe107b1079068fce3b8224dabcadeab4c43345edcbf33b686546
 raw=970ebb09dd0c16f90cd3c842a32aec1a194df41ee90def7b5a5a9af986c4888b
 ```
+
+## A.07 actual verification
+
+```text
+python -m pytest tests/test_loop.py tests/test_property_engine.py -q
+10 passed in 3.06s
+python -m pytest -m 'not sandbox and not mac' -q
+92 passed, 9 deselected in 3.46s
+CODEJURY_SANDBOX_TESTS=1 python -m pytest tests/test_runner_policy.py tests/test_runner_sandbox.py -q
+9 passed in 6.44s
+python -m codejury.controller.cli run --request ../contracts/fixtures/run-create.json --config config/model.yaml --out artifacts/demo/live-run.json
+run_id=670668cd1e0a4a26a11b042ba6dfefb7 status=unresolved
+809 input tokens; 105 generated tokens; 191 function executions; 29562 ms
+python -m codejury.controller.cli run --request artifacts/training/public-sum-request.json --config config/model.yaml --out artifacts/demo/live-sum-run.json
+run_id=d096a4f4cc444ce8abb21fb8a2bda22f status=supported_patch
+467 input tokens; 202 generated tokens; 135 function executions; 20075 ms
+python tools/api_smoke.py --base-url http://127.0.0.1:8000 --contract ../contracts/stage1-api.schema.json
+PASS all HTTP envelopes; live model_ready=true sandbox_ready=true POST=202
+Real asynchronous HTTP sum repair: run_id=a0ebc38aea3143c0a4bbba03b1f9162c
+supported_patch, busy=409, 208 events; 467 input/202 output tokens; 135 executions; 20734 ms
+```
+
+The fixed policy reproduces the supplied failure, generates A, checks supplied tests, calls raw Critic, explores approved properties (or observations), permits one revision and selects only an independently checked generated patch. The real unique example still fails after revision. Raw Critic used Markdown fences, so strict parsing rejected it and events identify the deterministic general fallback; no agent-discovery claim. The real sum example passed all admitted authoritative checks. Its training-family overlap remains disclosed.
+
+Hypothesis 6.169.0 `given`, `settings`, strategies and `find` APIs were inspected directly and against https://hypothesis.readthedocs.io/en/latest/reference/api.html and https://hypothesis.readthedocs.io/en/latest/reference/strategies.html. Host code generates values and checks trusted oracles only. Sandbox batches contain at most eight invocations, each in a fresh child interpreter. A verified shrunken failure is independently replayed; a bounded shrink may stop before global minimality and reports shrink_limited. At most 100 exploration inputs including replay, 400 attempted executions, 4096 total generated tokens, one format retry, one revision, 600 seconds. Original cannot be selected; no learned Judge or confidence values.
+
+Necessary integration edits extend the existing runner/image for batches and deadline propagation, and cache only schema self-validation (checksum is checked on every load; fresh schema objects remain independent). Runner image is now `sha256:2e357513b8bd95894224280a265c6d4153d160aca1bb1f57a6370d6ceaf9e9f5`; base digest unchanged. Unsupported sandbox AST policy returns semantic UnsupportedSource rather than infrastructure failure. Native worker shutdown cleans only its own PID-labelled containers if forced termination is necessary. The live HTTP server was stopped after verification. Runtime episodes/generations are ignored, separate from offline assessment.

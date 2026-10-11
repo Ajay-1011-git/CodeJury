@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+from functools import lru_cache
 from pathlib import Path
 
 from jsonschema import Draft202012Validator
@@ -14,6 +15,11 @@ class ContractError(ValueError):
     """Missing or invalid frozen contract assets."""
 
 
+@lru_cache(maxsize=2)
+def check_schema_bytes(content: bytes) -> None:
+    Draft202012Validator.check_schema(json.loads(content))
+
+
 def load_schema(contracts: Path | str | None = None) -> dict:
     directory = Path(contracts) if contracts is not None else REPO_ROOT / "contracts"
     path = directory / "stage1-api.schema.json"
@@ -24,7 +30,7 @@ def load_schema(contracts: Path | str | None = None) -> dict:
     if hashlib.sha256(content).hexdigest() != SCHEMA_SHA256:
         raise ContractError("Frozen schema checksum mismatch")
     schema = json.loads(content)
-    Draft202012Validator.check_schema(schema)
+    check_schema_bytes(content)
     return schema
 
 

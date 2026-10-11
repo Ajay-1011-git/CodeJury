@@ -84,3 +84,6 @@ class LocalWorker:
                 if self.process.is_alive():
                     self.process.terminate()
                     self.process.join(timeout=2)
+                    from ..runner import DockerRunner
+
+                    DockerRunner().cleanup_worker(self.process.pid)

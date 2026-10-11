@@ -6,6 +6,7 @@ import contextlib
 import copy
 import json
 import signal
+import subprocess
 import sys
 import time
 
@@ -66,8 +67,7 @@ def bounded(value, depth=0, remaining=None):
     raise ValueError("Unsupported output type or unsafe integer")
 
 
-def main():
-    job = json.loads(sys.stdin.buffer.read(65537))
+def single(job):
     source, args, name = job["source"], job["args"], job["function_name"]
     tree = ast.parse(source)
     denied = {
@@ -134,7 +134,60 @@ def main():
     encoded = json.dumps(result, allow_nan=False)
     if len(encoded.encode()) > 65536:
         result.update(actual_output=None, exception_type="OutputLimitExceeded")
-    print(json.dumps(result, allow_nan=False))
+    return result
+
+
+def main():
+    job = json.loads(sys.stdin.buffer.read(65537))
+    if "batch_args" not in job:
+        try:
+            result = single(job)
+        except (ValueError, SyntaxError):
+            result = {
+                "actual_output": None,
+                "exception_type": "UnsupportedSource",
+                "input_mutated": False,
+                "duration_ms": 0,
+                "trace": [],
+                "trace_truncated": False,
+            }
+        print(json.dumps(result, allow_nan=False))
+        return
+    batch = job["batch_args"]
+    if not isinstance(batch, list) or not 1 <= len(batch) <= 8:
+        raise ValueError("Batch must contain 1–8 invocations")
+    results = []
+    for args in batch:
+        child = {"source": job["source"], "function_name": job["function_name"], "args": args}
+        # New isolated interpreter for every invocation; state cannot persist across inputs.
+        try:
+            run = subprocess.run(
+                [sys.executable, __file__],
+                input=json.dumps(child),
+                capture_output=True,
+                text=True,
+                timeout=3,
+                check=True,
+            )
+            result = json.loads(run.stdout)
+        except subprocess.TimeoutExpired:
+            result = {
+                "actual_output": None,
+                "exception_type": "TimeoutError",
+                "input_mutated": False,
+                "duration_ms": 3000,
+                "trace": [],
+                "trace_truncated": False,
+            }
+        if len(json.dumps(result).encode()) > 7500:
+            result.update(
+                actual_output=None,
+                exception_type="OutputLimitExceeded",
+                trace=[],
+                trace_truncated=True,
+            )
+        results.append(result)
+    print(json.dumps({"results": results}, allow_nan=False))
 
 
 if __name__ == "__main__":

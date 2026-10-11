@@ -1,4 +1,4 @@
 base_image: python@sha256:e41613d42d4891e4930f79523f93f81bbc7632584ec65e36ab055f41a800b41e
 context: colima-codejury-stage1
-image_id: sha256:29ae090c8377a4e3d482dd6efa6fdee6a0d46a5d8eaabf916556ee341ae118b9
+image_id: sha256:2e357513b8bd95894224280a265c6d4153d160aca1bb1f57a6370d6ceaf9e9f5
 profile: stage1-demo

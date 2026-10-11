@@ -130,3 +130,13 @@ def test_forked_process_watchdog_kills_container(runner):
         text=True,
     )
     assert jobs.stdout.strip() == ""
+
+
+def test_batch_fresh_inputs_and_policy_failure(runner):
+    results = runner.execute_many(
+        "def f(values):\n    values.append(1)\n    return len(values)\n", "f", [[[]], [[]]]
+    )
+    assert [r.actual_output for r in results] == [1, 1]
+    assert all(r.input_mutated for r in results)
+    blocked = runner.execute_many("def f(x):\n    return x.__class__\n", "f", [[1]])
+    assert blocked[0].exception_type == "UnsupportedSource"

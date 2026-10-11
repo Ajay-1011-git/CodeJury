@@ -1,0 +1,14 @@
+profile: stage1-demo
+policy: fixed_stage1_policy
+input_tokens: 4096
+fixer_output_tokens: 1024
+critic_output_tokens: 512
+format_retries: 1
+revisions: 1
+output_tokens: 4096
+function_executions: 400
+property_inputs: 100
+batch_size: 8
+episode_seconds: 600
+function_seconds: 2
+job_slots: 1
