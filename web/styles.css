@@ -644,6 +644,53 @@ tr:hover td {
   font-style: italic;
 }
 
+/* Training & Evaluation View */
+.training-report-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.training-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+.meta-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.meta-label {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.meta-value {
+  font-size: 0.95rem;
+  color: var(--text-main);
+}
+
+.loss-chart-box {
+  background: var(--code-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+}
+
+.text-success {
+  color: #34d399;
+}
+
 /* Media Queries */
 @media (min-width: 1024px) {
   .container {

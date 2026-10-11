@@ -251,6 +251,42 @@
    ALL MODULES AND SERVERS SERVED AND VERIFIED PERFECTLY!
    ```
 
+---
+
+## Task Audit: S.06 · Training/Results Display and Evidence Contribution
+- **Status**: ✅ Complete
+- **Permitted Files Modified**:
+  - `web/src/training.mjs`
+  - `web/tests/training.test.mjs`
+  - `web/docs/demo-catalog.md`
+  - `web/docs/data-review.md`
+  - `web/styles.css`
+  - `web/docs/handoff.md`
+
+### Verification Commands & Actual Evidence
+1. **Node Test Suite (Training Report & Evaluation Integrity)**:
+   ```
+   $ cd web && npm test
+   > codejury-web@1.0.0 test
+   > node --test tests/*.test.mjs
+
+   ✔ Zero / empty report displays unmeasured state without fabricated curves (0.922916ms)
+   ✔ Real-shape nonempty loss points and evaluation rows render correctly (0.273ms)
+   ✔ Null metrics and empty memory are preserved as dashes and not converted to 0 (0.094584ms)
+   ✔ Evaluation validation rejects bad counters and solved > total (0.061458ms)
+   ✔ Verify no evaluation metrics or loss points are hardcoded in training.mjs (0.171375ms)
+   ℹ tests 32
+   ℹ suites 0
+   ℹ pass 32
+   ℹ fail 0
+   ℹ duration_ms 102.844708
+   ```
+
+2. **Presentation Deliverables**:
+   - `web/docs/demo-catalog.md`: 8 complete task descriptions with failing examples, boundary conditions, and edge-case explanations.
+   - `web/docs/data-review.md`: 20 preliminary training task descriptions reviewed with ambiguity notes, boundary caveats, and oracle consistency checks. Split manifests untouched; sealed evaluation targets uninspected.
+
+
 
 
 
