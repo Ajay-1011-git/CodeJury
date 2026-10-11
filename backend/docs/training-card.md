@@ -1,6 +1,6 @@
 # Fixer A training card
 
-Status: real seeded 10-step pilot and 300-step trial completed; selected step-100 adapter frozen on validation only. Evaluation remains pending A.08.
+Status: real seeded 10-step pilot and 300-step trial completed; selected step-100 adapter frozen on validation only. Measured A.08 assessment is complete; see stage1-results.md (1/10 solved for each method).
 
 Chosen model: mlx-community/Phi-4-mini-instruct-mlx-4Bit at conversion revision d848c30f6d5419b9892433cf6b1062626d15340e. Microsoft upstream model currently reports revision cfbefacb99257ffa30c83adab238a50856ac3083 and MIT license. The community card identifies the Microsoft base but does not publish the exact original base revision used during conversion; the current upstream revision is an observation, not an asserted conversion lineage. Local weight/tokenizer/config hashes will be recorded by native smoke.
 

@@ -6,15 +6,15 @@ Shared seed base: `c0ef9625f8a7781433d4692222a18cc86a43ae02`. Initial upstream c
 
 | Task | Status | Evidence |
 | --- | --- | --- |
-| A.01 | Complete, model/runner checks pending as permitted | Six CPU tests, eight contract fixtures, environment and lint checks; versions/source audit in dependency-audit.md |
+| A.01 | Complete; native checks completed in A.03/A.06 | Six CPU tests, eight contract fixtures, environment and lint checks; versions/source audit in dependency-audit.md |
 | A.02 | Complete | 36 intake/oracle/storage tests; frozen checker passes |
 | A.03 | Complete | Five real self-checks and eight runner tests; image/mount evidence below |
-| A.04 | Complete API foundation | 15 fixture-mode lifecycle tests and real HTTP smoke; native model/loop pending A.06/A.07 |
+| A.04 | Complete | 15 fixture lifecycle tests; genuine asynchronous native HTTP acceptance/report/cancel verified in A.07 |
 | A.05 | Complete minimum prototype | 40/10/10 bases, 80 train records, 406 real validation jobs, 13 CPU tests |
 | A.06 | Complete | Real seeded 10/300 steps, validation selection, correct sum smoke and A/raw/A hashes |
 | A.07 | Complete | Bounded policy, real supported sum and unresolved unique episodes, live HTTP acceptance/report |
 | A.08 | Complete | Actual same-10-base comparison, each method 1/10 solved, public completed TrainingReport |
-| A.09 | Not started | Final exports/checker pending |
+| A.09 | Complete | 4 live episode exports, train-only 40-base/80-trial mining, 104 CPU tests, final native checks |
 
 ## A.01 actual verification
 
@@ -184,3 +184,84 @@ Actual GET /stage1/training-report: HTTP200 pilot_only before completed comparis
 ```
 
 All final answers were exclusively saved before private execution, with no hidden-feedback revision. Same visible-input hashes across all methods; first sealed variant per base was predeclared. Exact costs and retained failures are in stage1-results.md; no success improvement or matched-budget superiority claim. Runtime/API reads only public aggregate JSON, not private tests/source. Report export is atomic and missing losses use null. Real supported sum and unresolved unique episodes remain independently reproducible; UI integration is still pending.
+
+## Run and reproduce the backend
+
+Python 3.11.16, uv 0.12.10, FastAPI 0.143.0, Pydantic 2.14.0, jsonschema 4.26.0, Hypothesis 6.169.0, MLX 0.32.3, MLX-LM 0.32.0, Uvicorn 0.54.0, pytest 9.1.1 were verified on this 16 GiB ARM64 Mac. CPU policy/API tests use clearly labelled fixtures; native inference/sandbox evidence is separate.
+
+From `backend/`, install with `uv sync --python 3.11 --extra model` and use `.venv/bin/python` for commands below. Existing local weights and selected adapter are available in this workspace. Machine-specific paths are environment settings, not committed absolute config values:
+
+```sh
+export CODEJURY_MODEL_DIR="$PWD/models/Phi4-mini"
+export CODEJURY_ADAPTER_DIR="$PWD/artifacts/training/fixer_a_selected"
+.venv/bin/python -m codejury.models.cli smoke --config config/model.yaml
+.venv/bin/python -m uvicorn codejury.api.app:app --host 127.0.0.1 --port 8000
+```
+
+A fresh Mac needs the dedicated VM and built image. Preserve the default Docker context and disable all personal-directory/agent shares:
+
+```sh
+colima start codejury-stage1 --arch aarch64 --vm-type vz --cpu 2 --memory 2 --disk 10 --mount none --activate=false --ssh-agent=false --ssh-config=false --dns 1.1.1.1 --dns 8.8.8.8
+.venv/bin/python tools/runner/build.py
+```
+
+The build records that machine's actual image ID in backend/config/runner.yaml. The current image is `sha256:2e357513b8bd95894224280a265c6d4153d160aca1bb1f57a6370d6ceaf9e9f5`; base `python@sha256:e41613d42d4891e4930f79523f93f81bbc7632584ec65e36ab055f41a800b41e`. No host fallback is used.
+
+Exact local model conversion: `mlx-community/Phi-4-mini-instruct-mlx-4Bit`, revision `d848c30f6d5419b9892433cf6b1062626d15340e`. The inspected Hugging Face CLI accepts:
+
+```sh
+HF_HUB_DISABLE_XET=1 hf download mlx-community/Phi-4-mini-instruct-mlx-4Bit --revision d848c30f6d5419b9892433cf6b1062626d15340e --local-dir models/Phi4-mini --include '*.json' '*.safetensors' '*.jinja' 'README.md'
+```
+
+Weights, adapters, private offline assets and all raw experiment outputs are ignored. To reproduce the identical experiment on another machine, transfer the selected adapter/config/freeze and private dataset bytes locally and verify their published hashes; they are not included by cloning Git. `data/manifests/stage1.json` fixes those asset hashes. Regenerating synthetic data creates new observed timings/bytes and a new experiment seal; it cannot be represented as the original frozen dataset. Existing collection/training/evaluation/freeze commands refuse overwriting evidence. The public source catalog is available for creating a new experiment, with the data card's limitations.
+
+CPU handoff verification requires no weights or private data:
+
+```sh
+.venv/bin/python tools/handoff_check.py --contracts ../contracts
+```
+
+Explicit hardware verification, after setup:
+
+```sh
+CODEJURY_SANDBOX_TESTS=1 .venv/bin/python -m pytest tests/test_runner_policy.py tests/test_runner_sandbox.py -q
+CODEJURY_MODEL_TESTS=1 .venv/bin/python -m pytest tests/test_model_views.py tests/test_model_adapter.py -q
+.venv/bin/python tools/handoff_check.py --contracts ../contracts --native
+```
+
+The checker stores its actual checked commit SHA and native/CPU distinction in ignored `artifacts/handoff/check.json`. Before A.09, the completed measurement commit is `61d385b092e1cedd5f803a7ac7fceef87a953665`; find the final handoff commit with `git log --grep='A.09' --format='%H %s'`. This avoids an impossible self-referential commit hash inside its own contents. Every backend task is separately committed/pushed using Ajay M, without co-author trailers. Approved seed initialization is the only change before the saved shared base; the comparison from that base is backend-only and the schema remains unchanged.
+
+## Limits and remaining integration
+
+The synthetic prototype meets the minimum 40/10/10 base split, not the larger 80/20/20 collection target. No natural student errors were supplied or fabricated. Training improves format conformity but the current sealed assessment remains 1/10 solved for all methods, with unequal loop/single budgets. Raw Critic formatting can fail; deterministic fallback is explicit. A verified bounded patch is supported only within admitted authoritative checks, never presented as universal correctness. Known failed generations and validation-loss worsening remain in the evidence.
+
+Sarvesh's web module, live UI integration, screenshots and complete M5 release are pending. No partner files, full Stage1 release tag, B adapter, trained Critic/Judge, AST search, or mutation audit have been added. The Stage2 final pool has not been scored or used for mining. Backend scripts use localhost only; HTTP verification servers were stopped when their checks finished.
+
+## A.09 actual verification and Stage2 hooks
+
+```text
+python -m pytest tests/test_episode_export.py -q
+7 passed in 0.24s
+python tools/export_episode.py runtime --out artifacts/stage2/runtime-visible-episodes.jsonl
+{"episodes":4,"runtime_modes":["live"],"hidden_join":false}
+python tools/export_episode.py mine-train --manifest data/manifests/stage1.json --config config/model.yaml --out artifacts/stage2/fixer-a-train-failures.jsonl --bases 5 --repeats 2
+bases=5 trials=10 failed_trials=0 failure_base_records=0 (retained smoke, not fabricated failures)
+python tools/export_episode.py mine-train --manifest data/manifests/stage1.json --config config/model.yaml --out artifacts/stage2/fixer-a-train-failures-full.jsonl --bases 40 --repeats 2
+runtime_mode=live bases=40 trials=80 failed_trials=16 failure_base_records=8 split=train
+python tools/handoff_check.py --contracts ../contracts
+104 passed, 9 hardware tests deselected; contract fixtures/checksum and backend-only diff pass
+python tools/handoff_check.py --contracts ../contracts --native
+104 passed, 9 deselected in 3.18s
+9 runner/policy tests passed in 5.44s (8 real sandbox + 1 CPU policy)
+12 model/view tests passed in 11.76s (1 real native adapter + 11 CPU views)
+```
+
+The first native checker run found the CPU suite inheriting live model paths, making an unavailable-model boundary test incorrectly see model_ready=true. The checker now explicitly isolates its CPU environment using nonexistent local model paths, then keeps actual model settings for hardware tests. This is test-environment isolation, not substituting live inference. The final complete check above passed; skipped hardware tests in the CPU invocation are not presented as passed.
+
+Runtime JSONL has stable visible problem, candidate, test, action and outcome IDs. Unknown offline fields are dropped; unapproved/hidden authoritative literals and malformed counterexample fields are rejected. Runtime export SHA-256: `ab99f41c705955cec2da9237b5e3f63a4eb79de2a3649c2f3ab7c8621c83cb58`. It contains public live episodes only, not assessment sessions.
+
+Training-only joins reject assessment/Stage2 IDs and unmatched visible requests. The loader opens only the sealed train asset. Full mining used the first buggy variant from each of 40 training bases, with two actual deterministic-settings A trials each; 80 repeated trials are not 80 independent problems or both original variants. The 8 failed bases are clamp, above_threshold, negative_positions, adjacent_differences, ceil_quotient, palindrome_sequence, all_equal and one_positive. Each failed twice. Failure export SHA-256: `3ca9312dee2079feba4442fbb2f081befc978d83e215e18fc47b1a2869ceef6f`.
+
+`artifacts/stage2/fixer-a-train-failures-full.jsonl` contains train provenance, source IDs, visible requests and repeated raw A outputs/outcomes. Independently frozen answers and offline training assessment outcomes are separate in `fixer-a-train-failures-full-evidence/offline-training-join.jsonl`; no private assessment test inputs or reference sources appear in the runtime-visible export. This supplies hooks/evidence for future B/Critic/Judge work, without training any Stage2 role. The sealed Stage1 assessment and final Stage2 pools were not opened for mining. Injection cannot claim live mining.
+
+Final verification compares `git diff --name-only c0ef9625f8a7781433d4692222a18cc86a43ae02...HEAD`; all changed paths are under backend. No weights, private datasets, SQLite databases, generated experiments or root Finder metadata are tracked. The frozen schema hash is unchanged. Current tracked work is complete for A.01–A.09; whole-application M5 remains pending partner UI integration.
