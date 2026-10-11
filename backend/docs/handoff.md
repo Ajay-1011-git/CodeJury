@@ -10,7 +10,8 @@ Shared seed base: `c0ef9625f8a7781433d4692222a18cc86a43ae02`. Initial upstream c
 | A.02 | Complete | 36 intake/oracle/storage tests; frozen checker passes |
 | A.03 | Complete | Five real self-checks and eight runner tests; image/mount evidence below |
 | A.04 | Complete API foundation | 15 fixture-mode lifecycle tests and real HTTP smoke; native model/loop pending A.06/A.07 |
-| A.05–A.09 | Not started | No completion or measured-learning claim |
+| A.05 | Complete minimum prototype | 40/10/10 bases, 80 train records, 406 real validation jobs, 13 CPU tests |
+| A.06–A.09 | Not started | No completion or measured-learning claim |
 
 ## A.01 actual verification
 
@@ -89,3 +90,23 @@ PASS GET /runs/unknown: 404 Error
 ```
 
 All frozen endpoints implemented. Synthetic worker exists only in tests and labels every snapshot/health as fixture; no fixture mode switch exists in the live application. Live native worker/loop loading remains A.06/A.07, with honest pre-acceptance 503. One SQLite transaction owns the queued/running slot; two concurrent requests produce one 202 and one 409. Cancellation is idempotent and retains the slot until a native worker stops. Restart terminates abandoned records as infrastructure_error, never replays generation. Dedicated spawned processes and exit watchers are wired; real model work is not yet exercised. API response bodies validate against the frozen schema, with JSON/no-store headers. Request bodies are bounded at 256 KiB. Development CORS accepts explicit localhost origins only. HTTP server was stopped after smoke.
+
+## A.05 actual verification
+
+```text
+python -m codejury.training.cli collect-data --manifest data/manifests/stage1.json
+Collected 70/70 bases: catalan
+train=40 bases/80 records; validation=10/20; assessment=10/20; reserved Stage2=10/19
+rejected_variants=1 (ineffective Stage2 corruption)
+python -m codejury.training.cli validate-data --manifest data/manifests/stage1.json
+manifest_sha256=95fabdb275e7f76e0b8aaa610e1708956aaf9a6666215c035fe0a6623ca7741a
+rejected=[] sandbox_executions=406 execution_mode=live
+python -m codejury.training.cli export-sft --manifest data/manifests/stage1.json --out artifacts/training/fixer_a_sft
+{"exported":{"train":80,"validation":20},"assessment_exported":0}
+python -m pytest tests/test_training_data.py -q
+13 passed in 0.17s
+python -m codejury.contracts.check ../contracts
+PASS schema SHA-256 5f760939e1fbf34cb7613a38f9476595d23a829089e8e557adc015cb0168f0df; 8 fixtures
+```
+
+All references and retained Stage1 bugs independently executed in the pinned sandbox; cache avoids repeated identical reference jobs without inventing execution counts. Tests reject base/family/alpha-normalized solution overlap, hidden/reference prompt leakage, wrong targets, non-failing bugs, reference failures and changed observations. Test-only runner data cannot write a live validation proof. Export requires the live proof and current manifest hash. Data is synthetic return corruption; no natural errors, external benchmarks, or broad generalization claim. Private validation/assessment/Stage2 bytes are ignored, their hashes are sealed. Offline authoring code is public, so this assessment is hidden from runtime, not secret from source-reading developers. See data-card.md for limitations.

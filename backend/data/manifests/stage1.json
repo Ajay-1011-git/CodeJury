@@ -1,0 +1,37 @@
+{
+  "dataset_id": "stage1-original-synthetic-v1",
+  "assets": [
+    {
+      "path": "train_source/train.jsonl",
+      "split": "train",
+      "sha256": "1f82d16714ab401be7429869566c7a76e9e29eff5f5f4f85be3c70d98b8ad81f",
+      "base_problems": 40,
+      "records": 80
+    },
+    {
+      "path": "private/validation.jsonl",
+      "split": "validation",
+      "sha256": "1e97d84d9f9cf87c635bdc0cbb4e11206a59e2da393d03308d72128d9f4a159f",
+      "base_problems": 10,
+      "records": 20
+    },
+    {
+      "path": "private/assessment.jsonl",
+      "split": "assessment",
+      "sha256": "8c25b096966437172591b007f049b87e6903162ef84f615f2b28b86cc8f2e5bc",
+      "base_problems": 10,
+      "records": 20
+    },
+    {
+      "path": "private/stage2_final.jsonl",
+      "split": "stage2_final",
+      "sha256": "070fa6316243ecede1c83d8425b83966d0a27dfa4ee041704796738d505ae300",
+      "base_problems": 10,
+      "records": 19
+    }
+  ],
+  "seal_sha256": "ed77405740496e19bfa0bfeac0fb0ce6c63ac5fc6cba311eab67987db61ab92a",
+  "rejected_variants": 1,
+  "public_demo_overlap": false,
+  "note": "Assessment and Stage 2 assets are local ignored offline data. All families split before corruption."
+}
