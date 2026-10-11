@@ -212,5 +212,45 @@
    ✓ Verified source edits transmitted verbatim with no fabricated repair code.
    ```
 
+---
+
+## Task Audit: S.05 · Evidence Views, Candidates and Verdict
+- **Status**: ✅ Complete
+- **Permitted Files Modified**:
+  - `web/src/evidence.mjs`
+  - `web/src/result.mjs`
+  - `web/src/app.mjs`
+  - `web/styles.css`
+  - `web/tests/evidence.test.mjs`
+  - `web/docs/handoff.md`
+
+### Verification Commands & Actual Evidence
+1. **Node Test Suite (Evidence Matrix, Oracles, and Verdict Views)**:
+   ```
+   $ cd web && npm test
+   > codejury-web@1.0.0 test
+   > node --test tests/*.test.mjs
+
+   ✔ Outcome badge rules: observed != pass (0.416458ms)
+   ✔ Property test with null expected output renders property badge (0.756375ms)
+   ✔ Diff line renderer escapes markup and flags diff changes (0.101167ms)
+   ✔ Supported patch displays selected candidate and copy/download buttons (0.342458ms)
+   ✔ Unresolved run does NOT include copy patch button or claim success (0.08875ms)
+   ✔ Stale success is cleared immediately when snapshot updates to running or cancelled (0.087ms)
+   ℹ tests 27
+   ℹ suites 0
+   ℹ pass 27
+   ℹ fail 0
+   ℹ duration_ms 96.107417
+   ```
+
+2. **Live HTTP Serving & Module Resolution**:
+   ```
+   ✓ http://127.0.0.1:8080/src/evidence.mjs loaded successfully (200 OK)
+   ✓ http://127.0.0.1:8080/src/result.mjs loaded successfully (200 OK)
+   ALL MODULES AND SERVERS SERVED AND VERIFIED PERFECTLY!
+   ```
+
+
 
 
