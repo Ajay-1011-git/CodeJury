@@ -172,4 +172,45 @@
    ℹ duration_ms 94.263125
    ```
 
+---
+
+## Task Audit: S.04 · Source/Contract Input and Explicit Property Approval
+- **Status**: ✅ Complete
+- **Permitted Files Modified**:
+  - `web/src/input.mjs`
+  - `web/src/app.mjs`
+  - `web/index.html`
+  - `web/styles.css`
+  - `web/tests/input.test.mjs`
+  - `web/docs/handoff.md`
+
+### Verification Commands & Actual Evidence
+1. **Node Test Suite (Input Validation & Safe Code Rendering)**:
+   ```
+   $ cd web && npm test
+   > codejury-web@1.0.0 test
+   > node --test tests/*.test.mjs
+
+   ✔ Valid example payload passes validation (0.512625ms)
+   ✔ Missing property consent check rejects payload (0.119584ms)
+   ✔ Unknown property name is rejected (0.068167ms)
+   ✔ Boolean passed as integer is rejected (0.070542ms)
+   ✔ Repeated test IDs are detected and rejected (0.065208ms)
+   ✔ HTML/XSS injection string is preserved verbatim as plain text (0.054417ms)
+   ✔ Source edits appear in request unchanged without expected repaired code (0.047584ms)
+   ℹ tests 21
+   ℹ suites 0
+   ℹ pass 21
+   ℹ fail 0
+   ℹ duration_ms 98.493291
+   ```
+
+2. **Schema & Mock API Acceptance of User Source**:
+   ```
+   ✓ Custom user payload strictly conforms to RunCreate schema.
+   ✓ Mock accepted custom payload: run-mock-eeaaf078
+   ✓ Verified source edits transmitted verbatim with no fabricated repair code.
+   ```
+
+
 
