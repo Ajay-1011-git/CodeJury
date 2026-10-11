@@ -1,0 +1,19 @@
+model_config: config/model.yaml
+dataset_manifest: data/manifests/stage1.json
+data: artifacts/training/fixer_a_sft
+output: artifacts/training/fixer_a_seed17
+pilot_output: artifacts/training/fixer_a_pilot_seed17
+pilot_steps: 10
+steps: 300
+batch_size: 1
+max_seq_length: 768
+num_layers: 4
+learning_rate: 0.0001
+seed: 17
+lora_parameters:
+  rank: 8
+  dropout: 0.0
+  scale: 16.0
+  keys: [self_attn.qkv_proj, self_attn.o_proj]
+grad_checkpoint: true
+grad_accumulation_steps: 1

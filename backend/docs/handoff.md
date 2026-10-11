@@ -11,7 +11,8 @@ Shared seed base: `c0ef9625f8a7781433d4692222a18cc86a43ae02`. Initial upstream c
 | A.03 | Complete | Five real self-checks and eight runner tests; image/mount evidence below |
 | A.04 | Complete API foundation | 15 fixture-mode lifecycle tests and real HTTP smoke; native model/loop pending A.06/A.07 |
 | A.05 | Complete minimum prototype | 40/10/10 bases, 80 train records, 406 real validation jobs, 13 CPU tests |
-| A.06–A.09 | Not started | No completion or measured-learning claim |
+| A.06 | Complete | Real seeded 10/300 steps, validation selection, correct sum smoke and A/raw/A hashes |
+| A.07–A.09 | Not started | Loop and measured assessment pending |
 
 ## A.01 actual verification
 
@@ -110,3 +111,29 @@ PASS schema SHA-256 5f760939e1fbf34cb7613a38f9476595d23a829089e8e557adc015cb0168
 ```
 
 All references and retained Stage1 bugs independently executed in the pinned sandbox; cache avoids repeated identical reference jobs without inventing execution counts. Tests reject base/family/alpha-normalized solution overlap, hidden/reference prompt leakage, wrong targets, non-failing bugs, reference failures and changed observations. Test-only runner data cannot write a live validation proof. Export requires the live proof and current manifest hash. Data is synthetic return corruption; no natural errors, external benchmarks, or broad generalization claim. Private validation/assessment/Stage2 bytes are ignored, their hashes are sealed. Offline authoring code is public, so this assessment is hidden from runtime, not secret from source-reading developers. See data-card.md for limitations.
+
+## A.06 actual verification
+
+```text
+python -m codejury.training.cli pilot --config config/training/fixer_a.yaml
+completed_steps=10 reload_verified=true (final NumPy/MLX seed17 pilot)
+python -m codejury.training.cli train --config config/training/fixer_a.yaml
+completed_steps=300 reload_verified=true mask_verified=true max_train_tokens=444
+elapsed_seconds=136.2167462919606 peak_memory_mb=3144.467552
+python -m codejury.training.cli select --config config/training/fixer_a.yaml
+selected_step=100; validation 2/10 solved, 0 malformed at each of 100/200/300
+adapter_sha256=274fd6b1a4a9abd04a8a2d3e56cfbde765c81e71fdb230682f4bf66509605fb4
+python -m pytest tests/test_model_views.py tests/test_training_data.py -q
+24 passed in 0.48s
+```
+
+Native checks use CODEJURY_MODEL_DIR and CODEJURY_ADAPTER_DIR shown in training-card.md. The sum smoke is a disclosed training-family-overlap mechanics demonstration; unique and raw-format failures remain retained. See training-card.md for actual loss worsening, fixed shuffle-seed defect, model/license/hashes and evidence locations. No sealed assessment was opened for selection.
+
+```text
+CODEJURY_MODEL_TESTS=1 python -m pytest tests/test_model_views.py tests/test_model_adapter.py -q
+12 passed in 11.88s
+python -m codejury.models.cli smoke --config config/model.yaml
+candidate_valid=true switch_verified=true actual_output=5
+A first/reloaded=62ad79b24257fe107b1079068fce3b8224dabcadeab4c43345edcbf33b686546
+raw=970ebb09dd0c16f90cd3c842a32aec1a194df41ee90def7b5a5a9af986c4888b
+```

@@ -16,6 +16,7 @@ from ..contracts.intake import (
     validate_domain,
     validate_json,
 )
+from ..models.views import REPAIR_SYSTEM, repair_view
 from ..properties import equal
 from ..runner import DockerRunner
 
@@ -43,7 +44,7 @@ def request_view(record):
 
 def prompt_view(record):
     """Only runtime-visible request and independently executed visible failures."""
-    return {"request": request_view(record), "failure_evidence": record["failure_evidence"]}
+    return repair_view(request_view(record), record["failure_evidence"])
 
 
 def chat_record(record):
@@ -53,11 +54,7 @@ def chat_record(record):
         "messages": [
             {
                 "role": "system",
-                "content": (
-                    "Repair one pure Python function. Return only JSON with source, di"
-                    "agnosis, assumptions. Preserve the contract and positional signat"
-                    "ure."
-                ),
+                "content": REPAIR_SYSTEM,
             },
             {"role": "user", "content": json.dumps(prompt_view(record), separators=(",", ":"))},
             {
