@@ -7,7 +7,8 @@ Shared seed base: `c0ef9625f8a7781433d4692222a18cc86a43ae02`. Initial upstream c
 | Task | Status | Evidence |
 | --- | --- | --- |
 | A.01 | Complete, model/runner checks pending as permitted | Six CPU tests, eight contract fixtures, environment and lint checks; versions/source audit in dependency-audit.md |
-| A.02–A.09 | Not started | No completion or measured-learning claim |
+| A.02 | Complete | 36 intake/oracle/storage tests; frozen checker passes |
+| A.03–A.09 | Not started | No completion or measured-learning claim |
 
 ## A.01 actual verification
 
@@ -39,3 +40,16 @@ PASS schema SHA-256 5f760939e1fbf34cb7613a38f9476595d23a829089e8e557adc015cb0168
 Audit found and corrected import ordering and made subprocess failure handling explicit. The checker refuses missing/changed schemas, unknown definitions, extra/missing wire fields, fixture symlinks, path traversal and unlisted JSON fixtures. Initial tests use synthetic fixtures only. Native MLX CLI help succeeds; actual inference/training remains pending. Docker daemon is unavailable and Colima is absent.
 
 The A.01 commit can be found with `git log --grep='A.01' --format='%H %s'`; storing its own hash in the same commit would require rewriting that hash.
+
+## A.02 actual verification
+
+```text
+python -m pytest tests/test_intake.py tests/test_oracles.py tests/test_storage.py -q
+36 passed in 1.23s
+python -m codejury.contracts.check ../contracts
+PASS schema SHA-256 5f760939e1fbf34cb7613a38f9476595d23a829089e8e557adc015cb0168f0df; 8 fixtures
+ruff check src tests tools
+All checks passed!
+```
+
+Audit: submitted source is parsed only; default/annotation/decorator execution, imports, nested helpers, generators and global state are rejected. JSON bounds are depth 8, 4096 nodes, 8000-character strings and JS-exact integers. Domains reject bool/float values. Property templates use trusted deterministic implementations and type-sensitive recursive equality. Runtime paths must be disjoint from offline data. SQLite triggers enforce append-only events and immutable candidate rows; parallel append/reopen tests prove stable ordered IDs. No model or sandbox evidence is claimed.
