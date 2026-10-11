@@ -13,7 +13,8 @@ Shared seed base: `c0ef9625f8a7781433d4692222a18cc86a43ae02`. Initial upstream c
 | A.05 | Complete minimum prototype | 40/10/10 bases, 80 train records, 406 real validation jobs, 13 CPU tests |
 | A.06 | Complete | Real seeded 10/300 steps, validation selection, correct sum smoke and A/raw/A hashes |
 | A.07 | Complete | Bounded policy, real supported sum and unresolved unique episodes, live HTTP acceptance/report |
-| A.08–A.09 | Not started | Measured assessment and final handoff pending |
+| A.08 | Complete | Actual same-10-base comparison, each method 1/10 solved, public completed TrainingReport |
+| A.09 | Not started | Final exports/checker pending |
 
 ## A.01 actual verification
 
@@ -165,3 +166,21 @@ The fixed policy reproduces the supplied failure, generates A, checks supplied t
 Hypothesis 6.169.0 `given`, `settings`, strategies and `find` APIs were inspected directly and against https://hypothesis.readthedocs.io/en/latest/reference/api.html and https://hypothesis.readthedocs.io/en/latest/reference/strategies.html. Host code generates values and checks trusted oracles only. Sandbox batches contain at most eight invocations, each in a fresh child interpreter. A verified shrunken failure is independently replayed; a bounded shrink may stop before global minimality and reports shrink_limited. At most 100 exploration inputs including replay, 400 attempted executions, 4096 total generated tokens, one format retry, one revision, 600 seconds. Original cannot be selected; no learned Judge or confidence values.
 
 Necessary integration edits extend the existing runner/image for batches and deadline propagation, and cache only schema self-validation (checksum is checked on every load; fresh schema objects remain independent). Runner image is now `sha256:2e357513b8bd95894224280a265c6d4153d160aca1bb1f57a6370d6ceaf9e9f5`; base digest unchanged. Unsupported sandbox AST policy returns semantic UnsupportedSource rather than infrastructure failure. Native worker shutdown cleans only its own PID-labelled containers if forced termination is necessary. The live HTTP server was stopped after verification. Runtime episodes/generations are ignored, separate from offline assessment.
+
+## A.08 actual verification
+
+```text
+python -m codejury.evaluation.cli stage1 --manifest data/manifests/stage1.json --config config/model.yaml --out artifacts/evaluation/stage1-results.json
+raw_single: solved=1 total=10 unresolved=9 incorrect_accepted=0 mean_elapsed_ms=7626 mean_output_tokens=203
+trained_a_single: solved=1 total=10 unresolved=9 incorrect_accepted=0 mean_elapsed_ms=2756 mean_output_tokens=35
+stage1_loop: solved=1 total=10 unresolved=9 incorrect_accepted=0 mean_elapsed_ms=56391 mean_output_tokens=239
+python -m pytest tests/test_evaluation.py -q
+5 passed in 0.15s
+python -m pytest -m 'not sandbox and not mac' -q
+97 passed, 9 deselected in 6.86s
+python -m codejury.evaluation.cli export-report --results artifacts/evaluation/stage1-results.json --out artifacts/evaluation/training-report.json
+TrainingReport schema valid, status=completed, steps=300, train/validation/evaluation bases=40/10/10
+Actual GET /stage1/training-report: HTTP200 pilot_only before completed comparison; HTTP200 completed after export
+```
+
+All final answers were exclusively saved before private execution, with no hidden-feedback revision. Same visible-input hashes across all methods; first sealed variant per base was predeclared. Exact costs and retained failures are in stage1-results.md; no success improvement or matched-budget superiority claim. Runtime/API reads only public aggregate JSON, not private tests/source. Report export is atomic and missing losses use null. Real supported sum and unresolved unique episodes remain independently reproducible; UI integration is still pending.

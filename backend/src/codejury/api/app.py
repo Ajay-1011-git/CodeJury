@@ -17,7 +17,7 @@ from ..contracts.intake import IntakeError, validate_request
 from ..controller.worker import LocalWorker
 from ..storage import Store
 from .repository import Busy, Repository
-from .training_report import not_started
+from .training_report import load_report
 from .types import TERMINAL, error
 
 
@@ -212,7 +212,10 @@ def create_app(store=None, worker=None) -> FastAPI:
 
     @app.get("/stage1/training-report")
     def training_report():
-        return response(not_started(worker.mode), "TrainingReport")
+        try:
+            return response(load_report(worker.mode), "TrainingReport")
+        except (OSError, ValueError, ValidationError):
+            return response(error("unavailable", "Public training report is invalid"), "Error", 503)
 
     return app
 
