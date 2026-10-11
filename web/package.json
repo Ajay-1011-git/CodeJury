@@ -1,0 +1,9 @@
+{
+  "name": "codejury-web",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "CodeJury Stage 1 Frontend UI, seam client, and test harness",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs"
+  }
+}

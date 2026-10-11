@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeJury — Stage 1 Prototype</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-main">
+      <div class="brand">
+        <h1>CodeJury</h1>
+        <span class="badge prototype-badge">Stage 1 Prototype</span>
+      </div>
+      <div id="fixture-banner" class="banner fixture-banner">
+        ⚠️ Fixture demonstration — no live inference
+      </div>
+    </div>
+    <div class="role-topology" aria-label="System Agent Roles">
+      <div class="role-pill">
+        <span class="role-name">Fixer A</span>
+        <span class="role-status" id="role-fixer-a">A: raw (unloaded)</span>
+      </div>
+      <div class="role-pill">
+        <span class="role-name">Critic</span>
+        <span class="role-status status-prompted">Prompted</span>
+      </div>
+      <div class="role-pill">
+        <span class="role-name">Controller</span>
+        <span class="role-status status-fixed">Fixed Policy</span>
+      </div>
+      <div class="role-pill role-deferred">
+        <span class="role-name">Fixer B / Judge / Auditor / Search</span>
+        <span class="role-status status-deferred">Deferred (Stage 2)</span>
+      </div>
+    </div>
+    <div class="connection-bar">
+      <span class="conn-label">Backend Seam:</span>
+      <code id="active-api-url">http://127.0.0.1:8001</code>
+      <span id="backend-status-pill" class="badge badge-neutral">Checking...</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Card 1: Input & Configuration -->
+    <section class="card" id="card-input">
+      <div class="card-header">
+        <h2>1. Task Input & Approved Contract Oracles</h2>
+        <span class="card-tag">Configuration</span>
+      </div>
+      <div class="card-content" id="input-container">
+        <!-- Rendered by input.mjs or placeholder in S.01 -->
+        <p class="placeholder-label">Input view placeholder (Active in S.04)</p>
+      </div>
+    </section>
+
+    <!-- Card 2: Repair Progress & Timeline -->
+    <section class="card" id="card-progress">
+      <div class="card-header">
+        <h2>2. Repair Progress & Action History</h2>
+        <span class="card-tag" id="run-status-badge">Idle</span>
+      </div>
+      <div class="card-content" id="progress-container">
+        <p class="placeholder-label">Progress & timeline view placeholder (Active in S.03 / S.05)</p>
+      </div>
+    </section>
+
+    <!-- Card 3: Candidates & Code Inspector -->
+    <section class="card" id="card-candidates">
+      <div class="card-header">
+        <h2>3. Candidates & Source Diff</h2>
+        <span class="card-tag">Code Inspector</span>
+      </div>
+      <div class="card-content" id="candidates-container">
+        <p class="placeholder-label">Candidates view placeholder (Active in S.05)</p>
+      </div>
+    </section>
+
+    <!-- Card 4: Execution Matrix & Oracles -->
+    <section class="card" id="card-execution">
+      <div class="card-header">
+        <h2>4. Execution Matrix & Counterexample Drilldown</h2>
+        <span class="card-tag">Verification Scope</span>
+      </div>
+      <div class="card-content" id="execution-container">
+        <p class="placeholder-label">Execution matrix placeholder (Active in S.05)</p>
+      </div>
+    </section>
+
+    <!-- Card 5: Verdict & Selected Candidate -->
+    <section class="card" id="card-result">
+      <div class="card-header">
+        <h2>5. Final Result & Verifiable Artifacts</h2>
+        <span class="card-tag">Decision</span>
+      </div>
+      <div class="card-content" id="result-container">
+        <p class="placeholder-label">Final result view placeholder (Active in S.05)</p>
+      </div>
+    </section>
+
+    <!-- Card 6: Training & Evaluation Metrics -->
+    <section class="card" id="card-training">
+      <div class="card-header">
+        <h2>6. Offline Training & Measured Evaluation</h2>
+        <span class="card-tag">Metrics</span>
+      </div>
+      <div class="card-content" id="training-container">
+        <p class="placeholder-label">Training summary placeholder (Active in S.06)</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <p>CodeJury Stage 1 — Local Verification Seam (<code>stage1.v1</code>). All rights reserved.</p>
+  </footer>
+
+  <script type="module" src="src/app.mjs"></script>
+</body>
+</html>
