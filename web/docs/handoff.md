@@ -81,3 +81,50 @@
    src/app.mjs status: 200
    Static server verification: SUCCESS.
    ```
+
+---
+
+## Task Audit: S.02 · Fixture-Only Mock API
+- **Status**: ✅ Complete
+- **Permitted Files Modified**:
+  - `web/tools/mock_api.py`
+  - `web/tests/test_mock_api.py`
+  - `web/docs/mock-api.md`
+  - `web/docs/handoff.md`
+
+### Verification Commands & Actual Evidence
+1. **Unittest Suite Execution**:
+   ```
+   $ python3 -m unittest discover -s web/tests -p 'test_mock_api.py' -v
+   test_all_scenarios (test_mock_api.MockApiIntegrationTest.test_all_scenarios) ... ok
+   test_busy_run_slot_409 (test_mock_api.MockApiIntegrationTest.test_busy_run_slot_409) ... ok
+   test_cancel_flow (test_mock_api.MockApiIntegrationTest.test_cancel_flow) ... ok
+   test_cors_options (test_mock_api.MockApiIntegrationTest.test_cors_options) ... ok
+   test_cursor_idempotence_and_events (test_mock_api.MockApiIntegrationTest.test_cursor_idempotence_and_events) ... ok
+   test_health_and_examples (test_mock_api.MockApiIntegrationTest.test_health_and_examples) ... ok
+   test_non_json_input_422 (test_mock_api.MockApiIntegrationTest.test_non_json_input_422) ... ok
+   test_post_run_lifecycle_and_report (test_mock_api.MockApiIntegrationTest.test_post_run_lifecycle_and_report) ... ok
+   test_service_unavailable_503 (test_mock_api.MockApiIntegrationTest.test_service_unavailable_503) ... ok
+   test_training_report_modes (test_mock_api.MockApiIntegrationTest.test_training_report_modes) ... ok
+   test_unknown_ids_404 (test_mock_api.MockApiIntegrationTest.test_unknown_ids_404) ... ok
+
+   Ran 11 tests in 0.660s
+   OK
+   ```
+
+2. **CLI Sequence & Schema Verification (Port 8001)**:
+   ```
+   $ python3 web/tools/mock_api.py --port 8001 --scenario supported
+   ✓ GET /health validated against $defs.Health
+   ✓ GET /examples validated against $defs.Examples
+   ✓ POST /runs accepted: run-mock-59fa8dd2 validated against $defs.RunAccepted
+   ✓ GET /runs/run-mock-59fa8dd2 (queued) validated against $defs.RunSnapshot
+   ✓ GET /runs/run-mock-59fa8dd2 (running) validated against $defs.RunSnapshot
+   ✓ GET /runs/run-mock-59fa8dd2 (terminal) validated against $defs.RunSnapshot
+   ✓ GET /runs/run-mock-59fa8dd2/events validated against $defs.EventPage
+   ✓ GET /runs/run-mock-59fa8dd2/candidates/cand-001 validated against $defs.Candidate
+   ✓ GET /runs/run-mock-59fa8dd2/report validated against $defs.RunSnapshot
+
+   ALL SEQUENCES AND SCHEMA VALIDATIONS PASSED PERFECTLY!
+   ```
+
