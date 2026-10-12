@@ -154,6 +154,15 @@ function renderCandidates(container, snap) {
     card.appendChild(diffLabel);
     card.appendChild(renderDiffLines(cand.diff));
 
+    const sourceDetails = document.createElement('details');
+    sourceDetails.className = 'candidate-source';
+    const summary = document.createElement('summary');
+    summary.textContent = 'Inspect full source';
+    const source = document.createElement('pre');
+    source.textContent = cand.source;
+    sourceDetails.appendChild(summary);
+    sourceDetails.appendChild(source);
+    card.appendChild(sourceDetails);
     list.appendChild(card);
   });
 
@@ -161,6 +170,9 @@ function renderCandidates(container, snap) {
 }
 
 function renderExecutionMatrix(container, snap, selectedExecution, onSelect) {
+  const previousTable = container.querySelector('.table-responsive');
+  const scrollLeft = previousTable?.scrollLeft || 0;
+  const scrollTop = previousTable?.scrollTop || 0;
   container.innerHTML = '';
   if (!snap || !snap.tests || snap.tests.length === 0) {
     const p = document.createElement('p');
@@ -182,6 +194,8 @@ function renderExecutionMatrix(container, snap, selectedExecution, onSelect) {
 
   const tableWrapper = document.createElement('div');
   tableWrapper.className = 'table-responsive';
+  tableWrapper.setAttribute('tabindex', '0');
+  tableWrapper.setAttribute('aria-label', 'Scrollable execution matrix');
 
   const table = document.createElement('table');
   table.className = 'matrix-table';
@@ -236,6 +250,8 @@ function renderExecutionMatrix(container, snap, selectedExecution, onSelect) {
   table.appendChild(tbody);
   tableWrapper.appendChild(table);
   container.appendChild(tableWrapper);
+  tableWrapper.scrollLeft = scrollLeft;
+  tableWrapper.scrollTop = scrollTop;
 
   // Counterexample drilldown inspector
   const drilldownBox = document.createElement('div');
@@ -312,7 +328,12 @@ function renderTimeline(container, events, snap) {
 
     const typeBadge = document.createElement('span');
     typeBadge.className = 'badge badge-neutral';
-    typeBadge.textContent = ev.type;
+    typeBadge.textContent = ({
+      run_started: 'Case opened', original_checked: 'Baseline checked',
+      candidate_created: 'Patch proposed', execution_completed: 'Test executed',
+      test_admitted: 'Check admitted', test_rejected: 'Proposal rejected',
+      revision_requested: 'Revision requested', run_finished: 'Case closed'
+    })[ev.type] || ev.type;
     content.appendChild(typeBadge);
 
     const msg = document.createElement('span');

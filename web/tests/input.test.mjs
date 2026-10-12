@@ -112,3 +112,19 @@ test('Source edits appear in request unchanged without expected repaired code', 
   assert.equal('repaired_code' in customPayload, false);
   assert.equal('patch' in customPayload, false);
 });
+
+test('Malformed domain entries produce validation errors instead of crashing the editor', () => {
+  for (const value of [null, 3, []]) {
+    const result = validateRunCreatePayload({ ...validBasePayload, input_domain: [value] }, false);
+    assert.equal(result.valid, false);
+    assert.ok(result.errors.some(error => error.includes('domain object')));
+  }
+});
+
+test('Malformed test entries produce validation errors instead of crashing the editor', () => {
+  for (const value of [null, 3, []]) {
+    const result = validateRunCreatePayload({ ...validBasePayload, supplied_tests: [value] }, false);
+    assert.equal(result.valid, false);
+    assert.ok(result.errors.some(error => error.includes('test object')));
+  }
+});

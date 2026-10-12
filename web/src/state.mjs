@@ -17,7 +17,7 @@ export class AppState {
     this.pollTimer = null;
     this.state = {
       health: null,
-      runtimeMode: 'fixture',
+      runtimeMode: 'unknown',
       activeApiUrl: '',
       currentRunId: null,
       generationToken: 0,

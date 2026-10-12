@@ -54,7 +54,9 @@ def main():
         assert status == 200, f"Failed to load index.html (status {status})"
         assert "CodeJury" in html
         assert "Fixture demonstration — no live inference" in html
-        assert "Stage 1 Prototype" in html
+        assert "STAGE 1 PROTOTYPE" in html
+        assert 'data-tabs="workspace"' in html
+        assert all(f'id="panel-{panel}"' in html for panel in ("repair", "evidence", "training"))
         assert "role-fixer-a" in html
         print("  ✓ index.html loaded with Stage 1 header, role topology, and fixture banner")
 
@@ -65,11 +67,19 @@ def main():
         print("  ✓ styles.css loaded")
 
         # JS modules
-        modules = ["app.mjs", "api.mjs", "state.mjs", "input.mjs", "evidence.mjs", "result.mjs", "training.mjs"]
+        modules = ["app.mjs", "api.mjs", "state.mjs", "input.mjs", "evidence.mjs", "result.mjs", "training.mjs", "tabs.mjs", "workspace.mjs"]
         for m in modules:
             status, code = check_url(f"{web_base}/src/{m}")
             assert status == 200, f"Module {m} returned status {status}"
             print(f"  ✓ web/src/{m} module loaded successfully")
+
+        for sprite in ("cloud", "robot", "gavel"):
+            status, svg = check_url(f"{web_base}/assets/sprites/{sprite}.svg")
+            assert status == 200 and 'shape-rendering="crispEdges"' in svg
+        for font in ("Jersey10-Regular.ttf", "Manrope-Variable.ttf"):
+            with urllib.request.urlopen(f"{web_base}/assets/fonts/{font}", timeout=5) as response:
+                assert response.status == 200 and response.read(4) == b"\x00\x01\x00\x00"
+        print("  ✓ Local fonts and original pixel sprites loaded")
 
         print("=== Step 3: Exercising API Seam & Polling Lifecycle ===")
         # Health check

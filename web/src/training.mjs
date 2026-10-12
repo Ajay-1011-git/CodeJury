@@ -74,25 +74,25 @@ export function generateLossSvg(lossPoints, width = 600, height = 240) {
   return `
     <svg viewBox="0 0 ${width} ${height}" class="loss-chart-svg" style="width: 100%; height: auto; max-height: 280px;">
       <!-- Grid & Axes -->
-      <line x1="${padding.left}" y1="${padding.top}" x2="${padding.left}" y2="${height - padding.bottom}" stroke="#2b3952" stroke-width="1" />
-      <line x1="${padding.left}" y1="${height - padding.bottom}" x2="${width - padding.right}" y2="${height - padding.bottom}" stroke="#2b3952" stroke-width="1" />
+      <line x1="${padding.left}" y1="${padding.top}" x2="${padding.left}" y2="${height - padding.bottom}" stroke="#c6d5df" stroke-width="1" />
+      <line x1="${padding.left}" y1="${height - padding.bottom}" x2="${width - padding.right}" y2="${height - padding.bottom}" stroke="#c6d5df" stroke-width="1" />
 
       <!-- Axis Labels -->
-      <text x="${padding.left - 10}" y="${padding.top + 5}" fill="#64748b" font-size="10" text-anchor="end">${maxLoss.toFixed(2)}</text>
-      <text x="${padding.left - 10}" y="${height - padding.bottom}" fill="#64748b" font-size="10" text-anchor="end">0.00</text>
-      <text x="${padding.left}" y="${height - padding.bottom + 18}" fill="#64748b" font-size="10">Step ${minStep}</text>
-      <text x="${width - padding.right}" y="${height - padding.bottom + 18}" fill="#64748b" font-size="10" text-anchor="end">Step ${maxStep}</text>
+      <text x="${padding.left - 10}" y="${padding.top + 5}" fill="#5c6066" font-size="10" text-anchor="end">${maxLoss.toFixed(2)}</text>
+      <text x="${padding.left - 10}" y="${height - padding.bottom}" fill="#5c6066" font-size="10" text-anchor="end">0.00</text>
+      <text x="${padding.left}" y="${height - padding.bottom + 18}" fill="#5c6066" font-size="10">Step ${minStep}</text>
+      <text x="${width - padding.right}" y="${height - padding.bottom + 18}" fill="#5c6066" font-size="10" text-anchor="end">Step ${maxStep}</text>
 
       <!-- Curves -->
-      ${trainPath ? `<path d="${trainPath}" fill="none" stroke="#38bdf8" stroke-width="2" />` : ''}
-      ${valPath ? `<path d="${valPath}" fill="none" stroke="#a855f7" stroke-width="2" stroke-dasharray="4" />` : ''}
+      ${trainPath ? `<path d="${trainPath}" fill="none" stroke="#ff5e24" stroke-width="2" />` : ''}
+      ${valPath ? `<path d="${valPath}" fill="none" stroke="#5c6066" stroke-width="2" stroke-dasharray="4" />` : ''}
 
       <!-- Legend -->
       <g transform="translate(${width - 220}, 15)">
-        <line x1="0" y1="0" x2="20" y2="0" stroke="#38bdf8" stroke-width="2" />
-        <text x="26" y="4" fill="#94a3b8" font-size="11">Training Loss</text>
-        <line x1="110" y1="0" x2="130" y2="0" stroke="#a855f7" stroke-width="2" stroke-dasharray="4" />
-        <text x="136" y="4" fill="#94a3b8" font-size="11">Validation Loss</text>
+        <line x1="0" y1="0" x2="20" y2="0" stroke="#ff5e24" stroke-width="2" />
+        <text x="26" y="4" fill="#5c6066" font-size="11">Training Loss</text>
+        <line x1="110" y1="0" x2="130" y2="0" stroke="#5c6066" stroke-width="2" stroke-dasharray="4" />
+        <text x="136" y="4" fill="#5c6066" font-size="11">Validation Loss</text>
       </g>
     </svg>
   `;
@@ -216,7 +216,7 @@ export function renderTrainingReport(container, report) {
       evalSection.className = 'eval-section';
       evalSection.innerHTML = `
         <h3 style="margin-top: 1rem; margin-bottom: 0.5rem; font-size: 1rem;">Measured Evaluation (${report.evaluation_base_problems} assessment problems)</h3>
-        <div class="table-responsive">
+        <div class="table-responsive" tabindex="0" aria-label="Scrollable evaluation table">
           <table class="eval-table">
             <thead>
               <tr>

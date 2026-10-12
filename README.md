@@ -43,11 +43,11 @@ Custom model and adapter directories can be supplied through the same environmen
 
 ## Demonstrate Stage 1
 
-1. Select **Sum signed integers**, review the request and explicitly approve `sum_ints`. Run verification. Show original failure, generated repair, authoritative PASS cells, bounded verification scope, and actual resource usage. This public mechanics example overlaps the training family and is unscored.
+1. In **Repair desk**, select **Sum signed integers**. Review **Source code**, **Contract**, and **Test cases**; explicitly approve `sum_ints` in **Contract**. Run verification. **Run evidence** opens automatically with the original failure, generated repair, authoritative PASS cells, bounded verification scope, and actual resource usage. This public mechanics example overlaps the training family and is unscored.
 2. Download the selected Python source and JSON evidence report. The source hash must match the selected candidate's `source_sha256`.
 3. Select **Preserve first-occurrence order**, approve its property and run it. Inspect concrete counterexamples, the revision event and the actual final outcome. The current adapter can leave this unresolved.
 4. Start another run and cancel it. Show cancellation without a selected patch. Invalid input produces a typed error.
-5. Show the training panel: 300 actual training steps, selected checkpoint 100, 40/10/10 base split, and the measured comparison below.
+5. Open **Training log**: 300 actual training steps, selected checkpoint 100, 40/10/10 base split, and the measured comparison below. Switching workspace or editor tabs preserves your draft and ongoing run.
 
 | Method | Solved / total | Unresolved | Incorrect accepted |
 | --- | --- | --- | --- |
@@ -58,6 +58,8 @@ Custom model and adapter directories can be supplied through the same environmen
 This synthetic internal assessment shows improved formatting and single-shot token cost after training, with no measured solved-count improvement. Loop and single-shot budgets differ. Five of ten planned milestones constitute the Stage 1 completion rubric; they do not imply 50% repair accuracy. Complementary Fixer B, learned Critic/Judge, AST repair search, mutation auditor and full matched-budget research evaluation remain Stage 2.
 
 See `docs/stage1-integration.md` for merge/acceptance evidence and `web/docs/professor-demo.md` for a short presentation script.
+
+The frontend follows the root `DESIGN.md` with local fonts, original pixel sprites, accessible tabs, and responsive paper-window layouts. See `docs/frontend-design.md` for implementation and verification notes.
 
 ## Checks and development
 

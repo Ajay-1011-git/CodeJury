@@ -1,3 +1,5 @@
+import { mountTabs } from './tabs.mjs';
+
 /**
  * CodeJury Input and Contract Specification Component (stage1.v1)
  * Safely renders code via textContent; validates exact schema types before POST.
@@ -53,6 +55,10 @@ export function validateRunCreatePayload(payload, propertyApproved = false) {
     errors.push('input_domain must contain between 1 and 3 domain descriptors');
   } else {
     payload.input_domain.forEach((d, idx) => {
+      if (!d || typeof d !== 'object' || Array.isArray(d)) {
+        errors.push(`input_domain[${idx}] must be a domain object`);
+        return;
+      }
       if (!['integer', 'list_integer'].includes(d.kind)) {
         errors.push(`input_domain[${idx}].kind must be 'integer' or 'list_integer'`);
       }
@@ -100,6 +106,10 @@ export function validateRunCreatePayload(payload, propertyApproved = false) {
   } else {
     const seenTestIds = new Set();
     payload.supplied_tests.forEach((t, idx) => {
+      if (!t || typeof t !== 'object' || Array.isArray(t)) {
+        errors.push(`supplied_tests[${idx}] must be a test object`);
+        return;
+      }
       if (!t.test_id || typeof t.test_id !== 'string') {
         errors.push(`supplied_tests[${idx}] must have a non-empty test_id`);
       } else {
@@ -138,70 +148,64 @@ export function mountInputView(container, store, client) {
 
   container.innerHTML = `
     <div class="input-form-wrapper">
-      <div class="callout callout-info">
-        <strong>Stage 1 Contract Subset:</strong> Pure functions with 1–3 integer or list-of-integer arguments.
-        Bounds are restricted to [-1,000, 1,000], list lengths &le; 30. Imports, helpers, float values, decorators, and global state are forbidden.
-      </div>
-
       <div class="form-row">
         <div class="form-group flex-1">
-          <label class="form-label" for="example-select">Load Preset Example</label>
-          <select id="example-select" class="form-control">
-            <option value="">-- Choose an example task --</option>
-          </select>
+          <label class="form-label" for="example-select">START WITH AN EXAMPLE</label>
+          <select id="example-select" class="form-control"><option value="">Choose a case…</option></select>
         </div>
-        <div class="form-group flex-1">
-          <label class="form-label" for="function-name-input">Python Function Name</label>
-          <input type="text" id="function-name-input" class="form-control" placeholder="e.g. sort_ints" value="sort_ints">
+        <div class="form-group function-group">
+          <label class="form-label" for="function-name-input">FUNCTION NAME</label>
+          <input id="function-name-input" class="form-control" placeholder="e.g. quicksort" value="unique" autocomplete="off" spellcheck="false">
         </div>
       </div>
-
-      <div class="form-group">
-        <label class="form-label" for="source-code-input">Buggy Source Code (Unmodified Input)</label>
-        <textarea id="source-code-input" class="form-control code-editor" rows="7" placeholder="def sort_ints(items):\n    ..."></textarea>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="contract-text-input">Contract Specification (Natural Language)</label>
-        <textarea id="contract-text-input" class="form-control" rows="2" placeholder="Sort an integer list in non-decreasing order..."></textarea>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group flex-1">
-          <label class="form-label" for="domain-json-input">Input Domain Descriptors (JSON)</label>
-          <textarea id="domain-json-input" class="form-control" rows="4"></textarea>
+      <div data-tabs="editor">
+        <div class="editor-tabs" role="tablist" aria-label="Request editor">
+          <button id="editor-tab-source" role="tab" aria-selected="true" aria-controls="editor-source" data-tab-target="source">Source code</button>
+          <button id="editor-tab-contract" role="tab" aria-selected="false" aria-controls="editor-contract" data-tab-target="contract" tabindex="-1">Contract</button>
+          <button id="editor-tab-tests" role="tab" aria-selected="false" aria-controls="editor-tests" data-tab-target="tests" tabindex="-1">Test cases</button>
         </div>
-        <div class="form-group flex-1">
-          <label class="form-label" for="tests-json-input">Supplied Literal Tests (JSON)</label>
-          <textarea id="tests-json-input" class="form-control" rows="4"></textarea>
+        <div id="editor-source" role="tabpanel" data-tab-panel="source" aria-labelledby="editor-tab-source">
+          <div class="editor-shell">
+            <div class="editor-chrome"><span class="file-name">solution.py</span><span>PYTHON</span></div>
+            <div class="editor-body">
+              <div class="line-gutter" id="source-line-numbers" aria-hidden="true">1</div>
+              <textarea id="source-code-input" class="form-control code-editor" rows="9" aria-label="Buggy Source Code (Unmodified Input)" placeholder="def unique(values):&#10;    ..." spellcheck="false" wrap="off"></textarea>
+            </div>
+          </div>
+          <div class="editor-hint"><span>One function · no top-level print calls</span><span id="source-line-count">1 line</span></div>
+          <details class="source-guide"><summary>What's supported in Stage 1?</summary><p>Pure Python functions with 1–3 integer or list-of-integer arguments. Integer bounds: −1,000 to 1,000; list length: up to 30. No imports, helper functions, decorators or global state. Tests call your function for you.</p></details>
+        </div>
+        <div id="editor-contract" role="tabpanel" data-tab-panel="contract" aria-labelledby="editor-tab-contract" hidden>
+          <div class="form-group"><label class="form-label" for="contract-text-input">WHAT SHOULD THIS FUNCTION DO?</label><textarea id="contract-text-input" class="form-control" rows="3" placeholder="Describe the expected behavior, including edge cases…"></textarea></div>
+          <div class="form-group"><label class="form-label" for="domain-json-input">INPUT DOMAIN (JSON)</label><textarea id="domain-json-input" class="form-control json-editor" rows="5" spellcheck="false"></textarea></div>
+          <div class="property-selection-card">
+            <label class="form-label" for="property-select">OPTIONAL PROPERTY CHECK</label>
+            <select id="property-select" class="form-control">
+              <option value="">None — use my supplied tests</option>
+              <option value="sort_ascending_ints">Sort integers, preserving duplicates</option>
+              <option value="unique_preserve_order_ints">Unique integers in first-occurrence order</option>
+              <option value="sum_ints">Sum of all input integers</option>
+            </select>
+            <p id="property-desc" class="property-desc">No property selected.</p>
+            <div class="checkbox-group" id="consent-wrapper" style="display: none;">
+              <input type="checkbox" id="property-consent-checkbox">
+              <label for="property-consent-checkbox">I approve this property as an authoritative check for my function.</label>
+            </div>
+          </div>
+        </div>
+        <div id="editor-tests" role="tabpanel" data-tab-panel="tests" aria-labelledby="editor-tab-tests" hidden>
+          <div class="form-group"><label class="form-label" for="tests-json-input">SUPPLIED TEST CASES (JSON)</label><textarea id="tests-json-input" class="form-control json-editor" rows="11" spellcheck="false"></textarea></div>
+          <p class="source-guide">Each case needs a unique <code>test_id</code>, positional <code>args</code>, and the <code>expected</code> result. Include a failing example and an edge case.</p>
         </div>
       </div>
-
-      <div class="property-selection-card">
-        <label class="form-label" for="property-select">Approved Property Oracle (Optional)</label>
-        <select id="property-select" class="form-control">
-          <option value="">None (Supplied literal tests only)</option>
-          <option value="sort_ascending_ints">sort_ascending_ints — Nondecreasing multiset equality</option>
-          <option value="unique_preserve_order_ints">unique_preserve_order_ints — Unique elements in first-appearance order</option>
-          <option value="sum_ints">sum_ints — Mathematical list sum</option>
-        </select>
-        <p id="property-desc" class="property-desc">No property oracle selected.</p>
-        <div class="checkbox-group" id="consent-wrapper" style="display: none; margin-top: 0.5rem;">
-          <input type="checkbox" id="property-consent-checkbox">
-          <label for="property-consent-checkbox">
-            <strong>Explicit Approval:</strong> I approve the selected property as an authoritative verification oracle for this task.
-          </label>
-        </div>
-      </div>
-
-      <div id="validation-error-box" class="callout callout-danger" style="display: none; margin-top: 1rem;"></div>
-
-      <div class="form-actions" style="margin-top: 1.25rem; display: flex; gap: 0.75rem;">
-        <button id="btn-submit-run" class="btn btn-primary">Start Verification Run</button>
-        <button id="btn-cancel-run" class="btn btn-danger" disabled>Cancel Run</button>
+      <div id="validation-error-box" class="callout callout-danger" style="display: none;" role="alert"></div>
+      <div class="form-actions">
+        <span class="local-note">Isolated execution. Local model.<br>Your code stays on your Mac.</span>
+        <div class="form-actions-buttons"><button id="btn-cancel-run" class="btn btn-danger" disabled>Cancel Run</button><button id="btn-submit-run" class="btn btn-primary" aria-label="Start Verification Run">Start Verification Run <span aria-hidden="true">↗</span></button></div>
       </div>
     </div>
   `;
+  const editor = mountTabs(container.querySelector('[data-tabs="editor"]'));
 
   // References
   const exampleSelect = container.querySelector('#example-select');
@@ -218,19 +222,42 @@ export function mountInputView(container, store, client) {
   const submitBtn = container.querySelector('#btn-submit-run');
   const cancelBtn = container.querySelector('#btn-cancel-run');
 
-  // Load examples from API
+  const gutter = container.querySelector('#source-line-numbers');
+  const lineCount = container.querySelector('#source-line-count');
+  function updateLines() {
+    const count = sourceInput.value.split('\n').length;
+    gutter.textContent = Array.from({ length: count }, (_, i) => i + 1).join('\n');
+    lineCount.textContent = `${count} ${count === 1 ? 'line' : 'lines'}`;
+  }
+  sourceInput.addEventListener('input', updateLines);
+  sourceInput.addEventListener('scroll', () => { gutter.scrollTop = sourceInput.scrollTop; });
+  sourceInput.addEventListener('keydown', event => {
+    if (event.key === 'Tab') {
+      event.preventDefault();
+      sourceInput.setRangeText('    ', sourceInput.selectionStart, sourceInput.selectionEnd, 'end');
+      updateLines();
+    }
+    if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+      event.preventDefault();
+      submitBtn.click();
+    }
+  });
+  let cachedExamples = [];
+  // Load examples once; changing presets must not race property consent.
   client.getExamples()
     .then((data) => {
       const examples = data.examples || [];
+      cachedExamples = examples;
       examples.forEach((ex, idx) => {
         const opt = document.createElement('option');
         opt.value = ex.example_id;
-        opt.textContent = `${ex.title} — ${ex.description.slice(0, 50)}...`;
+        opt.textContent = ex.title;
         exampleSelect.appendChild(opt);
       });
 
       // Default to first example
       if (examples.length > 0) {
+        exampleSelect.value = examples[0].example_id;
         populateFormFromExample(examples[0].request);
       }
     })
@@ -248,17 +275,16 @@ export function mountInputView(container, store, client) {
     propSelect.value = req.approved_property || '';
     updatePropertyUI();
     consentCheckbox.checked = false;
+    errorBox.style.display = 'none';
+    errorBox.textContent = '';
+    updateLines();
   }
 
   exampleSelect.addEventListener('change', () => {
     const selectedId = exampleSelect.value;
     if (!selectedId) return;
-    client.getExamples().then((data) => {
-      const ex = (data.examples || []).find(e => e.example_id === selectedId);
-      if (ex && ex.request) {
-        populateFormFromExample(ex.request);
-      }
-    });
+    const ex = cachedExamples.find(e => e.example_id === selectedId);
+    if (ex?.request) populateFormFromExample(ex.request);
   });
 
   function updatePropertyUI() {
@@ -285,14 +311,14 @@ export function mountInputView(container, store, client) {
     try {
       parsedDomain = JSON.parse(domainInput.value);
     } catch {
-      showError('Input Domain must be valid JSON');
+      showError('Input Domain must be valid JSON', 'contract');
       return;
     }
 
     try {
       parsedTests = JSON.parse(testsInput.value);
     } catch {
-      showError('Supplied Tests must be valid JSON');
+      showError('Supplied Tests must be valid JSON', 'tests');
       return;
     }
 
@@ -309,7 +335,8 @@ export function mountInputView(container, store, client) {
 
     const validation = validateRunCreatePayload(payload, consentCheckbox.checked);
     if (!validation.valid) {
-      showError(validation.errors.join('; '));
+      const messages = validation.errors.join('; ');
+      showError(messages, /property|input_domain|contract/i.test(messages) ? 'contract' : /test/i.test(messages) ? 'tests' : 'source');
       return;
     }
 
@@ -324,7 +351,8 @@ export function mountInputView(container, store, client) {
     store.cancelRun(client);
   });
 
-  function showError(msg) {
+  function showError(msg, tab = null) {
+    if (tab) editor.activate(tab, true);
     errorBox.style.display = 'block';
     errorBox.textContent = msg;
   }
