@@ -145,6 +145,32 @@ def test_manifest_cannot_disguise_final_asset_as_training(tmp_path):
         load_stage1(path)
 
 
+def test_sft_target_must_be_the_reference_checked_in_the_sandbox():
+    row = record()
+    row["response_target"]["source"] = "def solve(values):\n    return 999\n"
+    with pytest.raises(ValueError, match="sandbox-validated"):
+        validate_records([row])
+
+
+def test_checkpoint_selection_refuses_regressions_and_ignores_training_loss():
+    from codejury.stage2_core.training.fixer_a.select import non_regressing, rank
+
+    baseline = {
+        "solved": 2,
+        "incorrect_accepted": 0,
+        "malformed": 2,
+        "input_tokens": 1000,
+        "output_tokens": 1000,
+        "train_loss": 0.1,
+    }
+    improved = {**baseline, "solved": 3, "malformed": 0, "train_loss": 50.0}
+    assert non_regressing(improved, baseline)
+    assert rank(improved) < rank(baseline)
+    assert not non_regressing({**improved, "incorrect_accepted": 1}, baseline)
+    assert not non_regressing({**improved, "malformed": 3}, baseline)
+    assert not non_regressing({**improved, "solved": 1}, baseline)
+
+
 @pytest.mark.parametrize("mutation", [None, "hash", "inspected", "count"])
 def test_benchmark_public_seal_is_checked_without_opening_final_files(tmp_path, mutation):
     import yaml
@@ -198,3 +224,62 @@ def test_benchmark_public_seal_is_checked_without_opening_final_files(tmp_path, 
         assert receipt["final_contents_opened"] is False
         assert receipt["final_base_problems"] == 50 and receipt["limited_evidence"]
         assert not (tmp_path / "private/stage2_final.jsonl").exists()
+
+
+@pytest.mark.parametrize("mutation", ["pilot", "batch", "nan", "seed", "checkpoint"])
+def test_refresh_refuses_unsafe_or_inconsistent_recipe(mutation):
+    from codejury.stage2_core.training.fixer_a.refresh import recipe
+
+    settings = {
+        "seed": 17,
+        "refresh": {
+            "reference_proof": "unused",
+            "pilot_steps": 20,
+            "steps": 100,
+            "save_every": 50,
+            "batch_size": 1,
+            "max_seq_length": 768,
+            "learning_rate": 0.00005,
+            "grad_checkpoint": True,
+            "seed": 17,
+        },
+    }
+    assert recipe(settings) == settings["refresh"]
+    key, value = {
+        "pilot": ("pilot_steps", True),
+        "batch": ("batch_size", 2),
+        "nan": ("learning_rate", float("nan")),
+        "seed": ("seed", 29),
+        "checkpoint": ("save_every", 30),
+    }[mutation]
+    settings["refresh"][key] = value
+    with pytest.raises(ValueError):
+        recipe(settings)
+
+
+@pytest.mark.parametrize("mutation", ["identity", "reload", "updates", "steps", "phase"])
+def test_full_training_refuses_unmatched_or_failed_pilot_before_native_load(tmp_path, mutation):
+    from codejury.stage2_core.training.fixer_a.refresh import verify_pilot
+
+    proof = {
+        "status": "pilot_verified",
+        "phase": "pilot",
+        "job_identity": "a" * 64,
+        "completed_steps": 20,
+        "reload_verified": True,
+        "updates_verified": True,
+        # Deliberately nonexistent registry: failed proof must be rejected first.
+        "registry_path": str(tmp_path / "MUST_NOT_OPEN"),
+    }
+    key, value = {
+        "identity": ("job_identity", "b" * 64),
+        "reload": ("reload_verified", False),
+        "updates": ("updates_verified", False),
+        "steps": ("completed_steps", 9),
+        "phase": ("phase", "full"),
+    }[mutation]
+    proof[key] = value
+    path = tmp_path / "pilot.json"
+    path.write_text(json.dumps(proof))
+    with pytest.raises(ValueError, match="pilot/save/reload"):
+        verify_pilot(path, "a" * 64, 20)

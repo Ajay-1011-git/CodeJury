@@ -1,14 +1,14 @@
 # A2.05 data and A validation checkpoint
 
-Status: curation and native diagnostic implemented; A refresh/selection and expanded Stage 2 learning remain pending. No new adapter was trained. The retained Stage 1 A remains pilot-only in the Stage 2 registry.
+Status: curation, native diagnostics and genuine A refresh are implemented. A 20-step pilot and bounded 100-step refresh have run with actual updates, save and fresh-process reload. Executable checkpoint selection and expanded Stage 2 learning are audited separately in [a-training.md](a-training.md).
 
 Integration update, 12 October: Sarvesh's public `data/stage2_tools/manifests/stage2.json` is now adopted by the core. Its inherited final seal contains 10 bases / 19 records. The earlier absent-exchange-path blocker below is historical and resolved; private final verification/results and refreshed training remain pending. See integration/stage2/HANDOFF.md.
 
 ## Actual pools and provenance
 
-The frozen Stage 1 manifest contains 80 training records / 40 bases / 8 families and 20 validation records / 10 bases / 2 families. Only those two allowlisted files are opened. Original assessment and Stage 2 final asset entries are filtered before any content access. The new Sarvesh final-pool exchange seal is absent. Existing Stage 1 final metadata is not a replacement for that exchange.
+The frozen Stage 1 manifest contains 80 training records / 40 bases / 8 families and 20 validation records / 10 bases / 2 families. Only those two allowlisted files are opened. Original assessment and Stage 2 final asset entries are filtered before any content access. Sarvesh's public Stage 2 seal is now verified before training; private final contents remain unopened.
 
-All imported examples are project-authored synthetic bugs, with the original license string retained: repository redistribution license not declared. No external/student mistakes or expanded boolean/string/dictionary/helper pool is claimed. Family/base and identifier-normalized reference ASTs are disjoint across train/validation. Runtime problem fingerprints also include contract/domain: a common `return 0` corruption alone is not treated as a shared intended problem. This does not prove semantic independence of every possible near-duplicate.
+All imported examples are project-authored synthetic bugs, with the original license string retained: repository redistribution license not declared. No external/student mistakes or expanded boolean/string/dictionary/helper pool is claimed. Family/base and identifier-normalized reference ASTs are disjoint across train/validation. Runtime problem fingerprints also include contract/domain: a common `return 0` corruption alone is not treated as a shared intended problem. This does not prove semantic independence of every possible near-duplicate. SFT target source must exactly match the reference source verified in the sandbox.
 
 Actual isolated reference validation passed 200 calls across 50 unique reference bundles, using visible and authorized offline validation cases. No submitted/reference code ran on the host. Separately hashed train and validation ArtifactManifests export records, provenance, independent B views and A SFT chats into ignored private artifacts. They contain reference targets for authorized offline learning, without final tests or runtime exposure. Export requires matching successful sandbox evidence.
 
@@ -41,6 +41,6 @@ python -m codejury.stage2_core.training_cli evaluate --role fixer_a --config con
 python -m pytest tests/stage2_core/test_corpus.py -q
 ```
 
-Commands refuse to overwrite evidence; use a fresh --out path for repeats. CPU data checks do not execute references. The train command currently exits with explicit prerequisites and training_started=false; the refreshed trainer is not complete. New training must wait for the partner final seal, expanded reviewed pools, verified pilot/save/reload and executable validation-controlled selection. Learning, B mining and final evaluation must not substitute fixtures or these validation failures for training failures.
+Commands refuse to overwrite evidence; use a fresh --out path for repeats. CPU data checks do not execute references. The train command now runs an explicit pilot or gated full refresh using the approved integer/list pools. The partner public seal is verified from metadata before learning. Full training requires a matching native pilot/save/reload proof; any promoted checkpoint requires executable validation. Expanded reviewed pools remain pending. Learning, B mining and final evaluation must not substitute fixtures or these validation failures for training failures. See a-training.md for the new commands and measurements.
 
 API patterns were checked against installed source and official [MLX datasets](https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/tuner/datasets.py), [tokenizer wrapper](https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/tokenizer_utils.py), and [LoRA entrypoint](https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/lora.py).

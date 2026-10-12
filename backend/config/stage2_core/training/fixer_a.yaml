@@ -5,4 +5,14 @@ report_directory: artifacts/stage2_core/fixer-a-validation
 stage2_final_seal: data/stage2_tools/manifests/stage2.json
 max_new_tokens: 1024
 seed: 17
-training_enabled: false
+training_enabled: true
+refresh:
+  reference_proof: artifacts/stage2_core/fixer-a-validation/data-sandbox.json
+  pilot_steps: 20
+  steps: 100
+  save_every: 50
+  batch_size: 1
+  max_seq_length: 768
+  learning_rate: 0.00005
+  grad_checkpoint: true
+  seed: 17

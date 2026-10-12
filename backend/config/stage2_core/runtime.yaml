@@ -1,5 +1,5 @@
 profile: mac-standard-v1
-model_manifest: artifacts/stage2_core/model-registry-json-policy.json
+model_manifest: artifacts/stage2_core/fixer-a-refresh/selected-seed17/registry.json
 # CODEJURY_STAGE2_MODEL_MANIFEST overrides this local, ignored registry path.
 startup_timeout_s: 60
 shutdown_grace_s: 5

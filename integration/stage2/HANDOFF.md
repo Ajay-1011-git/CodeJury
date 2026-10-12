@@ -1,6 +1,6 @@
 # Stage 2 Mac integration and learning handoff
 
-12 October 2026. Sarvesh's `stage2/sarvesh-tools` through 9e72c1d is integrated with Ajay's core through 056a05d. This is a tested module/native-tool checkpoint, not completion of Stage 2 learning or the final application.
+12 October 2026. Sarvesh's `stage2/sarvesh-tools` through 9e72c1d is integrated with Ajay's core through 056a05d. The subsequent integration/training commits add actual native tool checks and a genuine A refresh; this is not completion of Stage 2 learning or the final application. Current A evidence and commands are in [a-training.md](../../backend/docs/stage2_core/a-training.md).
 
 ## What the reported blockers mean
 
@@ -17,11 +17,12 @@ Sarvesh's earlier audit described his checkout: no MLX or reachable Docker daemo
 
 - macOS ARM64; Python 3.11.16, MLX 0.32.3, MLX-LM 0.32.0, Transformers 5.19.0; Metal is available.
 - The actual retained A validation already loaded weights and switched raw/A in one resident base (data-card.md): raw 0/10, A 1/10 solved on a limited one-seed validation diagnostic. This is not a selected Stage 2 A/B release.
+- Subsequent genuine A refresh selection used all 20 authorized validation variants / 10 bases: raw0/20, retained A3/20 (1 incorrect acceptance), refresh50 4/20, refresh100 5/20 (both0 incorrect acceptances). The selected100-step adapter hash is 784db8b11ff90aa2d84e3f883238b27a55f28db443da57df663d99f001cd1b5f; runtime points to its private selected registry. It loses two formerly solved variants despite the aggregate gain. This is limited synthetic evidence; B and real A/B episodes remain pending.
 - The global `codejury.stage2_core.leases.ComputeLease` must cover standalone training, teachers and model benchmarks as well as inference. It defaults to one per-user /private/tmp lock shared across clones. Do not invent a second independent lock or run concurrent native jobs on this 16 GB profile.
 - Actual installed signatures: `train_model(args, model, train_set, valid_set, training_callback=None)`, `load_dataset(args, tokenizer)`, `ChatDataset(data, tokenizer, chat_key='messages', mask_prompt=False)`, `linear_to_lora_layers(model, num_layers, config, use_dora=False)`, `load_adapters(model, adapter_path)`, `remove_lora_layers(model)`.
 - The real parser exposes --train, --mask-prompt, --num-layers, --fine-tune-type, --iters, --max-seq-length, --adapter-path, --grad-checkpoint and --seed. Verified complete prompt/completion masking in 100 converted chats, using the actual installed ChatDataset; no completion truncation, maximum 574 tokens.
 - Phi3 conversion, 32 layers, 4-bit affine/group64. Existing common LoRA uses the last 4 layers, self_attn.qkv_proj/self_attn.o_proj, rank8/scale16/dropout0. Registry checks exact base/tokenizer/quantization/topology and all adapter tensor keys/shapes; save/reload must be verified for every new trained role.
-- `inspect_mlx.py` imports and records interfaces/Metal availability without loading a model or training. Its success is not a substitute for a native pilot. Current `training_cli train` remains a truthful prerequisite report, not a finished Stage 2 trainer. Do not use the old Stage 1 launcher to import the entire manifest into a Stage 2 learning job; consume only authorized train/validation artifact files.
+- `inspect_mlx.py` imports and records interfaces/Metal availability without loading a model or training. Its success is not a substitute for a native pilot. `training_cli train` now uses inspected native APIs: an actual 20-step A pilot and bounded 100-step refresh passed update/save/fresh-reload checks on this Mac, with peak MLX memory 3192.4/3256.4 MB. Executable checkpoint selection is documented separately; B/episodes/Judge remain pending. Do not use the old Stage 1 launcher to import the entire manifest into a Stage 2 learning job; consume only authorized train/validation artifact files.
 
 The primary upstream sources are [MLX LoRA](https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/lora.py), [training loop](https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/tuner/trainer.py), [datasets](https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/tuner/datasets.py) and [adapter utilities](https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/tuner/utils.py). Installed source and executed behavior govern this checkpoint.
 

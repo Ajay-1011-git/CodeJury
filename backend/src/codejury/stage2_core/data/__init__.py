@@ -47,7 +47,7 @@ def config(path):
     }
     if (
         type(value) is not dict
-        or set(value) != required
+        or set(value) not in (required, required | {"refresh"})
         or value["version"] != "stage2.fixer-a-validation.v1"
         or type(value["max_new_tokens"]) is not int
         or value["max_new_tokens"] != 1024
@@ -98,6 +98,8 @@ def validate_records(rows):
     for row in rows:
         if set(row) != FIELDS or row["split"] not in {"train", "validation"}:
             raise ValueError("Only strictly shaped train/validation records accepted")
+        if row["response_target"].get("source") != row["correct_source"]:
+            raise ValueError("SFT target differs from the sandbox-validated reference")
         provenance = row["provenance"]
         if (
             not provenance.get("license")
@@ -366,7 +368,7 @@ def export_pools(config_path, directory, verified_report, *, base_revision_hash)
                 "base_problem_count": len({e["base_problem_id"] for e in pool}),
                 "contains_hidden_assessment": False,
                 "note": "Authorized offline reference targets; preserve license/provenance. "
-                "No final contents. Curation only; Stage 2 learning awaits final-pool seal.",
+                "No final contents. Separate authorized offline training/validation pools.",
             },
             "ArtifactManifest",
         )

@@ -77,14 +77,18 @@ def mask_audit(rows, registry):
     }
 
 
-def evaluate(config_path, out=None):
+def evaluate(
+    config_path, out=None, *, registry_path=None, all_variants=False, roles=("raw", "fixer_a")
+):
     settings = config(config_path)
     manifest, records = load_stage1(local_path(settings["source_manifest"]))
     learning_records = records
+    if tuple(roles) not in (("raw", "fixer_a"), ("fixer_a",)):
+        raise ValueError("Validation compares raw/A or an A checkpoint only")
     selected = {}
     for row in records:
         if row["split"] == "validation":
-            selected.setdefault(row["base_problem_id"], row)
+            selected.setdefault(row["record_id"] if all_variants else row["base_problem_id"], row)
     records = list(selected.values())
     directory = Path(out) if out else local_path(settings["report_directory"]) / "native"
     directory.mkdir(parents=True, exist_ok=False)
@@ -92,14 +96,27 @@ def evaluate(config_path, out=None):
     runner = DockerRunner()
     runner_info = runner.ready()
     runtime_config = local_path(settings["runtime_config"])
-    with make_model_port(runtime_config) as port:
+    if registry_path is not None:
+        import yaml
+
+        from ...model_worker import NativeModelPort
+        from ...registry import Registry
+
+        model_port = NativeModelPort(
+            Registry(Path(registry_path)), yaml.safe_load(runtime_config.read_text())
+        )
+    else:
+        model_port = make_model_port(runtime_config)
+    with model_port as port:
         masks = mask_audit(learning_records, port.registry)
         write_report(directory / "mask-audit.json", masks)
         model_manifest_hash = port.registry.manifest_hash
+        registry_used = str(port.registry.path)
+        base_revision_hash = port.registry.base["base_revision_hash"]
         for record in records:
             example = learning_example(record)
             problem, tests = runtime_example(record)
-            for role in ("raw", "fixer_a"):
+            for role in roles:
                 request = {
                     "schema_version": "stage2.v1",
                     "request_id": "val-" + uuid4().hex,
@@ -215,7 +232,7 @@ def evaluate(config_path, out=None):
                     )
                     raise RuntimeError("Validation interrupted; partial evidence retained")
     aggregates = {}
-    for role in ("raw", "fixer_a"):
+    for role in roles:
         subset = [r for r in rows if r["role"] == role]
         aggregates[role] = {
             "total": len(subset),
@@ -234,15 +251,24 @@ def evaluate(config_path, out=None):
         "rows": rows,
         "function_executions": executions,
         "model_manifest_hash": model_manifest_hash,
+        "registry_path": registry_used,
+        "base_revision_hash": base_revision_hash,
+        "all_variants": all_variants,
+        "seed": settings["seed"],
+        "max_new_tokens": settings["max_new_tokens"],
         "source_manifest_hash": json_hash(manifest),
         "runner": runner_info,
         "training_started": False,
         "selected_adapter": None,
-        "scope": "One fixed corruption per each of 10 Stage 1 validation bases; one seed.",
+        "scope": (
+            "All 20 authorized validation variants; one seed."
+            if all_variants
+            else "One fixed corruption per each of 10 Stage 1 validation bases; one seed."
+        ),
         "limitations": [
             "Earlier A checkpoints not compared in Stage 2 yet.",
-            "Not a final benchmark or full 20-record validation.",
-            "No expanded Stage 2 corpus/final pool seal or new training.",
+            "Not a final benchmark; limited imported synthetic corpus.",
+            "No expanded Stage 2 corpus.",
             "Checkpoint selection/non-regression remains pending.",
         ],
     }
@@ -260,11 +286,16 @@ def training_preconditions(config_path):
     except (ValueError, KeyError, OSError) as error:
         reasons.append(str(error))
     if not settings["training_enabled"]:
-        reasons.append(
-            "No refreshed A training configuration has passed pilot/validation selection"
-        )
+        reasons.append("Training disabled by configuration")
+    else:
+        from .refresh import recipe
+
+        try:
+            recipe(settings)
+        except ValueError as error:
+            reasons.append(str(error))
     return {
-        "status": "blocked" if reasons else "pending_implementation",
+        "status": "blocked" if reasons else "ready_for_pilot",
         "training_started": False,
         "reasons": reasons,
         "selected_adapter": None,
