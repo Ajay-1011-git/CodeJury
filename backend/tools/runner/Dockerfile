@@ -1,0 +1,7 @@
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+COPY worker.py /runner/worker.py
+USER 65532:65532
+WORKDIR /tmp
+ENTRYPOINT ["python", "-I", "/runner/worker.py"]
