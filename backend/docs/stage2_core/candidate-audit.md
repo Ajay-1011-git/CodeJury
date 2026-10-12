@@ -1,6 +1,6 @@
 # A2.04 candidate and view audit
 
-CPU implementation is complete. Native A/B acceptance awaits a real B adapter and Sarvesh ToolPort. This checkpoint does not claim learned diversity, executable repair quality, or E2 acceptance.
+CPU implementation is complete. Selected A/B and the real ToolPort are now coupled in the initial native pilot in [controller.md](controller.md). The pilot remains unresolved at the raw Critic output gate and does not certify the full E2 training corpus or broad repair quality.
 
 Intake parses ASTs without executing code. Controller IDs preserve supplied values and approved requirement references. Target/helper interfaces are checked, and semantic validation uses the injected checked ToolPort. Unsupported intake cannot start the initial pair.
 

@@ -235,7 +235,7 @@ class CandidatePool:
             },
         )
 
-    def initial_pair(self, *, seed, cancel):
+    def initial_pair(self, *, seed, cancel, original=None):
         if self._initial_started:
             raise ValueError("Initial pair already dispatched")
         snapshot = self.ledger.snapshot(self.run_id)
@@ -262,7 +262,13 @@ class CandidatePool:
             }
         )
         self._initial_started = True
-        original = self.original()
+        original = self.original() if original is None else original
+        if original not in snapshot["candidates"] and original not in self.ledger.records(
+            self.run_id, "candidates"
+        ):
+            raise ValueError("Original must be registered before reproduction")
+        if original["origin"] != "original":
+            raise ValueError("Initial generation needs an original parent")
         a = self.generate("fixer_a", self.views.a, parent=original, seed=seed, cancel=cancel)
         b = self.generate("fixer_b", self.views.b, parent=original, seed=seed, cancel=cancel)
         return {"original": original, "fixer_a": a, "fixer_b": b}

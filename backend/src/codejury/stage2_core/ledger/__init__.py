@@ -98,8 +98,11 @@ class Ledger:
                 CREATE TABLE IF NOT EXISTS cache (key TEXT PRIMARY KEY, body TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS checkpoints (
                     run_id TEXT PRIMARY KEY REFERENCES runs(id), usage TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS controller_records (
+                    run_id TEXT NOT NULL REFERENCES runs(id), kind TEXT NOT NULL,
+                    id TEXT NOT NULL, body TEXT NOT NULL, PRIMARY KEY(run_id,kind,id));
             """)
-            for table in ("events", "records", "cache"):
+            for table in ("events", "records", "cache", "controller_records"):
                 for verb in ("UPDATE", "DELETE"):
                     db.execute(
                         f"CREATE TRIGGER IF NOT EXISTS {table}_{verb} BEFORE {verb} "
@@ -769,6 +772,12 @@ class Ledger:
     def snapshot(self, run_id) -> dict:
         with self.connection() as db:
             run = self._run(db, run_id)
+            final = db.execute(
+                "SELECT body FROM controller_records WHERE run_id=? AND kind='final'",
+                (run_id,),
+            ).fetchone()
+            if final is not None:
+                return checked(json.loads(final[0]), "RunSnapshot")
             usage = (
                 self.accounts[run_id].usage()
                 if run_id in self.accounts

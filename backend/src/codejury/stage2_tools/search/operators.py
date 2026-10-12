@@ -80,11 +80,6 @@ def overlaps(a: dict, b: dict) -> bool:
     ) <= (a["end_lineno"], a["end_col_offset"])
 
 
-def _render(tree: ast.Module) -> str:
-    ast.fix_missing_locations(tree)
-    return ast.unparse(tree) + "\n"
-
-
 def _function_scopes(tree: ast.Module) -> dict[int, set[str]]:
     """Map id(Name node) -> names bound in the enclosing function (params + assigned names)."""
     scope = {}
@@ -192,11 +187,33 @@ def enumerate_edits(
         for node_index, node, label, payload in _variants(tree, family):
             if limit is not None and len(proposals) >= limit:
                 return proposals
-            before = ast.unparse(node)
+            # AST offsets are UTF-8 byte offsets. Preserve comments, spelling and all
+            # source outside the reported edit so the core can replay the exact chain.
+            lines = source.encode().splitlines(keepends=True)
+            start = sum(map(len, lines[: node.lineno - 1])) + node.col_offset
+            stop = sum(map(len, lines[: node.end_lineno - 1])) + node.end_col_offset
+            before = source.encode()[start:stop].decode()
             changed = _apply(tree, node_index, label, payload)
             new_node = list(ast.walk(changed))[node_index] if label != "neg" else None
             after = ast.unparse(new_node) if new_node is not None else _after_negation(node)
-            text = _render(changed)
+
+            def splice(replacement):
+                return (
+                    source.encode()[:start] + replacement.encode() + source.encode()[stop:]
+                ).decode()
+
+            text = splice(after)
+            expected = ast.dump(ast.parse(ast.unparse(changed)), include_attributes=False)
+            try:
+                same = ast.dump(ast.parse(text), include_attributes=False) == expected
+            except SyntaxError:
+                same = False
+            # Add grouping only when the parent needs it to preserve the intended AST.
+            if not same and isinstance(node, ast.expr):
+                after = "(" + after + ")"
+                text = splice(after)
+            if ast.dump(ast.parse(text), include_attributes=False) != expected:
+                continue
             proposals.append(
                 EditProposal(
                     family,

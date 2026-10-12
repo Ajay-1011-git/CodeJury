@@ -1,6 +1,6 @@
 # A2.06 native B training and complementarity
 
-Status: genuine train-only selected-A failure mining, separate B pilot/full training, alpha/view controls and executable checkpoint selection completed on this Mac. This is limited synthetic-corpus evidence. Canonical tool-driven A/B episodes remain the next task; this file does not claim a final controller or final benchmark.
+Status: genuine train-only selected-A failure mining, separate B pilot/full training, alpha/view controls and executable checkpoint selection completed on this Mac. This is limited synthetic-corpus evidence. The first real fixed-controller episode pilot is now described in [controller.md](controller.md). It remains limited by invalid raw Critic proposals; this file does not claim a final benchmark.
 
 The public final seal is verified before learning using metadata only. Selected A is the actual 100-step refresh, hash784db8b11ff90aa2d84e3f883238b27a55f28db443da57df663d99f001cd1b5f. Its limited validation is documented in a-training.md. No private final contents are opened.
 
