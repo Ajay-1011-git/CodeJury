@@ -1,0 +1,25 @@
+{
+  "schema_version": "stage2.v1",
+  "proposal_id": "p-negative",
+  "requirement_ids": [
+    "sum-all"
+  ],
+  "generator_spec": null,
+  "concrete_inputs": [
+    [
+      [
+        -1
+      ]
+    ]
+  ],
+  "oracle_spec": {
+    "kind": "property",
+    "property_id": "sum_ints",
+    "parameters": {}
+  },
+  "rationale": "Synthetic approved-property challenge.",
+  "target_candidate_ids": [
+    "c-a",
+    "c-b"
+  ]
+}

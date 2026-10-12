@@ -1,0 +1,287 @@
+{
+  "schema_version": "stage2.v1",
+  "run_id": "fixture-run",
+  "status": "running",
+  "runtime_mode": "fixture",
+  "phase": "audit",
+  "problem": {
+    "schema_version": "stage2.v1",
+    "problem_id": "fixture-problem",
+    "source_hash": "40557ac3e4d9875c40f62048d530ed7d0e9da94b7dbf0169155f5d9c942a7123",
+    "source": "def sum_values(values):\n    total = 0\n    for i in range(len(values) - 1):\n        total += values[i]\n    return total\n",
+    "function_name": "sum_values",
+    "signature": "sum_values(values)",
+    "contract_text": "Return the sum of every integer. Empty input returns 0. Do not modify input.",
+    "domain_schema": [
+      {
+        "name": "values",
+        "domain": {
+          "kind": "list",
+          "item_domain": {
+            "kind": "integer",
+            "min": -10,
+            "max": 10
+          },
+          "min_length": 0,
+          "max_length": 8
+        }
+      }
+    ],
+    "helper_interfaces": [],
+    "requirements": [
+      {
+        "schema_version": "stage2.v1",
+        "requirement_id": "sum-all",
+        "description": "Return the integer sum of every value, preserving inputs.",
+        "source": "reviewed_contract",
+        "approval_status": "approved",
+        "property_template_id": "sum_ints",
+        "parameters": {}
+      }
+    ],
+    "supplied_test_ids": [
+      "t-supplied"
+    ],
+    "allowed_dependencies": [],
+    "resource_profile": "mac-standard-v1",
+    "input_codec_version": "json.v1"
+  },
+  "candidates": [
+    {
+      "schema_version": "stage2.v1",
+      "candidate_id": "c-original",
+      "problem_id": "fixture-problem",
+      "parent_id": null,
+      "origin": "original",
+      "generation_view": "original",
+      "source": "def sum_values(values):\n    total = 0\n    for i in range(len(values) - 1):\n        total += values[i]\n    return total\n",
+      "source_hash": "40557ac3e4d9875c40f62048d530ed7d0e9da94b7dbf0169155f5d9c942a7123",
+      "diagnosis": "Synthetic fixture example; no model inference.",
+      "assumptions": [],
+      "requirement_ids": [
+        "sum-all"
+      ],
+      "model_config_hash": null,
+      "edits": [],
+      "created_event_id": 2,
+      "eligibility": "rejected",
+      "rejection_reason": "Fails admitted authoritative test.",
+      "verification_suite_hash": "5cec3734365ed7f4cc974ee42ca01ae6f3d5d1fd56242da2b7e9bd50b563ee21"
+    },
+    {
+      "schema_version": "stage2.v1",
+      "candidate_id": "c-a",
+      "problem_id": "fixture-problem",
+      "parent_id": "c-original",
+      "origin": "fixer_a",
+      "generation_view": "targeted_repair",
+      "source": "def sum_values(values):\n    total = 0\n    for value in values:\n        if value > 0:\n            total += value\n    return total\n",
+      "source_hash": "afb55335fb20c76eee9a30a34c8c8c006f66b9bc5149ab07321a93e245dc6579",
+      "diagnosis": "Synthetic fixture example; no model inference.",
+      "assumptions": [],
+      "requirement_ids": [
+        "sum-all"
+      ],
+      "model_config_hash": "631f66eb93d025ee47820cf91a8e91476525c73a64f27aed82b2d9067217923e",
+      "edits": [],
+      "created_event_id": 3,
+      "eligibility": "eligible",
+      "rejection_reason": null,
+      "verification_suite_hash": "5cec3734365ed7f4cc974ee42ca01ae6f3d5d1fd56242da2b7e9bd50b563ee21"
+    },
+    {
+      "schema_version": "stage2.v1",
+      "candidate_id": "c-b",
+      "problem_id": "fixture-problem",
+      "parent_id": "c-original",
+      "origin": "fixer_b",
+      "generation_view": "independent_reconstruction",
+      "source": "def sum_values(values):\n    total = 0\n    for value in values:\n        total += abs(value)\n    return total\n",
+      "source_hash": "99d7d5b6a09c79f493b2328fa74c079fa74fbb768d4aab045df9fbcccca17fdc",
+      "diagnosis": "Synthetic fixture example; no model inference.",
+      "assumptions": [],
+      "requirement_ids": [
+        "sum-all"
+      ],
+      "model_config_hash": "c8991e1089705ffac8e3eec23685726ac75dfbb04ba9479f266409d0444019c6",
+      "edits": [],
+      "created_event_id": 4,
+      "eligibility": "eligible",
+      "rejection_reason": null,
+      "verification_suite_hash": "5cec3734365ed7f4cc974ee42ca01ae6f3d5d1fd56242da2b7e9bd50b563ee21"
+    }
+  ],
+  "tests": [
+    {
+      "schema_version": "stage2.v1",
+      "test_id": "t-supplied",
+      "input_codec_version": "json.v1",
+      "inputs": [
+        [
+          2,
+          3
+        ]
+      ],
+      "related_inputs": null,
+      "oracle_spec": {
+        "kind": "literal",
+        "expected": 5
+      },
+      "oracle_status": "authoritative",
+      "oracle_source": "user",
+      "domain_valid": true,
+      "requirement_ids": [
+        "sum-all"
+      ],
+      "provenance": "supplied"
+    }
+  ],
+  "executions": [
+    {
+      "schema_version": "stage2.v1",
+      "execution_id": "e-original",
+      "candidate_id": "c-original",
+      "test_id": "t-supplied",
+      "runtime_hash": "087bf5ca75c48138e467aae95a7822de0e76437105bbfdd2163148d047e445db",
+      "actual_output": 2,
+      "input_effects": [
+        {
+          "call_index": 0,
+          "mutated": false,
+          "before_hash": "32df5bcef9fe387f787f39a4f1f0b6bc1514da2929cedc7ee6bddb5578e36f5f",
+          "after_hash": "32df5bcef9fe387f787f39a4f1f0b6bc1514da2929cedc7ee6bddb5578e36f5f"
+        }
+      ],
+      "exception": null,
+      "outcome": "fail",
+      "duration_ms": 1,
+      "trace_ref": null,
+      "trace_truncated": false
+    },
+    {
+      "schema_version": "stage2.v1",
+      "execution_id": "e-a-pos",
+      "candidate_id": "c-a",
+      "test_id": "t-supplied",
+      "runtime_hash": "087bf5ca75c48138e467aae95a7822de0e76437105bbfdd2163148d047e445db",
+      "actual_output": 5,
+      "input_effects": [
+        {
+          "call_index": 0,
+          "mutated": false,
+          "before_hash": "32df5bcef9fe387f787f39a4f1f0b6bc1514da2929cedc7ee6bddb5578e36f5f",
+          "after_hash": "32df5bcef9fe387f787f39a4f1f0b6bc1514da2929cedc7ee6bddb5578e36f5f"
+        }
+      ],
+      "exception": null,
+      "outcome": "pass",
+      "duration_ms": 1,
+      "trace_ref": null,
+      "trace_truncated": false
+    },
+    {
+      "schema_version": "stage2.v1",
+      "execution_id": "e-b-pos",
+      "candidate_id": "c-b",
+      "test_id": "t-supplied",
+      "runtime_hash": "087bf5ca75c48138e467aae95a7822de0e76437105bbfdd2163148d047e445db",
+      "actual_output": 5,
+      "input_effects": [
+        {
+          "call_index": 0,
+          "mutated": false,
+          "before_hash": "32df5bcef9fe387f787f39a4f1f0b6bc1514da2929cedc7ee6bddb5578e36f5f",
+          "after_hash": "32df5bcef9fe387f787f39a4f1f0b6bc1514da2929cedc7ee6bddb5578e36f5f"
+        }
+      ],
+      "exception": null,
+      "outcome": "pass",
+      "duration_ms": 1,
+      "trace_ref": null,
+      "trace_truncated": false
+    }
+  ],
+  "audit_gaps": [
+    {
+      "schema_version": "stage2.v1",
+      "gap_id": "g-boundary",
+      "candidate_id": "c-a",
+      "candidate_source_hash": "afb55335fb20c76eee9a30a34c8c8c006f66b9bc5149ab07321a93e245dc6579",
+      "location": {
+        "lineno": 4,
+        "col_offset": 19,
+        "end_lineno": 4,
+        "end_col_offset": 20
+      },
+      "operator_family": "boundary_constant",
+      "mutant_ids": [
+        "m-boundary"
+      ],
+      "observed_outcomes": [
+        {
+          "mutant_id": "m-boundary",
+          "outcome": "survived"
+        }
+      ],
+      "requirement_ids": [
+        "sum-all"
+      ],
+      "suite_hash": "5cec3734365ed7f4cc974ee42ca01ae6f3d5d1fd56242da2b7e9bd50b563ee21",
+      "interpretation": "unresolved_test_gap"
+    }
+  ],
+  "probe_mutants": [
+    {
+      "schema_version": "stage2.v1",
+      "mutant_id": "m-boundary",
+      "parent_candidate_id": "c-a",
+      "source": "def sum_values(values):\n    total = 0\n    for value in values:\n        if value > 1:\n            total += value\n    return total\n",
+      "source_hash": "419c1880488b1207ab5cc2e1a07aa13e8103ff76e20f698fa52117b09f7a383b",
+      "edit": {
+        "location": {
+          "lineno": 4,
+          "col_offset": 19,
+          "end_lineno": 4,
+          "end_col_offset": 20
+        },
+        "operator_family": "boundary_constant",
+        "before": "0",
+        "after": "1",
+        "parent_source_hash": "afb55335fb20c76eee9a30a34c8c8c006f66b9bc5149ab07321a93e245dc6579",
+        "result_source_hash": "419c1880488b1207ab5cc2e1a07aa13e8103ff76e20f698fa52117b09f7a383b"
+      },
+      "outcome": "survived",
+      "test_ids": [
+        "t-supplied"
+      ],
+      "equivalence_status": "unknown",
+      "suite_hash": "5cec3734365ed7f4cc974ee42ca01ae6f3d5d1fd56242da2b7e9bd50b563ee21"
+    }
+  ],
+  "edit_sources": [
+    {
+      "schema_version": "stage2.v1",
+      "source_hash": "809a5da60b2cc2fb214375a58e0cc068b520bd2fe0fc14ad8dc3ac6956c05ee8",
+      "source": "def sum_values(values):\n    total = 0\n    for i in range(len(values) - 0):\n        total += values[i]\n    return total\n"
+    }
+  ],
+  "actions": [],
+  "decision": null,
+  "resource_usage": {
+    "schema_version": "stage2.v1",
+    "output_tokens": 0,
+    "input_tokens": 0,
+    "function_executions": 4,
+    "elapsed_ms": 0,
+    "learned_candidates": 0,
+    "search_candidates": 0,
+    "audit_mutants": 1,
+    "judge_decisions": 0,
+    "peak_memory_mb": null
+  },
+  "policy_mode": "learned",
+  "model_manifest_hash": "9836fdcf525989c95e5b7867258a8f94f68840cb1b32c0b8cdd0816cbd5cfadd",
+  "profile_hash": "fa1300adea006eb9da2e5f051c0509ac70dda01fdcecbdc537c05c774216ed8e",
+  "suite_hash": null,
+  "termination_reason": null
+}

@@ -1,0 +1,23 @@
+{
+  "schema_version": "stage2.v1",
+  "request_id": "model-call-1",
+  "status": "ok",
+  "role": "fixer_b",
+  "text": "{\"source\": \"def sum_values(values):\\n    total = 0\\n    for value in values:\\n        total += abs(value)\\n    return total\\n\", \"diagnosis\": \"Synthetic output.\", \"assumptions\": [], \"requirement_ids\": [\"sum-all\"], \"suspected_sites\": [], \"suggested_families\": []}",
+  "model_revision_hash": "68828f0b413235f5c2d7d6803a3570a7e3ebd0fd4481be30f82aa490082d788b",
+  "adapter_hash": "cb7e65456a99d795111a135d8ddebb1aa63f4db40ecf610f3c4f771124109d29",
+  "model_config_hash": "c8991e1089705ffac8e3eec23685726ac75dfbb04ba9479f266409d0444019c6",
+  "usage": {
+    "schema_version": "stage2.v1",
+    "output_tokens": 32,
+    "input_tokens": 8,
+    "function_executions": 0,
+    "elapsed_ms": 0,
+    "learned_candidates": 1,
+    "search_candidates": 0,
+    "audit_mutants": 0,
+    "judge_decisions": 0,
+    "peak_memory_mb": null
+  },
+  "error": null
+}

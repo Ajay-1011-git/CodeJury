@@ -1,0 +1,8 @@
+{
+  "state_id": "state-before-gap",
+  "action_option_id": "opt-gap",
+  "evidence_ids": [
+    "e-a-pos"
+  ],
+  "rationale": "Synthetic action choice."
+}

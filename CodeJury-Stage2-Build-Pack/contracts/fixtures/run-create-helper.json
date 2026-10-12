@@ -1,0 +1,61 @@
+{
+  "schema_version": "stage2.v1",
+  "source": "from math import gcd\n\ndef pair_gcd(a, b):\n    return gcd(a, b)\n\ndef gcd_values(values):\n    result = 1\n    for value in values:\n        result = pair_gcd(result, value)\n    return result\n",
+  "function_name": "gcd_values",
+  "contract_text": "Return the nonnegative greatest common divisor of all list values, without modifying inputs.",
+  "domain_schema": [
+    {
+      "name": "values",
+      "domain": {
+        "kind": "list",
+        "item_domain": {
+          "kind": "integer",
+          "min": 0,
+          "max": 100
+        },
+        "min_length": 1,
+        "max_length": 8
+      }
+    }
+  ],
+  "helper_interfaces": [
+    {
+      "name": "pair_gcd",
+      "signature": "pair_gcd(a, b)",
+      "contract_text": "Return the nonnegative mathematical gcd of the two nonnegative integer inputs, with gcd(0,0)=0."
+    }
+  ],
+  "requirements": [
+    {
+      "schema_version": "stage2.v1",
+      "requirement_id": "gcd-helper",
+      "description": "Return the nonnegative greatest common divisor of all list values, without modifying inputs.",
+      "source": "user",
+      "approval_status": "approved",
+      "property_template_id": null,
+      "parameters": {}
+    }
+  ],
+  "supplied_tests": [
+    {
+      "schema_version": "stage2.v1",
+      "test_id": "test-gcd-helper",
+      "inputs": [
+        [
+          12,
+          18
+        ]
+      ],
+      "expected": 6,
+      "requirement_ids": [
+        "gcd-helper"
+      ]
+    }
+  ],
+  "allowed_dependencies": [
+    "math.gcd"
+  ],
+  "resource_profile": "mac-standard-v1",
+  "policy_mode": "learned",
+  "seed": 11
+}

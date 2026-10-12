@@ -1,0 +1,53 @@
+{
+  "schema_version": "stage2.v1",
+  "source": "def normalize_number(value):\n    if value is None:\n        return 1\n    return value\n",
+  "function_name": "normalize_number",
+  "contract_text": "Return 0 for null, otherwise return the supplied integer unchanged.",
+  "domain_schema": [
+    {
+      "name": "value",
+      "domain": {
+        "kind": "union",
+        "options": [
+          {
+            "kind": "null"
+          },
+          {
+            "kind": "integer",
+            "min": 0,
+            "max": 10
+          }
+        ]
+      }
+    }
+  ],
+  "helper_interfaces": [],
+  "requirements": [
+    {
+      "schema_version": "stage2.v1",
+      "requirement_id": "nullable-zero",
+      "description": "Return 0 for null, otherwise return the supplied integer unchanged.",
+      "source": "user",
+      "approval_status": "approved",
+      "property_template_id": null,
+      "parameters": {}
+    }
+  ],
+  "supplied_tests": [
+    {
+      "schema_version": "stage2.v1",
+      "test_id": "test-nullable-zero",
+      "inputs": [
+        null
+      ],
+      "expected": 0,
+      "requirement_ids": [
+        "nullable-zero"
+      ]
+    }
+  ],
+  "allowed_dependencies": [],
+  "resource_profile": "mac-standard-v1",
+  "policy_mode": "learned",
+  "seed": 11
+}

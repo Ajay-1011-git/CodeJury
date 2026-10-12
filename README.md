@@ -2,6 +2,10 @@
 
 Local Python repair prototype on an Apple Silicon Mac: trained Fixer A, raw/prompted Critic, fixed controller, isolated ARM64 sandbox, SQLite evidence store, and browser interface. The UI and API share one server. No mock server or frontend build is needed for live use.
 
+## Stage 2 build docs
+
+The complete [Stage 2 build pack](CodeJury-Stage2-Build-Pack/README.md) includes both owners' instructions, shared contracts, synthetic fixtures, and training/evaluation requirements. Read the [plan and merge guide](CodeJury-Stage2-Build-Pack/CodeJury-Stage2-Plan-and-Merge.md) first, then [Sarvesh's build guide](CodeJury-Stage2-Build-Pack/CodeJury-Stage2-Sarvesh.md) or [Ajay's build guide](CodeJury-Stage2-Build-Pack/CodeJury-Stage2-Ajay.md). Follow the common seed process before creating the owner branches.
+
 ## Start everything
 
 From this folder:

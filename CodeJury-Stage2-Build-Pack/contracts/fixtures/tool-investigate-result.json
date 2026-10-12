@@ -1,0 +1,95 @@
+{
+  "schema_version": "stage2.v1",
+  "request_id": "tool-investigate",
+  "status": "ok",
+  "validation": null,
+  "candidates": [],
+  "tests": [
+    {
+      "schema_version": "stage2.v1",
+      "test_id": "tool-investigate-t000",
+      "input_codec_version": "json.v1",
+      "inputs": [
+        [
+          -1
+        ]
+      ],
+      "related_inputs": null,
+      "oracle_spec": {
+        "kind": "property",
+        "property_id": "sum_ints",
+        "parameters": {}
+      },
+      "oracle_status": "authoritative",
+      "oracle_source": "reviewed_contract",
+      "domain_valid": true,
+      "requirement_ids": [
+        "sum-all"
+      ],
+      "provenance": "audit_followup"
+    }
+  ],
+  "executions": [
+    {
+      "schema_version": "stage2.v1",
+      "execution_id": "tool-investigate-e000",
+      "candidate_id": "c-a",
+      "test_id": "tool-investigate-t000",
+      "runtime_hash": "087bf5ca75c48138e467aae95a7822de0e76437105bbfdd2163148d047e445db",
+      "actual_output": 0,
+      "input_effects": [
+        {
+          "call_index": 0,
+          "mutated": false,
+          "before_hash": "3aa68b41fe21beb89166e0e32d3467a7e1dfa6923a33e9779ef226e3233da949",
+          "after_hash": "3aa68b41fe21beb89166e0e32d3467a7e1dfa6923a33e9779ef226e3233da949"
+        }
+      ],
+      "exception": null,
+      "outcome": "fail",
+      "duration_ms": 1,
+      "trace_ref": null,
+      "trace_truncated": false
+    },
+    {
+      "schema_version": "stage2.v1",
+      "execution_id": "tool-investigate-e001",
+      "candidate_id": "c-b",
+      "test_id": "tool-investigate-t000",
+      "runtime_hash": "087bf5ca75c48138e467aae95a7822de0e76437105bbfdd2163148d047e445db",
+      "actual_output": 1,
+      "input_effects": [
+        {
+          "call_index": 0,
+          "mutated": false,
+          "before_hash": "3aa68b41fe21beb89166e0e32d3467a7e1dfa6923a33e9779ef226e3233da949",
+          "after_hash": "3aa68b41fe21beb89166e0e32d3467a7e1dfa6923a33e9779ef226e3233da949"
+        }
+      ],
+      "exception": null,
+      "outcome": "fail",
+      "duration_ms": 1,
+      "trace_ref": null,
+      "trace_truncated": false
+    }
+  ],
+  "mutants": [],
+  "audit_gaps": [],
+  "edit_sources": [],
+  "usage": {
+    "schema_version": "stage2.v1",
+    "output_tokens": 0,
+    "input_tokens": 0,
+    "function_executions": 2,
+    "elapsed_ms": 0,
+    "learned_candidates": 0,
+    "search_candidates": 0,
+    "audit_mutants": 0,
+    "judge_decisions": 0,
+    "peak_memory_mb": null
+  },
+  "warnings": [
+    "Synthetic fixture only; no tool ran."
+  ],
+  "error": null
+}

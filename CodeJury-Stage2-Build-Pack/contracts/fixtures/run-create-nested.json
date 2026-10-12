@@ -1,0 +1,78 @@
+{
+  "schema_version": "stage2.v1",
+  "source": "def count_positive_ints(data):\n    count = 0\n    for value in data[\"numbers\"]:\n        if value > 0:\n            count += 1\n    return count\n",
+  "function_name": "count_positive_ints",
+  "contract_text": "Count strictly positive integer values under numbers. Boolean values are not integers for this contract. Do not mutate data.",
+  "domain_schema": [
+    {
+      "name": "data",
+      "domain": {
+        "kind": "dict",
+        "key_domain": {
+          "kind": "string",
+          "alphabet": "numbers",
+          "min_length": 7,
+          "max_length": 7
+        },
+        "value_domain": {
+          "kind": "list",
+          "item_domain": {
+            "kind": "union",
+            "options": [
+              {
+                "kind": "integer",
+                "min": -10,
+                "max": 10
+              },
+              {
+                "kind": "boolean"
+              }
+            ]
+          },
+          "min_length": 0,
+          "max_length": 8
+        },
+        "required_keys": [
+          "numbers"
+        ],
+        "min_size": 1,
+        "max_size": 1
+      }
+    }
+  ],
+  "helper_interfaces": [],
+  "requirements": [
+    {
+      "schema_version": "stage2.v1",
+      "requirement_id": "nested-bool-int",
+      "description": "Count strictly positive integer values under numbers. Boolean values are not integers for this contract. Do not mutate data.",
+      "source": "user",
+      "approval_status": "approved",
+      "property_template_id": null,
+      "parameters": {}
+    }
+  ],
+  "supplied_tests": [
+    {
+      "schema_version": "stage2.v1",
+      "test_id": "test-nested-bool-int",
+      "inputs": [
+        {
+          "numbers": [
+            true,
+            2,
+            -1
+          ]
+        }
+      ],
+      "expected": 1,
+      "requirement_ids": [
+        "nested-bool-int"
+      ]
+    }
+  ],
+  "allowed_dependencies": [],
+  "resource_profile": "mac-standard-v1",
+  "policy_mode": "learned",
+  "seed": 11
+}

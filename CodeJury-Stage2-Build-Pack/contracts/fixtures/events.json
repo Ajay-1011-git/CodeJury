@@ -1,0 +1,187 @@
+{
+  "schema_version": "stage2.v1",
+  "run_id": "fixture-run",
+  "events": [
+    {
+      "schema_version": "stage2.v1",
+      "run_id": "fixture-run",
+      "event_id": 1,
+      "type": "run_started",
+      "timestamp_utc": "2026-10-12T00:00:00Z",
+      "payload": {
+        "message": "Synthetic run_started example.",
+        "candidate_id": null,
+        "test_id": null,
+        "action_id": null,
+        "gap_id": null,
+        "evidence_ids": []
+      }
+    },
+    {
+      "schema_version": "stage2.v1",
+      "run_id": "fixture-run",
+      "event_id": 2,
+      "type": "candidate_created",
+      "timestamp_utc": "2026-10-12T00:00:00Z",
+      "payload": {
+        "message": "Synthetic candidate_created example.",
+        "candidate_id": "c-original",
+        "test_id": null,
+        "action_id": null,
+        "gap_id": null,
+        "evidence_ids": []
+      }
+    },
+    {
+      "schema_version": "stage2.v1",
+      "run_id": "fixture-run",
+      "event_id": 3,
+      "type": "candidate_created",
+      "timestamp_utc": "2026-10-12T00:00:00Z",
+      "payload": {
+        "message": "Synthetic candidate_created example.",
+        "candidate_id": "c-a",
+        "test_id": null,
+        "action_id": null,
+        "gap_id": null,
+        "evidence_ids": []
+      }
+    },
+    {
+      "schema_version": "stage2.v1",
+      "run_id": "fixture-run",
+      "event_id": 4,
+      "type": "candidate_created",
+      "timestamp_utc": "2026-10-12T00:00:00Z",
+      "payload": {
+        "message": "Synthetic candidate_created example.",
+        "candidate_id": "c-b",
+        "test_id": null,
+        "action_id": null,
+        "gap_id": null,
+        "evidence_ids": []
+      }
+    },
+    {
+      "schema_version": "stage2.v1",
+      "run_id": "fixture-run",
+      "event_id": 5,
+      "type": "execution_completed",
+      "timestamp_utc": "2026-10-12T00:00:00Z",
+      "payload": {
+        "message": "Synthetic execution_completed example.",
+        "candidate_id": null,
+        "test_id": null,
+        "action_id": null,
+        "gap_id": null,
+        "evidence_ids": []
+      }
+    },
+    {
+      "schema_version": "stage2.v1",
+      "run_id": "fixture-run",
+      "event_id": 6,
+      "type": "audit_gap_found",
+      "timestamp_utc": "2026-10-12T00:00:00Z",
+      "payload": {
+        "message": "Synthetic audit_gap_found example.",
+        "candidate_id": null,
+        "test_id": null,
+        "action_id": null,
+        "gap_id": "g-boundary",
+        "evidence_ids": []
+      }
+    },
+    {
+      "schema_version": "stage2.v1",
+      "run_id": "fixture-run",
+      "event_id": 7,
+      "type": "action_selected",
+      "timestamp_utc": "2026-10-12T00:00:00Z",
+      "payload": {
+        "message": "Synthetic action_selected example.",
+        "candidate_id": null,
+        "test_id": null,
+        "action_id": "a-critic-gap",
+        "gap_id": null,
+        "evidence_ids": []
+      }
+    },
+    {
+      "schema_version": "stage2.v1",
+      "run_id": "fixture-run",
+      "event_id": 8,
+      "type": "test_admitted",
+      "timestamp_utc": "2026-10-12T00:00:00Z",
+      "payload": {
+        "message": "Synthetic test_admitted example.",
+        "candidate_id": null,
+        "test_id": "t-negative",
+        "action_id": null,
+        "gap_id": null,
+        "evidence_ids": []
+      }
+    },
+    {
+      "schema_version": "stage2.v1",
+      "run_id": "fixture-run",
+      "event_id": 9,
+      "type": "candidate_invalidated",
+      "timestamp_utc": "2026-10-12T00:00:00Z",
+      "payload": {
+        "message": "Synthetic candidate_invalidated example.",
+        "candidate_id": "c-a",
+        "test_id": null,
+        "action_id": null,
+        "gap_id": null,
+        "evidence_ids": []
+      }
+    },
+    {
+      "schema_version": "stage2.v1",
+      "run_id": "fixture-run",
+      "event_id": 10,
+      "type": "candidate_created",
+      "timestamp_utc": "2026-10-12T00:00:00Z",
+      "payload": {
+        "message": "Synthetic candidate_created example.",
+        "candidate_id": "c-search",
+        "test_id": null,
+        "action_id": null,
+        "gap_id": null,
+        "evidence_ids": []
+      }
+    },
+    {
+      "schema_version": "stage2.v1",
+      "run_id": "fixture-run",
+      "event_id": 11,
+      "type": "execution_completed",
+      "timestamp_utc": "2026-10-12T00:00:00Z",
+      "payload": {
+        "message": "Synthetic execution_completed example.",
+        "candidate_id": null,
+        "test_id": null,
+        "action_id": null,
+        "gap_id": null,
+        "evidence_ids": []
+      }
+    },
+    {
+      "schema_version": "stage2.v1",
+      "run_id": "fixture-run",
+      "event_id": 12,
+      "type": "run_finished",
+      "timestamp_utc": "2026-10-12T00:00:00Z",
+      "payload": {
+        "message": "Synthetic run_finished example.",
+        "candidate_id": null,
+        "test_id": null,
+        "action_id": null,
+        "gap_id": null,
+        "evidence_ids": []
+      }
+    }
+  ],
+  "next_after": 12
+}

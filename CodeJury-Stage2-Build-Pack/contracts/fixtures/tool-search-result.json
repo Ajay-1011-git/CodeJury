@@ -1,0 +1,109 @@
+{
+  "schema_version": "stage2.v1",
+  "request_id": "tool-search",
+  "status": "ok",
+  "validation": null,
+  "candidates": [
+    {
+      "schema_version": "stage2.v1",
+      "candidate_id": "tool-search-c000",
+      "problem_id": "fixture-problem",
+      "parent_id": "c-original",
+      "origin": "ast_search",
+      "generation_view": "ast_search",
+      "source": "def sum_values(values):\n    total = 0\n    for i in range(len(values) - 0):\n        total += values[i]\n    return total\n",
+      "source_hash": "809a5da60b2cc2fb214375a58e0cc068b520bd2fe0fc14ad8dc3ac6956c05ee8",
+      "diagnosis": "Synthetic fixture example; no model inference.",
+      "assumptions": [],
+      "requirement_ids": [
+        "sum-all"
+      ],
+      "model_config_hash": null,
+      "edits": [
+        {
+          "location": {
+            "lineno": 3,
+            "col_offset": 33,
+            "end_lineno": 3,
+            "end_col_offset": 34
+          },
+          "operator_family": "boundary_constant",
+          "before": "1",
+          "after": "0",
+          "parent_source_hash": "40557ac3e4d9875c40f62048d530ed7d0e9da94b7dbf0169155f5d9c942a7123",
+          "result_source_hash": "809a5da60b2cc2fb214375a58e0cc068b520bd2fe0fc14ad8dc3ac6956c05ee8"
+        }
+      ]
+    }
+  ],
+  "tests": [],
+  "executions": [
+    {
+      "schema_version": "stage2.v1",
+      "execution_id": "tool-search-e000",
+      "candidate_id": "tool-search-c000",
+      "test_id": "t-supplied",
+      "runtime_hash": "087bf5ca75c48138e467aae95a7822de0e76437105bbfdd2163148d047e445db",
+      "actual_output": 5,
+      "input_effects": [
+        {
+          "call_index": 0,
+          "mutated": false,
+          "before_hash": "32df5bcef9fe387f787f39a4f1f0b6bc1514da2929cedc7ee6bddb5578e36f5f",
+          "after_hash": "32df5bcef9fe387f787f39a4f1f0b6bc1514da2929cedc7ee6bddb5578e36f5f"
+        }
+      ],
+      "exception": null,
+      "outcome": "pass",
+      "duration_ms": 1,
+      "trace_ref": null,
+      "trace_truncated": false
+    },
+    {
+      "schema_version": "stage2.v1",
+      "execution_id": "tool-search-e001",
+      "candidate_id": "tool-search-c000",
+      "test_id": "t-negative",
+      "runtime_hash": "087bf5ca75c48138e467aae95a7822de0e76437105bbfdd2163148d047e445db",
+      "actual_output": -1,
+      "input_effects": [
+        {
+          "call_index": 0,
+          "mutated": false,
+          "before_hash": "3aa68b41fe21beb89166e0e32d3467a7e1dfa6923a33e9779ef226e3233da949",
+          "after_hash": "3aa68b41fe21beb89166e0e32d3467a7e1dfa6923a33e9779ef226e3233da949"
+        }
+      ],
+      "exception": null,
+      "outcome": "pass",
+      "duration_ms": 1,
+      "trace_ref": null,
+      "trace_truncated": false
+    }
+  ],
+  "mutants": [],
+  "audit_gaps": [],
+  "edit_sources": [
+    {
+      "schema_version": "stage2.v1",
+      "source_hash": "809a5da60b2cc2fb214375a58e0cc068b520bd2fe0fc14ad8dc3ac6956c05ee8",
+      "source": "def sum_values(values):\n    total = 0\n    for i in range(len(values) - 0):\n        total += values[i]\n    return total\n"
+    }
+  ],
+  "usage": {
+    "schema_version": "stage2.v1",
+    "output_tokens": 0,
+    "input_tokens": 0,
+    "function_executions": 2,
+    "elapsed_ms": 0,
+    "learned_candidates": 0,
+    "search_candidates": 1,
+    "audit_mutants": 0,
+    "judge_decisions": 0,
+    "peak_memory_mb": null
+  },
+  "warnings": [
+    "Synthetic fixture only; no tool ran."
+  ],
+  "error": null
+}

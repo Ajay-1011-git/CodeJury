@@ -1,0 +1,96 @@
+{
+  "schema_version": "stage2.v1",
+  "state_id": "state-before-gap",
+  "problem_id": "fixture-problem",
+  "candidate_summaries": [
+    {
+      "candidate_id": "c-original",
+      "origin": "original",
+      "eligibility": "rejected",
+      "source_hash": "40557ac3e4d9875c40f62048d530ed7d0e9da94b7dbf0169155f5d9c942a7123",
+      "assumptions": [],
+      "hard_passes": 0,
+      "hard_failures": 1
+    },
+    {
+      "candidate_id": "c-a",
+      "origin": "fixer_a",
+      "eligibility": "eligible",
+      "source_hash": "afb55335fb20c76eee9a30a34c8c8c006f66b9bc5149ab07321a93e245dc6579",
+      "assumptions": [],
+      "hard_passes": 1,
+      "hard_failures": 0
+    },
+    {
+      "candidate_id": "c-b",
+      "origin": "fixer_b",
+      "eligibility": "eligible",
+      "source_hash": "99d7d5b6a09c79f493b2328fa74c079fa74fbb768d4aab045df9fbcccca17fdc",
+      "assumptions": [],
+      "hard_passes": 1,
+      "hard_failures": 0
+    }
+  ],
+  "behaviour_groups": [
+    [
+      "c-a",
+      "c-b"
+    ]
+  ],
+  "authoritative_counterexample_ids": [],
+  "audit_gap_ids": [
+    "g-boundary"
+  ],
+  "unresolved_requirement_ids": [],
+  "previous_action_ids": [],
+  "remaining_budget": {
+    "output_tokens": 10000,
+    "input_tokens": 100000,
+    "function_executions": 3000,
+    "elapsed_ms": 900000,
+    "learned_candidates": 8,
+    "search_candidates": 48,
+    "audit_mutants": 48,
+    "judge_decisions": 8
+  },
+  "available_actions": [
+    {
+      "schema_version": "stage2.v1",
+      "option_id": "opt-gap",
+      "action": {
+        "schema_version": "stage2.v1",
+        "action_id": "a-critic-gap",
+        "kind": "criticize",
+        "target_ids": [
+          "c-a",
+          "c-b"
+        ],
+        "requirement_ids": [
+          "sum-all"
+        ],
+        "evidence_ids": [
+          "e-a-pos",
+          "e-b-pos"
+        ],
+        "parameters": {
+          "kind": "criticize",
+          "mode": "audit_gap"
+        },
+        "requested_budget": {
+          "output_tokens": 512,
+          "input_tokens": 4096,
+          "function_executions": 128,
+          "elapsed_ms": 900000,
+          "learned_candidates": 0,
+          "search_candidates": 0,
+          "audit_mutants": 0,
+          "judge_decisions": 0
+        },
+        "rationale": "Synthetic plan: investigate gap, not assume survivor proves bug."
+      },
+      "prerequisite_summary": "Current A/B candidates and a source-matched audit gap."
+    }
+  ],
+  "incumbent_candidate_id": "c-a",
+  "suite_hash": "5cec3734365ed7f4cc974ee42ca01ae6f3d5d1fd56242da2b7e9bd50b563ee21"
+}
