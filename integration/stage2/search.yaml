@@ -1,0 +1,7 @@
+families: [comparison, boundary_constant, boolean_negation, arithmetic, variable_reference]
+max_parents: 3
+max_depth: 2
+beam_width: 4
+max_executed_candidates: 48
+max_preflight_proposals: 192
+runner_config: runner.yaml

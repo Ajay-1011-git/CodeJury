@@ -1,0 +1,17 @@
+# This Mac already has a dedicated CodeJury ARM64 VM with no host/agent shares.
+# Reuse it sequentially with a separate Stage 2 image; Stage 1 config/image stay intact.
+context: colima-codejury-stage1
+colima_profile: codejury-stage1
+image_env: CODEJURY_STAGE2_RUNNER_IMAGE
+entrypoint: ["python", "/opt/codejury/entry.py"]
+vm: {cpus: 2, memory_gb: 2, arch: aarch64, mounts: [], forward_agent: false}
+limits:
+  memory_mb: 512
+  pids: 64
+  cpus: 1
+  tmpfs_mb: 16
+  call_timeout_s: 2
+  chunk_calls: 8
+  max_job_bytes: 262144
+  max_stdout_bytes: 1048576
+  watchdog_slack_s: 6

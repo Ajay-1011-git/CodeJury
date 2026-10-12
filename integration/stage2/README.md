@@ -9,5 +9,9 @@ integrator changes the package manifest/lock at a checkpoint.
 From `backend/`, ` .venv/bin/python ../integration/stage2/bootstrap.py` checks
 the frozen schema, fixtures and discoverable Python ports. It starts no service.
 See `backend/docs/stage2_core/audit.md` for actual baseline evidence and limits.
-Both owners branch from the A2.01 seed in separate clones/worktrees. Stage 2
-implementation and the live service are pending the documented owner tasks.
+Both owners branch from the A2.01 seed in separate clones/worktrees.
+
+The Sarvesh tools/workbench branch is integrated. See [HANDOFF.md](HANDOFF.md)
+for actual Mac MLX inspection, native sandbox/tool checks and remaining learning
+dependencies. Stage 2's live service, real A/B episode collection, Critic/Judge/general
+training and final benchmark remain pending; module integration is not E2/E4 completion.

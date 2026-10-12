@@ -1,13 +1,13 @@
 import threading
 
-from conftest import literal_test, make_problem
-from hostsandbox import FixtureHostSandbox
-
 import codejury.stage2_tools.auditor.engine as engine_module
 from codejury.stage2_tools.auditor import AuditCache, Auditor, gap_is_stale
 from codejury.stage2_tools.oracles import suite_hash
 from codejury.stage2_tools.runner import Evaluator
 from codejury.stage2_tools.search.operators import EditProposal, sha
+
+from .conftest import literal_test, make_problem
+from .hostsandbox import FixtureHostSandbox
 
 POSITIVES = (
     "def f(values):\n    total = 0\n    for v in values:\n        if v > 0:\n"

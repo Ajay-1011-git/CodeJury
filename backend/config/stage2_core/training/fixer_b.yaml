@@ -3,6 +3,6 @@ seeds: [17, 29, 41]
 alpha_trials: [0, 1, 2, 4]
 broad_fraction: 0.25
 selected_a_manifest: artifacts/stage2_core/fixer-a-selected/selection.json
-final_pool_seal: artifacts/stage2_exchange/final-pool-seal.json
+final_pool_seal: data/stage2_tools/manifests/stage2.json
 training_enabled: false
-note: No selected Stage 2 A, measured train failures, or trained B adapter exists yet.
+note: Public final seal is integrated; selected Stage 2 A, three-seed failures and trained B remain pending.

@@ -268,6 +268,48 @@ def write_report(path, value):
         stream.write(canonical_json(value) + b"\n")
 
 
+def final_pool_metadata(config_path):
+    """Adopt the benchmark owner's public seal; never open hidden final assets."""
+    settings = config(config_path)
+    path = local_path(settings["stage2_final_seal"])
+    if not path.is_file() or path.is_symlink():
+        raise ValueError("Benchmark owner's public final-pool manifest is absent")
+    value = json.loads(path.read_text())
+    source_path = local_path(settings["source_manifest"])
+    source = json.loads(source_path.read_text())
+    derived = value.get("derived_from", {})
+    final = value.get("splits", {}).get("final_assessment", {})
+    original = [a for a in source["assets"] if a["split"] == "stage2_final"]
+    if (
+        value.get("schema") != "stage2-split-manifest.v1"
+        or len(original) != 1
+        or json_hash(source["assets"]) != source["seal_sha256"]
+        or derived.get("manifest") != settings["source_manifest"]
+        or derived.get("sha256") != hashlib.sha256(source_path.read_bytes()).hexdigest()
+        or derived.get("stage1_seal_sha256") != source["seal_sha256"]
+        or final.get("inspected_in_development") is not False
+        or final.get("role") != "final"
+        or final.get("asset") != original[0]["path"]
+        or final.get("sha256") != original[0]["sha256"]
+        or type(final.get("base_problems")) is not int
+        or type(final.get("records")) is not int
+        or final["base_problems"] != original[0]["base_problems"]
+        or final["records"] != original[0]["records"]
+        or final["base_problems"] < 1
+    ):
+        raise ValueError("Public final seal does not match the frozen source split metadata")
+    return {
+        "status": "sealed_metadata_verified",
+        "manifest_hash": hashlib.sha256(path.read_bytes()).hexdigest(),
+        "final_base_problems": final["base_problems"],
+        "final_records": final["records"],
+        "final_contents_opened": False,
+        "limited_evidence": final["base_problems"] < 200,
+        "scope": "Public metadata and inherited Stage 1 seal; private final assessment remains "
+        "benchmark-owner-only. This is not a final benchmark result.",
+    }
+
+
 def export_pools(config_path, directory, verified_report, *, base_revision_hash):
     """Export existing authorized pools, retaining references only in offline artifacts."""
     settings = config(config_path)

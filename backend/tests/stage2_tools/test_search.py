@@ -1,9 +1,6 @@
 import ast
 import threading
 
-from conftest import literal_test, make_problem
-from hostsandbox import FixtureHostSandbox
-
 from codejury.stage2_tools.runner import Evaluator
 from codejury.stage2_tools.search import (
     FAMILIES,
@@ -12,6 +9,9 @@ from codejury.stage2_tools.search import (
     enumerate_edits,
 )
 from codejury.stage2_tools.search.operators import sha
+
+from .conftest import literal_test, make_problem
+from .hostsandbox import FixtureHostSandbox
 
 
 def parent_of(source, cid="orig"):

@@ -1,8 +1,6 @@
 import threading
 
 import pytest
-from conftest import int_list, literal_test, make_problem, requirement
-from hostsandbox import MODE, FixtureHostSandbox
 
 from codejury.stage2_tools.codec import canonical, typed_equal, validate, value_hash
 from codejury.stage2_tools.runner import (
@@ -13,6 +11,9 @@ from codejury.stage2_tools.runner import (
 )
 from codejury.stage2_tools.runner.base import validate_envelope
 from codejury.stage2_tools.runner.docker import DockerSandbox
+
+from .conftest import int_list, literal_test, make_problem, requirement
+from .hostsandbox import MODE, FixtureHostSandbox
 
 SUM = "def f(values):\n    t = 0\n    for v in values:\n        t += v\n    return t\n"
 
@@ -278,7 +279,7 @@ def test_envelope_validation_rejects_malformed_rows():
 def test_worker_and_host_canonical_hashes_agree():
     import importlib.util
 
-    from conftest import BACKEND
+    from .conftest import BACKEND
 
     spec = importlib.util.spec_from_file_location(
         "entry", BACKEND / "src/codejury/stage2_tools/runner/entry.py"

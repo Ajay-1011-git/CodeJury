@@ -2,11 +2,12 @@ import copy
 import threading
 
 import pytest
-from hostsandbox import FixtureHostSandbox
 
 from codejury.stage2_tools.codec import sha256_text, validate
 from codejury.stage2_tools.port import ResultError, ToolPortImpl, verify_result
 from codejury.stage2_tools.runner import InfrastructureError
+
+from .hostsandbox import FixtureHostSandbox
 
 OPS = ["validate", "evaluate", "search", "audit", "investigate"]
 

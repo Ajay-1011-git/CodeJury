@@ -7,7 +7,12 @@ import json
 import pytest
 
 from codejury.stage2_core.contracts import json_hash
-from codejury.stage2_core.data import learning_example, load_stage1, validate_records
+from codejury.stage2_core.data import (
+    final_pool_metadata,
+    learning_example,
+    load_stage1,
+    validate_records,
+)
 
 
 def record(split="train"):
@@ -138,3 +143,58 @@ def test_manifest_cannot_disguise_final_asset_as_training(tmp_path):
     path.write_text(json.dumps(value))
     with pytest.raises(ValueError, match="allowlisted"):
         load_stage1(path)
+
+
+@pytest.mark.parametrize("mutation", [None, "hash", "inspected", "count"])
+def test_benchmark_public_seal_is_checked_without_opening_final_files(tmp_path, mutation):
+    import yaml
+
+    source_path = manifest(tmp_path)
+    source = json.loads(source_path.read_text())
+    asset = next(a for a in source["assets"] if a["split"] == "stage2_final")
+    public = {
+        "schema": "stage2-split-manifest.v1",
+        "derived_from": {
+            "manifest": str(source_path),
+            "sha256": hashlib.sha256(source_path.read_bytes()).hexdigest(),
+            "stage1_seal_sha256": source["seal_sha256"],
+        },
+        "splits": {
+            "final_assessment": {
+                "asset": asset["path"],
+                "sha256": asset["sha256"],
+                "role": "final",
+                "inspected_in_development": False,
+                "base_problems": asset["base_problems"],
+                "records": asset["records"],
+            }
+        },
+    }
+    if mutation == "hash":
+        public["derived_from"]["sha256"] = "0" * 64
+    elif mutation == "inspected":
+        public["splits"]["final_assessment"]["inspected_in_development"] = True
+    elif mutation == "count":
+        public["splits"]["final_assessment"]["records"] = 100.0
+    path = tmp_path / "public-seal.json"
+    path.write_text(json.dumps(public))
+    settings = {
+        "version": "stage2.fixer-a-validation.v1",
+        "source_manifest": str(source_path),
+        "runtime_config": "unused",
+        "report_directory": "unused",
+        "stage2_final_seal": str(path),
+        "max_new_tokens": 1024,
+        "seed": 17,
+        "training_enabled": False,
+    }
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text(yaml.safe_dump(settings))
+    if mutation:
+        with pytest.raises(ValueError):
+            final_pool_metadata(config_path)
+    else:
+        receipt = final_pool_metadata(config_path)
+        assert receipt["final_contents_opened"] is False
+        assert receipt["final_base_problems"] == 50 and receipt["limited_evidence"]
+        assert not (tmp_path / "private/stage2_final.jsonl").exists()

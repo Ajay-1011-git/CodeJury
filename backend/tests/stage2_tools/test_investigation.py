@@ -2,13 +2,14 @@ import copy
 import threading
 
 import pytest
-from conftest import make_problem, requirement
-from hostsandbox import FixtureHostSandbox
 
 from codejury.stage2_tools.codec import sha256_text
 from codejury.stage2_tools.domains import check_args
 from codejury.stage2_tools.investigation import InvestigationError, Investigator
 from codejury.stage2_tools.runner import Evaluator
+
+from .conftest import make_problem, requirement
+from .hostsandbox import FixtureHostSandbox
 
 BUGGY = "def f(values):\n    total = 0\n    for i in range(len(values) - 1):\n        total += values[i]\n    return total\n"  # noqa: E501
 GOOD = "def f(values):\n    total = 0\n    for v in values:\n        total += v\n    return total\n"

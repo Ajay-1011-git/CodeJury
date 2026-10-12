@@ -1,7 +1,6 @@
 import copy
 
 import pytest
-from conftest import int_list, literal_test, make_problem, requirement
 
 from codejury.stage2_tools.oracles import (
     METAMORPHIC,
@@ -18,6 +17,8 @@ from codejury.stage2_tools.oracles import (
     suite_hash,
     template_compatible,
 )
+
+from .conftest import int_list, literal_test, make_problem, requirement
 
 SCHEMA = [{"name": "values", "domain": int_list()}]
 SRC = "def f(values):\n    return sorted(values)\n"

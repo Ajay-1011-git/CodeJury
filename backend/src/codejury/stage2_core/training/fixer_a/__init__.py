@@ -15,7 +15,14 @@ from codejury.runner import DockerRunner
 from ...budgets import CAPS
 from ...candidates import parse_draft
 from ...contracts import canonical_json, json_hash
-from ...data import config, learning_example, load_stage1, runtime_example, write_report
+from ...data import (
+    config,
+    final_pool_metadata,
+    learning_example,
+    load_stage1,
+    runtime_example,
+    write_report,
+)
 from ...factory import make_model_port
 from ...leases import ComputeLease
 from ...registry import MODEL_SYSTEM, local_path
@@ -247,8 +254,11 @@ def evaluate(config_path, out=None):
 def training_preconditions(config_path):
     settings = config(config_path)
     reasons = []
-    if not local_path(settings["stage2_final_seal"]).is_file():
-        reasons.append("Sarvesh's frozen Stage 2 final-pool manifest is absent")
+    seal = None
+    try:
+        seal = final_pool_metadata(config_path)
+    except (ValueError, KeyError, OSError) as error:
+        reasons.append(str(error))
     if not settings["training_enabled"]:
         reasons.append(
             "No refreshed A training configuration has passed pilot/validation selection"
@@ -258,4 +268,5 @@ def training_preconditions(config_path):
         "training_started": False,
         "reasons": reasons,
         "selected_adapter": None,
+        "final_pool": seal,
     }

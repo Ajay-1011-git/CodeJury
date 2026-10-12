@@ -4,7 +4,6 @@ import threading
 import time
 
 import pytest
-from conftest import BACKEND
 
 from codejury.stage2_tools.codec import errors, sha256_text
 from codejury.stage2_tools.evaluation import (
@@ -18,6 +17,8 @@ from codejury.stage2_tools.evaluation import (
 )
 from codejury.stage2_tools.evaluation import config as cfg
 from codejury.stage2_tools.evaluation.stats import outcome
+
+from .conftest import BACKEND
 
 VALID = BACKEND / "config/stage2_tools/evaluation-validation.yaml"
 FINAL = BACKEND / "config/stage2_tools/evaluation.yaml"

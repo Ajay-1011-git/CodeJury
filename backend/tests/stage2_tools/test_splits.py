@@ -99,11 +99,32 @@ def test_unsafe_paths_and_missing_splits_rejected(tmp_path):
         validate_manifest({"splits": {"train": {}}}, [tmp_path])
 
 
-def test_shipped_manifest_matches_stage1_seal_and_public_pool():
-    from conftest import BACKEND
+def test_shipped_manifest_matches_stage1_seal_and_public_pool(tmp_path):
+    import shutil
+
+    from .conftest import BACKEND
 
     manifest = json.loads((BACKEND / "data/stage2_tools/manifests/stage2.json").read_text())
     rebuilt = build_manifest(BACKEND / "data/manifests/stage1.json", BACKEND)
     assert manifest == rebuilt
-    report = validate_manifest(manifest, [BACKEND / "data"])
+    # The shared CPU test must not depend on or open an owner's real private holdout.
+    train = tmp_path / "train_source"
+    train.mkdir()
+    shutil.copyfile(BACKEND / "data/train_source/train.jsonl", train / "train.jsonl")
+    report = validate_manifest(manifest, [tmp_path])
     assert report["status"] == "passed" and report["splits"]["train"]["status"] == "verified"
+    assert report["splits"]["final_assessment"]["status"] == "unverified_private"
+
+
+def test_normalized_clusters_ignore_empty_new_python_ast_metadata(monkeypatch):
+    import ast
+
+    from codejury.stage2_tools.domains import normalized_hash
+    source = "def f(x):\n    return x + 1\n"
+    expected = normalized_hash(source)
+    tree = ast.parse(source)
+    function = tree.body[0]
+    function._fields = (*function._fields, "type_params")
+    function.type_params = []
+    monkeypatch.setattr(ast, "parse", lambda _: tree)
+    assert normalized_hash(source) == expected

@@ -159,6 +159,7 @@ class DockerSandbox:
         return len(ids)
 
     def run(self, job: dict, cancel: threading.Event | None = None) -> dict:
+        self.last_exit_info = None
         lim = self.limits
         job = {"call_timeout_s": lim["call_timeout_s"], **job}
         payload = json.dumps(job, allow_nan=False).encode()
@@ -210,6 +211,23 @@ class DockerSandbox:
             for reader in readers:
                 reader.join(timeout=1)
             if process.returncode != 0:
+                # Diagnostics only: an OOM kill is containment evidence, not a fabricated
+                # semantic result for calls whose completion we cannot observe.
+                try:
+                    state = subprocess.run(
+                        self.docker("inspect", "--format", "{{json .State}}", name),
+                        capture_output=True,
+                        text=True,
+                        check=True,
+                        timeout=10,
+                    )
+                    value = json.loads(state.stdout)
+                    self.last_exit_info = {
+                        "oom_killed": value.get("OOMKilled") is True,
+                        "exit_code": value.get("ExitCode"),
+                    }
+                except (OSError, subprocess.SubprocessError, ValueError):
+                    pass
                 raise InfrastructureError("Sandbox worker exited abnormally")
             envelope = json.loads(output)
             validate_envelope(envelope, n_calls)

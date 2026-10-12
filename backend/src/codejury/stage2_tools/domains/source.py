@@ -247,4 +247,11 @@ def check_bundle(source: str, problem: dict) -> SourceInfo:
 
 def normalized_hash(source: str) -> str:
     """Hash of the formatting-independent AST, for deduplicating alternatives."""
-    return hashlib.sha256(ast.dump(ast.parse(source), annotate_fields=True).encode()).hexdigest()
+    tree = ast.parse(source)
+    # Python 3.12 adds empty type_params to function/class ASTs. Normalize that
+    # metadata structurally so the same supported source clusters on 3.11/3.12.
+    # Never edit the rendered dump: that could also alter literal string values.
+    for node in ast.walk(tree):
+        if getattr(node, "type_params", None) == []:
+            node._fields = tuple(field for field in node._fields if field != "type_params")
+    return hashlib.sha256(ast.dump(tree, annotate_fields=True).encode()).hexdigest()

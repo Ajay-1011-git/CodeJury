@@ -2,6 +2,8 @@
 
 Status: curation and native diagnostic implemented; A refresh/selection and expanded Stage 2 learning remain pending. No new adapter was trained. The retained Stage 1 A remains pilot-only in the Stage 2 registry.
 
+Integration update, 12 October: Sarvesh's public `data/stage2_tools/manifests/stage2.json` is now adopted by the core. Its inherited final seal contains 10 bases / 19 records. The earlier absent-exchange-path blocker below is historical and resolved; private final verification/results and refreshed training remain pending. See integration/stage2/HANDOFF.md.
+
 ## Actual pools and provenance
 
 The frozen Stage 1 manifest contains 80 training records / 40 bases / 8 families and 20 validation records / 10 bases / 2 families. Only those two allowlisted files are opened. Original assessment and Stage 2 final asset entries are filtered before any content access. The new Sarvesh final-pool exchange seal is absent. Existing Stage 1 final metadata is not a replacement for that exchange.

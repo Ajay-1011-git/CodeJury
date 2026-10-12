@@ -82,10 +82,17 @@ def checks(sandbox, config_path):
     out["output_overflow_error"] = rows[0]["outcome"] == "error"
     _, rows = run("def f(v):\n    while True:\n        pass\n", [_lit("t", [[1]], 0)])
     out["infinite_loop_timeout"] = rows[0]["outcome"] == "timeout"
-    _, rows = run(
-        "def f(v):\n    return [[0] * 5000 for _ in range(100000)]\n", [_lit("t", [[1]], 0)]
-    )
-    out["memory_bomb_contained"] = rows[0]["outcome"] in {"error", "timeout"}
+    try:
+        _, rows = run(
+            "def f(v):\n    return [[0] * 5000 for _ in range(100000)]\n", [_lit("t", [[1]], 0)]
+        )
+        out["memory_bomb_contained"] = rows[0]["outcome"] in {"error", "timeout"}
+    except InfrastructureError:
+        # Docker can kill the entire worker at its cgroup limit before it returns JSON.
+        # Keep that classification; verify the actual OOM state and live VM separately.
+        out["memory_bomb_contained"] = bool(
+            (sandbox.last_exit_info or {}).get("oom_killed") and sandbox.ready()
+        )
     cancel = threading.Event()
     threading.Timer(0.5, cancel.set).start()
     e, rows = run(
