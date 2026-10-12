@@ -1,0 +1,20 @@
+profile: mac-standard-v1
+context_tokens: 4096
+repair_output_tokens: 1024
+critic_output_tokens: 512
+judge_output_tokens: 192
+budget:
+  output_tokens: 10000
+  input_tokens: 100000
+  function_executions: 3000
+  elapsed_ms: 900000
+  learned_candidates: 8
+  search_candidates: 48
+  audit_mutants: 48
+  judge_decisions: 8
+# Controller raises this to the exact remaining full-suite cost before dispatch.
+final_qualification_executions: 128
+max_source_bytes: 48000
+per_call_timeout_ms: 2000
+runner_memory_mb: 512
+resident_model_jobs: 1
