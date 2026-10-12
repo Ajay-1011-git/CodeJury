@@ -16,18 +16,27 @@ from .runner.docker import DockerSandbox
 def _problem(source, name="f", deps=(), helpers=()):
     info = analyze_source(source, name, list(helpers), list(deps))
     return {
-        "function_name": name, "signature": info.signature, "helper_interfaces": list(helpers),
-        "allowed_dependencies": list(deps), "domain_schema": [], "requirements": [],
-    }  # fmt: skip
+        "function_name": name,
+        "signature": info.signature,
+        "helper_interfaces": list(helpers),
+        "allowed_dependencies": list(deps),
+        "domain_schema": [],
+        "requirements": [],
+    }
 
 
 def _lit(test_id, inputs, expected):
     return {
-        "test_id": test_id, "inputs": inputs, "related_inputs": None,
+        "test_id": test_id,
+        "inputs": inputs,
+        "related_inputs": None,
         "oracle_spec": {"kind": "literal", "expected": expected},
-        "oracle_status": "authoritative", "oracle_source": "user", "domain_valid": True,
-        "requirement_ids": [], "provenance": "supplied",
-    }  # fmt: skip
+        "oracle_status": "authoritative",
+        "oracle_source": "user",
+        "domain_valid": True,
+        "requirement_ids": [],
+        "provenance": "supplied",
+    }
 
 
 def checks(sandbox, config_path):
@@ -37,22 +46,34 @@ def checks(sandbox, config_path):
         return Evaluator(sandbox, problem, id_prefix="st", max_executions=200, **kw)
 
     def run(source, tests, deps=(), helpers=(), check=True, **kw):
-        e = ev(_problem(source, deps=deps, helpers=helpers) if check else
-               {"function_name": "f", "allowed_dependencies": list(deps)}, **kw)
+        e = ev(
+            _problem(source, deps=deps, helpers=helpers)
+            if check
+            else {"function_name": "f", "allowed_dependencies": list(deps)},
+            **kw,
+        )
         return e, e.evaluate({"candidate_id": "c", "source": source}, tests, check=check)
 
     sum_src = "def f(v):\n    t = 0\n    for x in v:\n        t += x\n    return t\n"
     helper = [{"name": "pair", "signature": "pair(a, b)", "contract_text": "gcd"}]
-    gcd_src = ("from math import gcd\ndef pair(a, b):\n    return gcd(a, b)\n"
-               "def f(v):\n    r = 0\n    for x in v:\n        r = pair(r, x)\n    return r\n")  # fmt: skip
+    gcd_src = (
+        "from math import gcd\ndef pair(a, b):\n    return gcd(a, b)\n"
+        "def f(v):\n    r = 0\n    for x in v:\n        r = pair(r, x)\n    return r\n"
+    )
     _, rows = run(gcd_src, [_lit("t", [[12, 18]], 6)], ["math.gcd"], helper)
     out["helper_allowlist_execution"] = rows[0]["outcome"] == "pass"
     nested = "def f(v):\n    return {'a': [[1, None], True]}\n"
     _, rows = run(nested, [_lit("t", [[1]], {"a": [[1, None], True]})])
     out["nested_json"] = rows[0]["outcome"] == "pass"
-    meta = {**_lit("m", [[1, 2]], 0), "related_inputs": [[2, 1]],
-            "oracle_spec": {"kind": "metamorphic", "relation_id": "permutation_invariant",
-                            "parameters": {}}}  # fmt: skip
+    meta = {
+        **_lit("m", [[1, 2]], 0),
+        "related_inputs": [[2, 1]],
+        "oracle_spec": {
+            "kind": "metamorphic",
+            "relation_id": "permutation_invariant",
+            "parameters": {},
+        },
+    }
     e, rows = run(sum_src, [meta])
     out["relation_costs_two"] = e.used == 2
     _, rows = run("def f(v):\n    v.append(1)\n    return 0\n", [_lit("t", [[1]], 0)])
@@ -61,23 +82,30 @@ def checks(sandbox, config_path):
     out["output_overflow_error"] = rows[0]["outcome"] == "error"
     _, rows = run("def f(v):\n    while True:\n        pass\n", [_lit("t", [[1]], 0)])
     out["infinite_loop_timeout"] = rows[0]["outcome"] == "timeout"
-    _, rows = run("def f(v):\n    return [[0] * 5000 for _ in range(100000)]\n",
-                  [_lit("t", [[1]], 0)])  # fmt: skip
+    _, rows = run(
+        "def f(v):\n    return [[0] * 5000 for _ in range(100000)]\n", [_lit("t", [[1]], 0)]
+    )
     out["memory_bomb_contained"] = rows[0]["outcome"] in {"error", "timeout"}
     cancel = threading.Event()
     threading.Timer(0.5, cancel.set).start()
-    e, rows = run("def f(v):\n    while True:\n        pass\n", [_lit("t", [[1]], 0)],
-                  cancel=cancel, call_timeout_s=30)  # fmt: skip
+    e, rows = run(
+        "def f(v):\n    while True:\n        pass\n",
+        [_lit("t", [[1]], 0)],
+        cancel=cancel,
+        call_timeout_s=30,
+    )
     out["cancel_kills_job"] = rows == [] and e.cancelled
     probe = sandbox.argv("codejury-s2-probe-net")
     probe = probe[: probe.index(sandbox.image) + 1] + [
-        "python", "-c",
+        "python",
+        "-c",
         "import socket,sys\ntry:\n socket.create_connection(('1.1.1.1',53),2)\nexcept OSError:\n"
         " sys.exit(0)\nsys.exit(9)",
-    ]  # fmt: skip
+    ]
     subprocess.run(probe, capture_output=True, check=True, timeout=20)
-    net = subprocess.run(sandbox.docker("start", "-a", "codejury-s2-probe-net"),
-                         capture_output=True, timeout=20)  # fmt: skip
+    net = subprocess.run(
+        sandbox.docker("start", "-a", "codejury-s2-probe-net"), capture_output=True, timeout=20
+    )
     subprocess.run(sandbox.docker("rm", "-f", "codejury-s2-probe-net"), capture_output=True)
     out["network_denied"] = net.returncode == 0
     inspected = _inspect(sandbox)
@@ -114,10 +142,20 @@ def self_test(config, out_dir: Path) -> dict:
         report["checks"] = checks(sandbox, config)
         report["overall"] = "passed" if all(report["checks"].values()) else "failed"
     except (InfrastructureError, OSError, subprocess.SubprocessError) as exc:
-        names = ["helper_allowlist_execution", "nested_json", "relation_costs_two",
-                 "input_mutation_detected", "output_overflow_error", "infinite_loop_timeout",
-                 "memory_bomb_contained", "cancel_kills_job", "network_denied",
-                 "isolation_inspection", "mount_denied", "missing_image"]  # fmt: skip
+        names = [
+            "helper_allowlist_execution",
+            "nested_json",
+            "relation_costs_two",
+            "input_mutation_detected",
+            "output_overflow_error",
+            "infinite_loop_timeout",
+            "memory_bomb_contained",
+            "cancel_kills_job",
+            "network_denied",
+            "isolation_inspection",
+            "mount_denied",
+            "missing_image",
+        ]
         report["checks"] = {name: "pending_native" for name in names}
         report["overall"] = "pending_native"
         report["reason"] = f"{type(exc).__name__}: {exc}"

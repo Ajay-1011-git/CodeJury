@@ -41,9 +41,11 @@ class FixtureHostSandbox:
         self.calls += len(job["calls"])
         proc = subprocess.Popen(
             [sys.executable, "-I", str(ENTRY)],
-            stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             start_new_session=True,
-        )  # fmt: skip
+        )
         try:
             proc.stdin.write(json.dumps(job).encode())
             proc.stdin.close()

@@ -56,8 +56,9 @@ def validate_value(
 def canonical(value: object) -> str:
     """Deterministic compact text; the same bytes every run and on every platform."""
     validate_value(value)
-    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True,
-                      allow_nan=False)
+    return json.dumps(
+        value, sort_keys=True, separators=(",", ":"), ensure_ascii=True, allow_nan=False
+    )
 
 
 encode = canonical

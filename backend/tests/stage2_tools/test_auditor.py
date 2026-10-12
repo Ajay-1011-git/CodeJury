@@ -17,15 +17,39 @@ WEAK = [literal_test("a", [[2, 3]], 5), literal_test("b", [[-1]], 0)]
 STRONG = WEAK + [literal_test("c", [[1]], 1)]
 
 
-def audit(source, tests, *, max_mutants=24, remaining=48, budget=5000, cancel=None, cache=None,
-          reqs=("r",), sandbox=None):
+def audit(
+    source,
+    tests,
+    *,
+    max_mutants=24,
+    remaining=48,
+    budget=5000,
+    cancel=None,
+    cache=None,
+    reqs=("r",),
+    sandbox=None,
+):
     problem = make_problem(source, "f")
-    ev = Evaluator(sandbox or FixtureHostSandbox(), problem, id_prefix="a", max_executions=budget,
-                   cancel=cancel)  # fmt: skip
+    ev = Evaluator(
+        sandbox or FixtureHostSandbox(),
+        problem,
+        id_prefix="a",
+        max_executions=budget,
+        cancel=cancel,
+    )
     cand = {"candidate_id": "cand", "source": source}
-    out = Auditor(ev, problem, cand, tests, max_mutants=max_mutants, suite=suite_hash(tests),
-                  id_prefix="a", episode_remaining=remaining, requirement_ids=list(reqs),
-                  cache=cache).run()  # fmt: skip
+    out = Auditor(
+        ev,
+        problem,
+        cand,
+        tests,
+        max_mutants=max_mutants,
+        suite=suite_hash(tests),
+        id_prefix="a",
+        episode_remaining=remaining,
+        requirement_ids=list(reqs),
+        cache=cache,
+    ).run()
     return out, ev
 
 
@@ -56,26 +80,45 @@ def test_weak_suite_leaves_survivor_and_followup_distinguishes_it():
 
 
 def test_equivalent_survivor_is_not_an_accusation_and_equivalence_is_only_observed():
-    src = "def f(values):\n    total = 0\n    for v in values:\n        if v >= 0:\n            total += v\n    return total\n"
+    src = "def f(values):\n    total = 0\n    for v in values:\n        if v >= 0:\n            total += v\n    return total\n"  # noqa: E501
     out, _ = audit(src, WEAK)
     eq = mutant_at(out, "v >= 0", "v > 0")  # genuinely equivalent: adding zero changes nothing
     assert eq["outcome"] == "survived"
     # sampled agreement on observation tests is not a proof
-    obs = [{**literal_test("o", [[0, 0]], 0, status="observation_only"), "oracle_source": "model",
-            "oracle_spec": {"kind": "observation", "hypothesis": "h"}}]  # fmt: skip
+    obs = [
+        {
+            **literal_test("o", [[0, 0]], 0, status="observation_only"),
+            "oracle_source": "model",
+            "oracle_spec": {"kind": "observation", "hypothesis": "h"},
+        }
+    ]
     out2, _ = audit(src, WEAK + obs)
     assert mutant_at(out2, "v >= 0", "v > 0")["equivalence_status"] == "observed_equivalent"
-    assert mutant_at(out2, "0", "1", 4)["equivalence_status"] in {"unknown", "observed_equivalent", "observed_different"}
-    assert all(set(g) >= {"interpretation"} and g["interpretation"] == "unresolved_test_gap" for g in out2.gaps)
+    assert mutant_at(out2, "0", "1", 4)["equivalence_status"] in {
+        "unknown",
+        "observed_equivalent",
+        "observed_different",
+    }
+    assert all(
+        set(g) >= {"interpretation"} and g["interpretation"] == "unresolved_test_gap"
+        for g in out2.gaps
+    )
     assert not any("candidate" in m and m.get("eligibility") for m in out2.mutants)
 
 
 def test_observation_can_show_a_survivor_is_behaviourally_different():
-    obs = [{**literal_test("o", [[1]], 1, status="observation_only"), "oracle_source": "model",
-            "oracle_spec": {"kind": "observation", "hypothesis": "probe boundary"}}]  # fmt: skip
+    obs = [
+        {
+            **literal_test("o", [[1]], 1, status="observation_only"),
+            "oracle_source": "model",
+            "oracle_spec": {"kind": "observation", "hypothesis": "probe boundary"},
+        }
+    ]
     out, _ = audit(POSITIVES, WEAK + obs)
     survivor = mutant_at(out, "0", "1", 4)
-    assert survivor["outcome"] == "survived" and survivor["equivalence_status"] == "observed_different"
+    assert (
+        survivor["outcome"] == "survived" and survivor["equivalence_status"] == "observed_different"
+    )
 
 
 def test_proposed_oracle_cannot_kill():
@@ -96,14 +139,27 @@ def test_invalid_duplicate_timeout_are_separate(monkeypatch):
         loop = "def f(values):\n    while True:\n        pass\n"
         broken = "def f(values:\n"
         dup = source.replace("v > 0", "v < 0")
-        return [p(loop, 2), p(broken, 3), p(dup, 4), p(dup, 5), p(source.replace("total += v", "total += 2 * v"), 6)]
+        return [
+            p(loop, 2),
+            p(broken, 3),
+            p(dup, 4),
+            p(dup, 5),
+            p(source.replace("total += v", "total += 2 * v"), 6),
+        ]
 
     monkeypatch.setattr(engine_module, "enumerate_edits", fake)
     ev_sandbox = FixtureHostSandbox()
     problem = make_problem(POSITIVES, "f")
     ev = Evaluator(ev_sandbox, problem, id_prefix="a", max_executions=500, call_timeout_s=0.3)
-    out = Auditor(ev, problem, {"candidate_id": "cand", "source": POSITIVES}, STRONG,
-                  max_mutants=24, suite=suite_hash(STRONG), id_prefix="a").run()  # fmt: skip
+    out = Auditor(
+        ev,
+        problem,
+        {"candidate_id": "cand", "source": POSITIVES},
+        STRONG,
+        max_mutants=24,
+        suite=suite_hash(STRONG),
+        id_prefix="a",
+    ).run()
     by_line = {m["edit"]["location"]["lineno"]: m["outcome"] for m in out.mutants}
     assert by_line[2] == "timeout" and by_line[3] == "invalid"
     assert by_line[4] == "killed" and by_line[5] == "duplicate" and by_line[6] == "killed"
@@ -158,7 +214,10 @@ def test_gaps_group_by_location_and_family_and_validate_against_schema():
     from codejury.stage2_tools.codec import validate
 
     out, _ = audit(POSITIVES, WEAK)
-    keys = [(g["location"]["lineno"], g["location"]["col_offset"], g["operator_family"]) for g in out.gaps]
+    keys = [
+        (g["location"]["lineno"], g["location"]["col_offset"], g["operator_family"])
+        for g in out.gaps
+    ]
     assert len(keys) == len(set(keys))
     for g in out.gaps:
         validate(g, "AuditGap")

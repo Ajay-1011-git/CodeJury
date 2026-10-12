@@ -89,8 +89,10 @@ class Auditor:
     # -- evidence -------------------------------------------------------------------------
     def _parent_observations(self) -> list[dict]:
         if self._parent_obs is None:
-            shell = {"candidate_id": self.candidate["candidate_id"],
-                     "source": self.candidate["source"]}  # fmt: skip
+            shell = {
+                "candidate_id": self.candidate["candidate_id"],
+                "source": self.candidate["source"],
+            }
             self._parent_obs = self.ev.evaluate(shell, self.observation, check=False)
         return self._parent_obs
 
@@ -108,18 +110,27 @@ class Auditor:
         if rejects:
             first = rejects[0]
             if first["outcome"] == "timeout":
-                result = {"outcome": "timeout", "test_ids": [first["test_id"]],
-                          "equivalence": "unknown"}  # fmt: skip
+                result = {
+                    "outcome": "timeout",
+                    "test_ids": [first["test_id"]],
+                    "equivalence": "unknown",
+                }
             elif first["exception"] and (
                 first["exception"]["message"] == "source does not compile"
             ):
                 result = {"outcome": "invalid", "test_ids": [], "equivalence": "unknown"}
             else:
-                result = {"outcome": "killed", "test_ids": [first["test_id"]],
-                          "equivalence": "observed_different"}  # fmt: skip
+                result = {
+                    "outcome": "killed",
+                    "test_ids": [first["test_id"]],
+                    "equivalence": "observed_different",
+                }
         else:
-            result = {"outcome": "survived", "test_ids": [r["test_id"] for r in rows],
-                      "equivalence": self._equivalence(shell)}  # fmt: skip
+            result = {
+                "outcome": "survived",
+                "test_ids": [r["test_id"] for r in rows],
+                "equivalence": self._equivalence(shell),
+            }
         self.cache.rows[key] = result
         return result
 
@@ -131,8 +142,10 @@ class Auditor:
         compared = 0
         for row in rows:
             base = parent.get(row["test_id"])
-            if base is None or "error" in (row["outcome"], base["outcome"]) or "timeout" in (
-                row["outcome"], base["outcome"]
+            if (
+                base is None
+                or "error" in (row["outcome"], base["outcome"])
+                or "timeout" in (row["outcome"], base["outcome"])
             ):
                 continue
             compared += 1
@@ -155,14 +168,20 @@ class Auditor:
             if len(records) >= self.limit:
                 break
             if p.result_source_hash in seen:
-                records.append((p, {"outcome": "duplicate", "test_ids": [], "equivalence": "unknown"}))
+                records.append(
+                    (p, {"outcome": "duplicate", "test_ids": [], "equivalence": "unknown"})
+                )
                 continue
             seen.add(p.result_source_hash)
             reason = check_edit_result(p, self.candidate["source"], self.problem)
             if reason == "no-op edit":
-                records.append((p, {"outcome": "duplicate", "test_ids": [], "equivalence": "unknown"}))
+                records.append(
+                    (p, {"outcome": "duplicate", "test_ids": [], "equivalence": "unknown"})
+                )
             elif reason is not None:
-                records.append((p, {"outcome": "invalid", "test_ids": [], "equivalence": "unknown"}))
+                records.append(
+                    (p, {"outcome": "invalid", "test_ids": [], "equivalence": "unknown"})
+                )
             else:
                 records.append((p, None))
         if len(raw) >= PREFLIGHT:
@@ -203,8 +222,13 @@ class Auditor:
         groups: dict[tuple, list[dict]] = {}
         for m in self.out.mutants:
             loc = m["edit"]["location"]
-            key = (loc["lineno"], loc["col_offset"], loc["end_lineno"], loc["end_col_offset"],
-                   m["edit"]["operator_family"])  # fmt: skip
+            key = (
+                loc["lineno"],
+                loc["col_offset"],
+                loc["end_lineno"],
+                loc["end_col_offset"],
+                m["edit"]["operator_family"],
+            )
             groups.setdefault(key, []).append(m)
         gaps = []
         for key in sorted(groups):
@@ -215,20 +239,23 @@ class Auditor:
             gap_id = f"{self.prefix}-g{n:03d}"
             if not self.requirement_ids:
                 self.out.warnings.append(f"{gap_id}: no reviewed requirement mapping")
-            gaps.append({
-                "schema_version": "stage2.v1",
-                "gap_id": gap_id,
-                "candidate_id": self.candidate["candidate_id"],
-                "candidate_source_hash": sha(self.candidate["source"]),
-                "location": members[0]["edit"]["location"],
-                "operator_family": key[4],
-                "mutant_ids": [m["mutant_id"] for m in members][:24],
-                "observed_outcomes": [{"mutant_id": m["mutant_id"], "outcome": m["outcome"]}
-                                      for m in members][:24],
-                "requirement_ids": list(self.requirement_ids),
-                "suite_hash": self.suite,
-                "interpretation": "unresolved_test_gap",
-            })  # fmt: skip
+            gaps.append(
+                {
+                    "schema_version": "stage2.v1",
+                    "gap_id": gap_id,
+                    "candidate_id": self.candidate["candidate_id"],
+                    "candidate_source_hash": sha(self.candidate["source"]),
+                    "location": members[0]["edit"]["location"],
+                    "operator_family": key[4],
+                    "mutant_ids": [m["mutant_id"] for m in members][:24],
+                    "observed_outcomes": [
+                        {"mutant_id": m["mutant_id"], "outcome": m["outcome"]} for m in members
+                    ][:24],
+                    "requirement_ids": list(self.requirement_ids),
+                    "suite_hash": self.suite,
+                    "interpretation": "unresolved_test_gap",
+                }
+            )
         return gaps
 
 

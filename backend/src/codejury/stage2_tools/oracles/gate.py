@@ -91,7 +91,9 @@ def check_intake(run: dict) -> None:
             raise OracleError(f"Supplied test {test['test_id']} is outside the domain: {reason}")
         unknown = set(test["requirement_ids"]) - known
         if unknown:
-            raise OracleError(f"Test {test['test_id']} cites unknown requirements {sorted(unknown)}")
+            raise OracleError(
+                f"Test {test['test_id']} cites unknown requirements {sorted(unknown)}"
+            )
         key = value_hash(test["inputs"])
         if key in seen_inputs and not typed_equal(seen_inputs[key], test["expected"]):
             raise OracleError("Supplied tests give contradictory expectations for one input")
@@ -114,8 +116,11 @@ def check_intake(run: dict) -> None:
 def oracle_version(oracle_spec: dict) -> str:
     kind = oracle_spec["kind"]
     if kind == "property":
-        return TEMPLATES[oracle_spec["property_id"]].version if (
-            oracle_spec["property_id"] in TEMPLATES) else "unregistered"
+        return (
+            TEMPLATES[oracle_spec["property_id"]].version
+            if (oracle_spec["property_id"] in TEMPLATES)
+            else "unregistered"
+        )
     if kind == "metamorphic":
         rel = METAMORPHIC.get(oracle_spec["relation_id"])
         return rel.version if rel else "unregistered"

@@ -24,10 +24,20 @@ SRC = "def f(values):\n    return sorted(values)\n"
 
 
 def run_create(tests, reqs, schema=None):
-    return {"domain_schema": schema or SCHEMA, "requirements": reqs,
-            "supplied_tests": [
-                {"schema_version": "stage2.v1", "test_id": i, "inputs": a, "expected": e,
-                 "requirement_ids": r} for i, a, e, r in tests]}  # fmt: skip
+    return {
+        "domain_schema": schema or SCHEMA,
+        "requirements": reqs,
+        "supplied_tests": [
+            {
+                "schema_version": "stage2.v1",
+                "test_id": i,
+                "inputs": a,
+                "expected": e,
+                "requirement_ids": r,
+            }
+            for i, a, e, r in tests
+        ],
+    }
 
 
 def test_five_templates_semantics():
@@ -43,8 +53,11 @@ def test_five_templates_semantics():
 
 
 def test_judge_property_checks_order_and_multiplicity_and_type():
-    t = {"oracle_status": "authoritative", "inputs": [[2, 1, 2]],
-         "oracle_spec": {"kind": "property", "property_id": "sort_ascending_ints", "parameters": {}}}  # fmt: skip
+    t = {
+        "oracle_status": "authoritative",
+        "inputs": [[2, 1, 2]],
+        "oracle_spec": {"kind": "property", "property_id": "sort_ascending_ints", "parameters": {}},
+    }
     assert judge(t, [[1, 2, 2]]) == "pass"
     assert judge(t, [[1, 2]]) == "fail"  # lost a duplicate
     assert judge(t, [[2, 1, 2]]) == "fail"  # wrong order
@@ -122,8 +135,11 @@ def test_admission_property_literal_and_observation_authority():
     assert admit_test(prop_test(reqs=()), problem)["oracle_status"] == "proposed"  # no basis
     assert admit_test(prop_test("sort_ascending_ints"), problem)["oracle_status"] == "proposed"
     # A model literal stays proposed even if it matches the reference.
-    lit = {**literal_test("m", [[1, 2]], 3, ["r"]), "oracle_source": "model",
-           "provenance": "critic"}  # fmt: skip
+    lit = {
+        **literal_test("m", [[1, 2]], 3, ["r"]),
+        "oracle_source": "model",
+        "provenance": "critic",
+    }
     assert admit_test(lit, problem)["oracle_status"] == "proposed"
     obs = {**lit, "oracle_spec": {"kind": "observation", "hypothesis": "h"}}
     assert admit_test(obs, problem)["oracle_status"] == "observation_only"
@@ -135,10 +151,13 @@ def test_admission_metamorphic_rules():
     problem = make_problem(SRC, "f", requirements=[requirement("r", "sort_ascending_ints")])
 
     def meta(relation, inputs, related, reqs=("r",)):
-        return {**literal_test("m", inputs, 0, reqs),
-                "oracle_spec": {"kind": "metamorphic", "relation_id": relation, "parameters": {}},
-                "related_inputs": related, "oracle_source": "reviewed_contract",
-                "provenance": "property_engine"}  # fmt: skip
+        return {
+            **literal_test("m", inputs, 0, reqs),
+            "oracle_spec": {"kind": "metamorphic", "relation_id": relation, "parameters": {}},
+            "related_inputs": related,
+            "oracle_source": "reviewed_contract",
+            "provenance": "property_engine",
+        }
 
     ok = admit_test(meta("permutation_invariant", [[1, 2, 3]], [[3, 1, 2]]), problem)
     assert ok["oracle_status"] == "authoritative"
@@ -155,9 +174,10 @@ def test_admission_metamorphic_rules():
         admit_test({**prop_test(), "related_inputs": [[1]]}, problem)
     # No approved sort/sum basis -> relation cannot reject
     weak = make_problem(SRC, "f", requirements=[requirement("r", None)])
-    assert admit_test(meta("permutation_invariant", [[1, 2]], [[2, 1]]), weak)[
-        "oracle_status"
-    ] == "proposed"
+    assert (
+        admit_test(meta("permutation_invariant", [[1, 2]], [[2, 1]]), weak)["oracle_status"]
+        == "proposed"
+    )
     # idempotent is only for sorting contracts
     summing = make_problem(SRC, "f", requirements=[requirement("r", "sum_ints")])
     assert admit_test(meta("idempotent", [[3, 1]], [[1, 3]]), summing)["oracle_status"] == (
@@ -166,9 +186,15 @@ def test_admission_metamorphic_rules():
 
 
 def test_relation_verdicts_use_two_outputs():
-    t = {"oracle_status": "authoritative", "inputs": [[1, 2]],
-         "oracle_spec": {"kind": "metamorphic", "relation_id": "permutation_invariant",
-                         "parameters": {}}}  # fmt: skip
+    t = {
+        "oracle_status": "authoritative",
+        "inputs": [[1, 2]],
+        "oracle_spec": {
+            "kind": "metamorphic",
+            "relation_id": "permutation_invariant",
+            "parameters": {},
+        },
+    }
     assert judge(t, [3, 3]) == "pass"
     assert judge(t, [3, 2]) == "fail"
     assert judge({**t, "oracle_status": "proposed"}, [3, 2]) == "observed"

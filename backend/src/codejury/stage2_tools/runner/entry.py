@@ -119,10 +119,16 @@ def run_call(code, name, allowed, call, timeout):
     before = digest(inputs)
     args = copy.deepcopy(inputs)
     result = {
-        "status": "ok", "output": None, "exception": None, "before_hash": before,
-        "after_hash": before, "mutated": False, "duration_ms": 0, "trace": None,
+        "status": "ok",
+        "output": None,
+        "exception": None,
+        "before_hash": before,
+        "after_hash": before,
+        "mutated": False,
+        "duration_ms": 0,
+        "trace": None,
         "trace_truncated": False,
-    }  # fmt: skip
+    }
     events, state = [], {"bytes": 0, "truncated": False}
     lines = call.get("trace_lines")
 
@@ -214,11 +220,18 @@ def run_job(job):
         unsupported = type(exc).__name__
     if unsupported:
         row = {
-            "status": "unsupported", "output": None, "mutated": False, "duration_ms": 0,
-            "exception": {"type": unsupported, "message": "source does not compile",
-                          "lineno": None},
-            "trace": None, "trace_truncated": False,
-        }  # fmt: skip
+            "status": "unsupported",
+            "output": None,
+            "mutated": False,
+            "duration_ms": 0,
+            "exception": {
+                "type": unsupported,
+                "message": "source does not compile",
+                "lineno": None,
+            },
+            "trace": None,
+            "trace_truncated": False,
+        }
         return {
             "worker_version": WORKER_VERSION,
             "results": [

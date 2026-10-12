@@ -62,8 +62,11 @@ class DockerSandbox:
                 raise InfrastructureError("Runner VM must have no host directory or agent shares")
             info = subprocess.run(
                 self.docker("image", "inspect", self.image),
-                capture_output=True, text=True, check=True, timeout=10,
-            )  # fmt: skip
+                capture_output=True,
+                text=True,
+                check=True,
+                timeout=10,
+            )
             image = json.loads(info.stdout)[0]
             if image["Architecture"] != "arm64" or image["Id"] != self.image:
                 raise InfrastructureError("Runner image architecture/digest mismatch")
@@ -76,17 +79,41 @@ class DockerSandbox:
     def argv(self, name: str) -> list[str]:
         lim = self.limits
         return self.docker(
-            "create", "--name", name,
-            "--label", f"codejury.stage2-worker-pid={os.getpid()}",
-            "--pull", "never", "--platform", "linux/arm64",
-            "--network", "none", "--user", "65532:65532", "--read-only",
-            "--tmpfs", f"/tmp:rw,noexec,nosuid,size={lim['tmpfs_mb']}m",
-            "--cap-drop", "ALL", "--security-opt", "no-new-privileges",
-            "--memory", f"{lim['memory_mb']}m", "--memory-swap", f"{lim['memory_mb']}m",
-            "--pids-limit", str(lim["pids"]), "--cpus", str(lim["cpus"]),
-            "--init", "--log-driver", "none", "-i",
-            self.image, *self.config["entrypoint"],
-        )  # fmt: skip
+            "create",
+            "--name",
+            name,
+            "--label",
+            f"codejury.stage2-worker-pid={os.getpid()}",
+            "--pull",
+            "never",
+            "--platform",
+            "linux/arm64",
+            "--network",
+            "none",
+            "--user",
+            "65532:65532",
+            "--read-only",
+            "--tmpfs",
+            f"/tmp:rw,noexec,nosuid,size={lim['tmpfs_mb']}m",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges",
+            "--memory",
+            f"{lim['memory_mb']}m",
+            "--memory-swap",
+            f"{lim['memory_mb']}m",
+            "--pids-limit",
+            str(lim["pids"]),
+            "--cpus",
+            str(lim["cpus"]),
+            "--init",
+            "--log-driver",
+            "none",
+            "-i",
+            self.image,
+            *self.config["entrypoint"],
+        )
 
     def inspect_job(self, name: str) -> dict:
         lim = self.limits
@@ -108,15 +135,24 @@ class DockerSandbox:
             or host["PidsLimit"] != lim["pids"]
         ):
             raise InfrastructureError("Container isolation inspection failed")
-        return {"mounts": [], "network": "none", "read_only": True, "user": "65532:65532",
-                "memory_bytes": host["Memory"], "pids_limit": host["PidsLimit"]}  # fmt: skip
+        return {
+            "mounts": [],
+            "network": "none",
+            "read_only": True,
+            "user": "65532:65532",
+            "memory_bytes": host["Memory"],
+            "pids_limit": host["PidsLimit"],
+        }
 
     def cleanup_orphans(self) -> int:
         """Remove labelled jobs from earlier workers of this user; returns how many."""
         listed = subprocess.run(
             self.docker("ps", "-aq", "--filter", "label=codejury.stage2-worker-pid"),
-            capture_output=True, text=True, check=True, timeout=10,
-        )  # fmt: skip
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=10,
+        )
         ids = [c for c in listed.stdout.split() if len(c) == 12 and c.isalnum()]
         for container in ids:
             subprocess.run(self.docker("rm", "-f", container), capture_output=True, timeout=10)
@@ -139,8 +175,10 @@ class DockerSandbox:
             self.inspect_job(name)
             process = subprocess.Popen(
                 self.docker("start", "-ai", name),
-                stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-            )  # fmt: skip
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
         except (OSError, subprocess.SubprocessError, InfrastructureError) as exc:
             self._remove(name)
             raise InfrastructureError("Sandbox creation failed") from exc

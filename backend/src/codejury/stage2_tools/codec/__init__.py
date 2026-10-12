@@ -10,13 +10,14 @@ from .json_v1 import (
     validate_value,
     value_hash,
 )
-from .wire import ContractError, load_schema, schema_hash, validate
+from .wire import ContractError, errors, load_schema, schema_hash, validate
 
 __all__ = [
     "CodecError",
     "ContractError",
     "canonical",
     "decode",
+    "errors",
     "encode",
     "load_schema",
     "schema_hash",

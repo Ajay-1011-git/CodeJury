@@ -12,8 +12,13 @@ from dataclasses import dataclass, field
 from ..codec.json_v1 import MAX_SAFE_INTEGER
 from ..domains import SourceError, check_bundle, normalized_hash
 
-FAMILIES = ("comparison", "boundary_constant", "boolean_negation", "arithmetic",
-            "variable_reference")  # fmt: skip
+FAMILIES = (
+    "comparison",
+    "boundary_constant",
+    "boolean_negation",
+    "arithmetic",
+    "variable_reference",
+)
 _CMP = {
     ast.Lt: [ast.LtE, ast.Gt, ast.GtE],
     ast.LtE: [ast.Lt, ast.GtE, ast.Gt],
@@ -70,7 +75,8 @@ def location_of(node: ast.AST) -> dict:
 
 def overlaps(a: dict, b: dict) -> bool:
     return (a["lineno"], a["col_offset"]) <= (b["end_lineno"], b["end_col_offset"]) and (
-        b["lineno"], b["col_offset"]
+        b["lineno"],
+        b["col_offset"],
     ) <= (a["end_lineno"], a["end_col_offset"])
 
 
@@ -193,7 +199,13 @@ def enumerate_edits(
             text = _render(changed)
             proposals.append(
                 EditProposal(
-                    family, location_of(node), before, after, text, parent_hash, sha(text),
+                    family,
+                    location_of(node),
+                    before,
+                    after,
+                    text,
+                    parent_hash,
+                    sha(text),
                     node_index,
                 )
             )

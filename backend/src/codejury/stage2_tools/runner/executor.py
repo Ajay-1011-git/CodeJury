@@ -147,28 +147,38 @@ class Evaluator:
         outcomes = {r["status"] for r in rows}
         failure = next((r for r in rows if r["status"] != "ok"), None)
         effects = [
-            {"call_index": k, "mutated": r["mutated"], "before_hash": r["before_hash"],
-             "after_hash": r["after_hash"]}
+            {
+                "call_index": k,
+                "mutated": r["mutated"],
+                "before_hash": r["before_hash"],
+                "after_hash": r["after_hash"],
+            }
             for k, r in enumerate(rows)
-        ]  # fmt: skip
+        ]
         exception = None
         output = None
         if "timeout" in outcomes:
             outcome = "timeout"
         elif failure is not None:
             outcome = "error"
-            info = failure.get("exception") or {"type": failure["status"], "message": "", "lineno": None}
+            info = failure.get("exception") or {
+                "type": failure["status"],
+                "message": "",
+                "lineno": None,
+            }
             line = info.get("lineno")
             exception = {
                 "type": str(info["type"])[:120],
                 "message": str(info.get("message", ""))[:200],
-                "location": None if line is None else {
-                    "lineno": line, "col_offset": 0, "end_lineno": line, "end_col_offset": 0
-                },
-            }  # fmt: skip
+                "location": None
+                if line is None
+                else {"lineno": line, "col_offset": 0, "end_lineno": line, "end_col_offset": 0},
+            }
         else:
             outputs = [r["output"] for r in rows]
-            output = outputs[0] if len(outputs) == 1 else {"base": outputs[0], "followup": outputs[1]}
+            output = (
+                outputs[0] if len(outputs) == 1 else {"base": outputs[0], "followup": outputs[1]}
+            )
             verdict = judge(test, outputs)
             if verdict == "pass" and any(r["mutated"] for r in rows):
                 verdict = "fail"  # in-place effects are outside the supported scope
@@ -199,8 +209,13 @@ class Evaluator:
 def _timeout_row(call: dict) -> dict:
     zero = value_hash(call["inputs"])
     return {
-        "status": "timeout", "output": None, "exception": None, "before_hash": zero,
-        "after_hash": zero, "mutated": False, "duration_ms": 0, "trace": None,
+        "status": "timeout",
+        "output": None,
+        "exception": None,
+        "before_hash": zero,
+        "after_hash": zero,
+        "mutated": False,
+        "duration_ms": 0,
+        "trace": None,
         "trace_truncated": False,
-    }  # fmt: skip
-
+    }

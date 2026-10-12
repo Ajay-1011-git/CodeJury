@@ -6,7 +6,6 @@ from hostsandbox import MODE, FixtureHostSandbox
 
 from codejury.stage2_tools.codec import canonical, typed_equal, validate, value_hash
 from codejury.stage2_tools.runner import (
-    Cancelled,
     Evaluator,
     InfrastructureError,
     WatchdogTimeout,
@@ -19,8 +18,9 @@ SUM = "def f(values):\n    t = 0\n    for v in values:\n        t += v\n    retu
 
 
 def evaluator(problem, sandbox=None, **kw):
-    return Evaluator(sandbox or FixtureHostSandbox(), problem, id_prefix="x", **{
-        "max_executions": 100, **kw})  # fmt: skip
+    return Evaluator(
+        sandbox or FixtureHostSandbox(), problem, id_prefix="x", **{"max_executions": 100, **kw}
+    )
 
 
 def cand(source, cid="c"):
@@ -28,9 +28,12 @@ def cand(source, cid="c"):
 
 
 def prop(template, inputs, reqs=("r",)):
-    return {**literal_test(f"t{value_hash(inputs)[:6]}", inputs, 0, reqs),
-            "oracle_spec": {"kind": "property", "property_id": template, "parameters": {}},
-            "oracle_source": "reviewed_contract", "provenance": "property_engine"}  # fmt: skip
+    return {
+        **literal_test(f"t{value_hash(inputs)[:6]}", inputs, 0, reqs),
+        "oracle_spec": {"kind": "property", "property_id": template, "parameters": {}},
+        "oracle_source": "reviewed_contract",
+        "provenance": "property_engine",
+    }
 
 
 PROBLEM = make_problem(SUM, "f", requirements=[requirement("r", "sum_ints")])
@@ -68,8 +71,9 @@ def test_nested_json_and_helper_allowlist_execution():
         "    c = Counter(values)\n    return {'gcd': r, 'seen': [[v, c[v]] for v in sorted(c)],"
         " 'ok': True, 'none': None}\n"
     )
-    problem = make_problem(src, "f", requirements=[], helpers=helpers,
-                           deps=["math.gcd", "collections.Counter"])  # fmt: skip
+    problem = make_problem(
+        src, "f", requirements=[], helpers=helpers, deps=["math.gcd", "collections.Counter"]
+    )
     expected = {"gcd": 6, "seen": [[12, 1], [18, 1]], "ok": True, "none": None}
     rows = evaluator(problem).evaluate(cand(src), [literal_test("n", [[12, 18]], expected)])
     assert rows[0]["outcome"] == "pass" and typed_equal(rows[0]["actual_output"], expected)
@@ -77,10 +81,16 @@ def test_nested_json_and_helper_allowlist_execution():
 
 def test_relation_costs_two_calls_and_reports_both_outputs():
     ev = evaluator(PROBLEM)
-    meta = {**literal_test("m", [[1, 2, 3]], 0, ["r"]),
-            "oracle_spec": {"kind": "metamorphic", "relation_id": "permutation_invariant",
-                            "parameters": {}},
-            "related_inputs": [[3, 1, 2]], "oracle_source": "reviewed_contract"}  # fmt: skip
+    meta = {
+        **literal_test("m", [[1, 2, 3]], 0, ["r"]),
+        "oracle_spec": {
+            "kind": "metamorphic",
+            "relation_id": "permutation_invariant",
+            "parameters": {},
+        },
+        "related_inputs": [[3, 1, 2]],
+        "oracle_source": "reviewed_contract",
+    }
     rows = ev.evaluate(cand(SUM), [meta])
     assert rows[0]["outcome"] == "pass" and ev.used == 2
     assert rows[0]["actual_output"] == {"base": 6, "followup": 6}
@@ -112,9 +122,8 @@ def test_exception_and_output_codec_violations_are_explicit_errors():
         "def f(values):\n    return {1}\n": "OutputCodecError",
         "def f(values):\n    return len(values) / 3\n": "OutputCodecError",
         "def f(values):\n    return 2 ** 60 + len(values)\n": "OutputCodecError",
-        "from collections import Counter\ndef f(values):\n    return Counter(values)\n":
-            "OutputCodecError",
-    }  # fmt: skip
+        "from collections import Counter\ndef f(values):\n    return Counter(values)\n": "OutputCodecError",  # noqa: E501
+    }
     for source, kind in cases.items():
         deps = ["collections.Counter"] if "Counter" in source else []
         problem = make_problem(source, "f", deps=deps)
@@ -128,8 +137,13 @@ def test_infinite_loop_times_out_without_semantic_confusion():
     rows = ev.evaluate(cand(loop), [literal_test("t", [[1]], 1)])
     assert rows[0]["outcome"] == "timeout" and hard_rejection(rows[0], literal_test("t", [[1]], 1))
     # swallowing the alarm with a bare except cannot hide the loop either
-    swallow = "def f(values):\n    while True:\n        try:\n            pass\n        except:\n            pass\n"
-    assert evaluator(PROBLEM, call_timeout_s=0.3).evaluate(cand(swallow), [literal_test("t", [[1]], 1)])[0]["outcome"] == "timeout"
+    swallow = "def f(values):\n    while True:\n        try:\n            pass\n        except:\n            pass\n"  # noqa: E501
+    assert (
+        evaluator(PROBLEM, call_timeout_s=0.3).evaluate(
+            cand(swallow), [literal_test("t", [[1]], 1)]
+        )[0]["outcome"]
+        == "timeout"
+    )
 
 
 def test_unsupported_runtime_surface_is_denied_inside_worker():
@@ -139,18 +153,24 @@ def test_unsupported_runtime_surface_is_denied_inside_worker():
         "import os\ndef f(values):\n    return 1\n",
         "def f(values):\n    return __import__('os')\n",
     ):
-        row = evaluator(PROBLEM).evaluate(cand(source), [literal_test("t", [[1]], 1)], check=False)[0]
+        row = evaluator(PROBLEM).evaluate(cand(source), [literal_test("t", [[1]], 1)], check=False)[
+            0
+        ]
         assert row["outcome"] == "error", source
 
 
 def test_static_rejection_runs_nothing():
     ev = evaluator(PROBLEM)
-    rows = ev.evaluate(cand("import os\ndef f(values):\n    return 1\n"), [literal_test("t", [[1]], 1)])
+    rows = ev.evaluate(
+        cand("import os\ndef f(values):\n    return 1\n"), [literal_test("t", [[1]], 1)]
+    )
     assert rows == [] and ev.used == 0 and "c" in ev.static_rejections
 
 
 def test_unsupported_source_compile_failure_is_error_row():
-    row = evaluator(PROBLEM).evaluate(cand("def f(values:\n"), [literal_test("t", [[1]], 1)], check=False)[0]
+    row = evaluator(PROBLEM).evaluate(
+        cand("def f(values:\n"), [literal_test("t", [[1]], 1)], check=False
+    )[0]
     assert row["outcome"] == "error"
 
 
@@ -162,10 +182,14 @@ def test_trace_is_bounded_hashed_and_sanitized():
     assert row["trace_ref"] == value_hash(trace)
     assert [e["line"] for e in trace] == [4, 4, 4] and trace[2]["locals"]["t"] == 3
     assert row["trace_truncated"] is False
-    many = evaluator(PROBLEM).evaluate(cand(src), [literal_test("t", [list(range(10))] , 45)], trace_lines=[4])[0]
+    many = evaluator(PROBLEM).evaluate(
+        cand(src), [literal_test("t", [list(range(10))], 45)], trace_lines=[4]
+    )[0]
     assert many["trace_ref"]
     long_src = "def f(values):\n    t = 0\n    for v in values:\n        t += v\n    return t\n"
-    big = evaluator(make_problem(long_src, "f", domain=[{"name": "values", "domain": int_list(0, 5, 0, 60)}]))
+    big = evaluator(
+        make_problem(long_src, "f", domain=[{"name": "values", "domain": int_list(0, 5, 0, 60)}])
+    )
     row = big.evaluate(cand(long_src), [literal_test("t", [[1] * 60], 60)], trace_lines=[4])[0]
     assert row["trace_truncated"] is True and len(big.traces[row["trace_ref"]]) <= 32
     assert "/" not in canonical(big.traces[row["trace_ref"]])  # no host paths
@@ -180,10 +204,16 @@ def test_budget_exhaustion_returns_only_performed_rows():
 
 
 def test_relation_not_started_when_only_one_call_remains():
-    meta = {**literal_test("m", [[1, 2]], 0, ["r"]),
-            "oracle_spec": {"kind": "metamorphic", "relation_id": "permutation_invariant",
-                            "parameters": {}},
-            "related_inputs": [[2, 1]], "oracle_source": "reviewed_contract"}  # fmt: skip
+    meta = {
+        **literal_test("m", [[1, 2]], 0, ["r"]),
+        "oracle_spec": {
+            "kind": "metamorphic",
+            "relation_id": "permutation_invariant",
+            "parameters": {},
+        },
+        "related_inputs": [[2, 1]],
+        "oracle_source": "reviewed_contract",
+    }
     ev = evaluator(PROBLEM, max_executions=1)
     assert ev.evaluate(cand(SUM), [meta]) == [] and ev.used == 0 and ev.exhausted
 
@@ -268,9 +298,17 @@ def test_docker_sandbox_requires_pinned_image_and_builds_hardened_argv(monkeypat
     sandbox = DockerSandbox(home=tmp_path)
     argv = sandbox.argv("job")
     joined = " ".join(argv)
-    for flag in ("--network none", "--read-only", "--cap-drop ALL", "--user 65532:65532",
-                 "--security-opt no-new-privileges", "--pull never", "--platform linux/arm64",
-                 "--memory 512m", "--pids-limit 64"):  # fmt: skip
+    for flag in (
+        "--network none",
+        "--read-only",
+        "--cap-drop ALL",
+        "--user 65532:65532",
+        "--security-opt no-new-privileges",
+        "--pull never",
+        "--platform linux/arm64",
+        "--memory 512m",
+        "--pids-limit 64",
+    ):
         assert flag in joined
     assert "-v" not in argv and "--volume" not in argv and "--mount" not in argv
     assert "--privileged" not in argv and "docker.sock" not in joined

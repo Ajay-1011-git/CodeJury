@@ -82,8 +82,14 @@ def test_nested_domain_membership_with_duplicates_negatives():
 
 def test_dict_required_keys_and_union():
     key = {"kind": "string", "alphabet": "abc", "min_length": 1, "max_length": 2}
-    d = {"kind": "dict", "key_domain": key, "value_domain": INT, "required_keys": ["a"],
-         "min_size": 0, "max_size": 3}  # fmt: skip
+    d = {
+        "kind": "dict",
+        "key_domain": key,
+        "value_domain": INT,
+        "required_keys": ["a"],
+        "min_size": 0,
+        "max_size": 3,
+    }
     validate_domain(d)
     assert check_value(d, {"a": 1, "b": 2}) is None
     assert "missing required key" in check_value(d, {"b": 2})
@@ -230,8 +236,11 @@ def test_normalized_hash_ignores_formatting():
     )
 
 
-MODULES = {"math": ["gcd", "isqrt"], "bisect": ["bisect_left", "bisect_right"],
-           "collections": ["Counter", "deque"]}  # fmt: skip
+MODULES = {
+    "math": ["gcd", "isqrt"],
+    "bisect": ["bisect_left", "bisect_right"],
+    "collections": ["Counter", "deque"],
+}
 
 
 def test_allowlist_symbols_exist_and_are_deterministic():

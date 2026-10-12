@@ -19,20 +19,52 @@ ALLOWLIST = {
     "collections.deque",
 }
 BUILTIN_CALLS = {
-    "len", "range", "sum", "min", "max", "abs", "sorted", "reversed", "enumerate", "zip",
-    "all", "any", "int", "bool", "str", "list", "dict", "set", "tuple",
-}  # fmt: skip
+    "len",
+    "range",
+    "sum",
+    "min",
+    "max",
+    "abs",
+    "sorted",
+    "reversed",
+    "enumerate",
+    "zip",
+    "all",
+    "any",
+    "int",
+    "bool",
+    "str",
+    "list",
+    "dict",
+    "set",
+    "tuple",
+}
 EXCEPTION_NAMES = {
-    "Exception", "ValueError", "TypeError", "IndexError", "KeyError", "ZeroDivisionError",
+    "Exception",
+    "ValueError",
+    "TypeError",
+    "IndexError",
+    "KeyError",
+    "ZeroDivisionError",
     "AssertionError",
-}  # fmt: skip
+}
 MAX_SOURCE_BYTES = 48_000
 MAX_NODES = 5000
 MAX_HELPERS = 3
 _FORBIDDEN = (
-    ast.ClassDef, ast.AsyncFunctionDef, ast.AsyncFor, ast.AsyncWith, ast.Await, ast.Global,
-    ast.Nonlocal, ast.Lambda, ast.Yield, ast.YieldFrom, ast.With, ast.Match,
-)  # fmt: skip
+    ast.ClassDef,
+    ast.AsyncFunctionDef,
+    ast.AsyncFor,
+    ast.AsyncWith,
+    ast.Await,
+    ast.Global,
+    ast.Nonlocal,
+    ast.Lambda,
+    ast.Yield,
+    ast.YieldFrom,
+    ast.With,
+    ast.Match,
+)
 _SIGNATURE = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*\(([^()]*)\)\s*$")
 
 
@@ -158,9 +190,10 @@ def analyze_source(
             raise SourceError(f"Missing helpers: {sorted(missing)}")
     for function in functions:
         _check_function(function)
-        if function.name in declared and [a.arg for a in function.args.args] != declared[
-            function.name
-        ]:
+        if (
+            function.name in declared
+            and [a.arg for a in function.args.args] != declared[function.name]
+        ):
             raise SourceError(f"Helper {function.name} changed its reviewed signature")
     for node in nodes:
         if isinstance(node, _FORBIDDEN):

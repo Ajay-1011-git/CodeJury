@@ -20,7 +20,7 @@ def schema_hash(contracts: Path | str | None = None) -> str:
 
 
 def _read(contracts: Path | str | None) -> bytes:
-    path = (Path(contracts) if contracts is not None else REPO_ROOT / "contracts")
+    path = Path(contracts) if contracts is not None else REPO_ROOT / "contracts"
     path = path / "stage2.schema.json"
     try:
         if path.is_symlink():
@@ -51,3 +51,16 @@ def validate(record: object, definition: str, contracts: Path | str | None = Non
     if definition not in cache:
         cache[definition] = Draft202012Validator({**schema, "$ref": f"#/$defs/{definition}"})
     cache[definition].validate(record)
+
+
+def errors(record: object, definition: str, contracts: Path | str | None = None) -> list[str]:
+    """Short human-readable structural problems, empty when the record is valid."""
+    schema, cache = _validators(_read(contracts))
+    if definition not in schema["$defs"]:
+        raise ContractError(f"Unknown Stage 2 definition: {definition}")
+    if definition not in cache:
+        cache[definition] = Draft202012Validator({**schema, "$ref": f"#/$defs/{definition}"})
+    found = sorted(cache[definition].iter_errors(record), key=lambda e: list(map(str, e.path)))
+    return [
+        f"{'/'.join(map(str, e.absolute_path)) or '<root>'}: {e.message[:160]}" for e in found[:8]
+    ]

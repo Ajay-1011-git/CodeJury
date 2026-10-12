@@ -63,14 +63,15 @@ TEMPLATES: dict[str, Template] = {
         _make("sort_ascending_ints", lambda d: len(d) == 1 and _is_int_list(d[0]), _sorted),
         _make("unique_preserve_order_ints", lambda d: len(d) == 1 and _is_int_list(d[0]), _unique),
         _make("sum_ints", lambda d: len(d) == 1 and _is_int_list(d[0]), _sum),
-        _make("reverse_string", lambda d: len(d) == 1 and d[0]["domain"]["kind"] == "string",
-              _reverse),
+        _make(
+            "reverse_string", lambda d: len(d) == 1 and d[0]["domain"]["kind"] == "string", _reverse
+        ),
         _make(
             "count_occurrences_ints",
             lambda d: len(d) == 2 and _is_int_list(d[0]) and d[1]["domain"]["kind"] == "integer",
             _count,
         ),
-    )  # fmt: skip
+    )
 }
 
 

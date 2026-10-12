@@ -6,7 +6,6 @@ checks first, then on the rest of the common suite. Partial success never qualif
 candidates that pass every authoritative test are returned.
 """
 
-import threading
 from dataclasses import dataclass, field
 
 from ..domains import normalized_hash
@@ -117,8 +116,13 @@ class SearchEngine:
         def key(p: EditProposal):
             hinted = any(overlaps(p.location, s) for s in self.sites)
             evidence = p.location["lineno"] in lines
-            return (not hinted, not evidence, self.families.index(p.family),
-                    p.location["lineno"], p.location["col_offset"])  # fmt: skip
+            return (
+                not hinted,
+                not evidence,
+                self.families.index(p.family),
+                p.location["lineno"],
+                p.location["col_offset"],
+            )
 
         return sorted(proposals, key=key)
 
@@ -155,11 +159,9 @@ class SearchEngine:
             rest = [t for t in self.tests if t["test_id"] not in {r["test_id"] for r in rows}]
             more = self.ev.evaluate(shell, rest, stop_on_first_hard_failure=True, check=False)
             rows += more
-            full = (
-                len(rows) == len(self.tests)
-                and not any(hard_rejection(r, by_id.get(r["test_id"], {"oracle_status": ""}))
-                            for r in rows)
-            )  # fmt: skip
+            full = len(rows) == len(self.tests) and not any(
+                hard_rejection(r, by_id.get(r["test_id"], {"oracle_status": ""})) for r in rows
+            )
         item = _Item(source, edits, parent, passed, full, intermediate)
         if full:
             self._n_candidates += 1
@@ -167,8 +169,11 @@ class SearchEngine:
             self.out.candidates.append(self._draft(cid, item))
             if intermediate is not None:
                 self.out.edit_sources.append(
-                    {"schema_version": "stage2.v1", "source_hash": sha(intermediate),
-                     "source": intermediate}  # fmt: skip
+                    {
+                        "schema_version": "stage2.v1",
+                        "source_hash": sha(intermediate),
+                        "source": intermediate,
+                    }
                 )
         return item
 
@@ -199,8 +204,9 @@ class SearchEngine:
                 self.out.warnings.append("no usable parent to search around")
             return self._finish()
         level1: list[_Item] = []
-        queues = {p["candidate_id"]: self._proposals(p["source"], p["candidate_id"])
-                  for p in parents}  # fmt: skip
+        queues = {
+            p["candidate_id"]: self._proposals(p["source"], p["candidate_id"]) for p in parents
+        }
         progressed = True
         while progressed and not self._stop():
             progressed = False
