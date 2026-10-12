@@ -1,0 +1,3 @@
+# Live ToolPort wiring. make_tool_port() reads this and builds the real Docker sandbox.
+runner_config: runner.yaml
+mode: live

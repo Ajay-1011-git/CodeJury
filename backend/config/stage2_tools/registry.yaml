@@ -1,0 +1,14 @@
+# Reviewed oracle registry and dependency allowlist for stage2.v1 (human-readable mirror).
+# tests/stage2_tools/test_oracles.py asserts this file matches the executable registry.
+property_templates:
+  - {id: sort_ascending_ints, signature: "(list[int]) -> list[int]", checks: "order AND multiplicity"}
+  - {id: unique_preserve_order_ints, signature: "(list[int]) -> list[int]", checks: "exact first-occurrence order"}
+  - {id: sum_ints, signature: "(list[int]) -> int", checks: "includes negatives"}
+  - {id: reverse_string, signature: "(string) -> string", checks: "Unicode codepoint order"}
+  - {id: count_occurrences_ints, signature: "(list[int], int) -> int", checks: "exact integer count"}
+metamorphic_relations:
+  - {id: permutation_invariant, templates: [sum_ints, sort_ascending_ints]}
+  - {id: idempotent, templates: [sort_ascending_ints]}
+dependency_allowlist: [math.gcd, math.isqrt, bisect.bisect_left, bisect.bisect_right, collections.Counter, collections.deque]
+builtin_calls: [len, range, sum, min, max, abs, sorted, reversed, enumerate, zip, all, any, int, bool, str, list, dict, set, tuple]
+limits: {source_bytes: 48000, helpers: 3, parameters: [1, 6], context_tokens: 4096}
