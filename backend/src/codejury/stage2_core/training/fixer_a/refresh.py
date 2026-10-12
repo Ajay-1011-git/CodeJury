@@ -62,7 +62,7 @@ def recipe(settings):
     return value
 
 
-def verify_pilot(path, identity, minimum_steps):
+def verify_pilot(path, identity, minimum_steps, *, role="fixer_a"):
     proof = json.loads(Path(path).read_text())
     if (
         proof.get("phase") != "pilot"
@@ -75,7 +75,7 @@ def verify_pilot(path, identity, minimum_steps):
     ):
         raise ValueError("Matching successful native pilot/save/reload required")
     registry = Registry(Path(proof["registry_path"]))
-    if registry.identity("fixer_a")["adapter_hash"] != proof["adapter_hash"]:
+    if registry.identity(role)["adapter_hash"] != proof["adapter_hash"]:
         raise ValueError("Pilot adapter changed after verification")
     return proof
 
@@ -88,6 +88,7 @@ def checkpoint_registry(directory, weights, step, session, original, metrics):
         Path(session["native_output"]) / "adapter_config.json", directory / "adapter_config.json"
     )
     digest = file_hash(directory / "adapters.safetensors")
+    role = session.get("role", "fixer_a")
     base = original.record["base"]
     write_report(
         directory / "freeze.json",
@@ -115,7 +116,7 @@ def checkpoint_registry(directory, weights, step, session, original, metrics):
     card = checked(
         {
             "schema_version": "stage2.v1",
-            "role": "fixer_a",
+            "role": role,
             "status": "pilot_only",
             "adapter_hash": digest,
             **{
@@ -124,7 +125,7 @@ def checkpoint_registry(directory, weights, step, session, original, metrics):
             },
             "topology_hash": original.record["topology_hash"],
             "data_manifest_hash": session["data_manifest_hash"],
-            "config_hash": role_config(base, original.record["topology_hash"], "fixer_a", digest),
+            "config_hash": role_config(base, original.record["topology_hash"], role, digest),
             "train_base_problems": session["train_base_problems"],
             "train_records": session["train_records"],
             "steps": step,
@@ -136,11 +137,16 @@ def checkpoint_registry(directory, weights, step, session, original, metrics):
     )
     record = copy.deepcopy(original.record)
     record["adapters"] = {
-        "fixer_a": {
+        **(
+            {"fixer_a": copy.deepcopy(original.record["adapters"]["fixer_a"])}
+            if role == "fixer_b"
+            else {}
+        ),
+        role: {
             "path": str(directory.resolve()),
             "files": hashes(directory, ADAPTER_FILES),
             "card": card,
-        }
+        },
     }
     path = directory / "registry.json"
     write_report(path, record)
@@ -148,7 +154,9 @@ def checkpoint_registry(directory, weights, step, session, original, metrics):
     return path
 
 
-def reload_check(registry_path, runtime_config, prompt, seed, expected_parameter_hash=None):
+def reload_check(
+    registry_path, runtime_config, prompt, seed, expected_parameter_hash=None, *, role="fixer_a"
+):
     # The first native trainer has exited before this fresh runtime process starts.
     registry = Registry(registry_path)
     runtime = yaml.safe_load(Path(runtime_config).read_text())
@@ -160,8 +168,8 @@ def reload_check(registry_path, runtime_config, prompt, seed, expected_parameter
                 "schema_version": "stage2.v1",
                 "request_id": "reload-" + uuid4().hex,
                 "run_id": "a-refresh-reload",
-                "role": "fixer_a",
-                "purpose": "repair",
+                "role": role,
+                "purpose": "reconstruct" if role == "fixer_b" else "repair",
                 "prompt": prompt,
                 "seed": seed,
                 "max_new_tokens": 256,

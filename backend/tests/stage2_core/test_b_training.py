@@ -103,3 +103,72 @@ def test_sampling_is_reproducible_and_b_view_excludes_buggy_body(alpha):
     assert 0.25 <= first["actual_broad_fraction"] <= 0.5
     assert all("BUG_AND_A_BODY_SENTINEL" not in p["b_prompt"] for p in first["plan"])
     assert first["training_started"] is False
+
+
+def test_pair_metrics_measure_rescue_not_disagreement():
+    from codejury.stage2_core.training.fixer_b.evaluate import paired
+
+    rows = []
+    for index, (a, b) in enumerate([(True, True), (True, False), (False, True), (False, False)]):
+        for role, solved in (("fixer_a", a), ("fixer_b", b)):
+            rows.append(
+                {
+                    "record_id": str(index),
+                    "role": role,
+                    "solved": solved,
+                    "incorrect_accepted": False,
+                    "malformed": False,
+                    "usage": {"input_tokens": 10, "output_tokens": 20},
+                }
+            )
+    summary = paired(rows)
+    assert summary["a_solved"] == summary["b_solved"] == 2
+    assert summary["union_solved"] == 3 and summary["joint_failures"] == 1
+    assert summary["rescued_a_failures"] == summary["overlap_solved"] == 1
+    assert summary["rescue_rate"] == 0.5
+    with pytest.raises(ValueError, match="Complete"):
+        paired(rows[:-1])
+    with pytest.raises(ValueError, match="Duplicate"):
+        paired(rows + [rows[0]])
+
+
+def test_chat_export_uses_only_the_frozen_prompt_and_target():
+    from codejury.stage2_core.training.fixer_b.train import chats
+
+    target = json.loads((REPO_ROOT / "contracts/stage2-fixtures/repair-draft.json").read_text())
+    plan = [
+        {
+            "prompt": "INDEPENDENT_CONTRACT",
+            "target": target,
+            "b_prompt": "INDEPENDENT_CONTRACT",
+            "hidden_body": "BUGGY_BODY_SENTINEL",
+        }
+    ]
+    result = chats(plan, view="independent")
+    assert result[0]["messages"][1]["content"] == "INDEPENDENT_CONTRACT"
+    assert "BUGGY_BODY_SENTINEL" not in json.dumps(result)
+
+
+def test_b_selection_ranks_safety_union_and_standalone_success_without_loss_reward():
+    from codejury.stage2_core.training.fixer_b.select import rank
+
+    baseline = {
+        "b_incorrect_accepted": 0,
+        "union_solved": 5,
+        "b_solved": 3,
+        "b_malformed": 0,
+        "b_input_tokens": 100,
+        "b_output_tokens": 200,
+        "train_loss": 0.01,
+    }
+    rescue = {**baseline, "union_solved": 6, "train_loss": 99.0}
+    harmful = {**rescue, "b_incorrect_accepted": 1}
+    assert rank(rescue) < rank(baseline) < rank(harmful)
+
+
+def test_adapter_handoff_split_uses_the_frozen_schema_enum():
+    from codejury.stage2_core.contracts import checked
+
+    value = json.loads((REPO_ROOT / "contracts/stage2-fixtures/artifact-manifest.json").read_text())
+    value.update(kind="fixer_adapters", split="none", contains_hidden_assessment=False)
+    assert checked(value, "ArtifactManifest")["split"] == "none"

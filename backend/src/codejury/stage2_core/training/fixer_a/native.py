@@ -25,7 +25,7 @@ def main():
         from mlx_lm.lora import CONFIG_DEFAULTS, train_model
         from mlx_lm.tuner.callbacks import TrainingCallback
         from mlx_lm.tuner.datasets import load_dataset
-        from mlx_lm.tuner.utils import remove_lora_layers
+        from mlx_lm.tuner.utils import linear_to_lora_layers, remove_lora_layers
 
         from ...model_worker.native import MLXBackend, verify_tensors
 
@@ -38,9 +38,17 @@ def main():
             raise ValueError("Only local allowlisted train/valid exports accepted")
         if any(file_hash(data / n) != h for n, h in session["data_hashes"].items()):
             raise ValueError("Export changed before native training")
-        initial = registry.verify_adapter("fixer_a")
-        if file_hash(initial / "adapters.safetensors") != session["initial_adapter_hash"]:
+        role = session.get("role", "fixer_a")
+        if role not in {"fixer_a", "fixer_b"}:
+            raise ValueError("Unsupported native training role")
+        initial = registry.verify_adapter("fixer_a") if role == "fixer_a" else None
+        if (
+            initial is not None
+            and file_hash(initial / "adapters.safetensors") != session["initial_adapter_hash"]
+        ):
             raise ValueError("Initialization changed before native training")
+        if role == "fixer_b" and session["initial_adapter_hash"] is not None:
+            raise ValueError("B starts separately from the frozen base, without A weights")
         args = SimpleNamespace(
             **{
                 **CONFIG_DEFAULTS,
@@ -60,7 +68,7 @@ def main():
                 "grad_accumulation_steps": 1,
                 "seed": cfg["seed"],
                 "adapter_path": session["native_output"],
-                "resume_adapter_file": str(initial / "adapters.safetensors"),
+                "resume_adapter_file": str(initial / "adapters.safetensors") if initial else None,
                 "steps_per_report": 1 if session["phase"] == "pilot" else 10,
                 "steps_per_eval": session["steps"] if session["phase"] == "pilot" else 50,
                 "val_batches": -1,
@@ -76,8 +84,19 @@ def main():
         try:
             # Verify the complete resume tensor set with the exact runtime inserter.
             # Upstream train_model's partial resume load is used only after this check.
-            backend.switch("fixer_a")
-            initial_weights = mx.load(str(initial / "adapters.safetensors"))
+            if initial is not None:
+                backend.switch("fixer_a")
+                initial_weights = mx.load(str(initial / "adapters.safetensors"))
+            else:
+                # Match train_model's seeded fresh LoRA initialization for the update check.
+                mx.random.seed(args.seed)
+                linear_to_lora_layers(backend.model, args.num_layers, args.lora_parameters)
+                initial_weights = {
+                    name: value
+                    for name, value in tree_flatten(backend.model.parameters())
+                    if name.rsplit(".", 1)[-1] in {"lora_a", "lora_b"}
+                }
+                mx.eval(initial_weights)
             initial_parameter_hash = backend.inspect()["parameter_hash"]
             backend.model = remove_lora_layers(backend.model)
             train_set, valid_set, test_set = load_dataset(args, backend.tokenizer)
