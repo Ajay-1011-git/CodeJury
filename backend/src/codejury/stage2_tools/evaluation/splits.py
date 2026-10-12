@@ -10,8 +10,12 @@ import json
 import os
 from pathlib import Path
 
-ROLES = {"train": "training", "validation": "validation", "development_assessment": "development",
-         "final_assessment": "final"}
+ROLES = {
+    "train": "training",
+    "validation": "validation",
+    "development_assessment": "development",
+    "final_assessment": "final",
+}
 KEYS = ("base_problem_ids", "family_ids", "cluster_ids")
 TARGET_FINAL = 200
 
@@ -51,8 +55,12 @@ def load_ids(path: Path, normalized_hash) -> dict:
             clusters.add(normalized_hash(row["correct_source"]))
         except (SyntaxError, KeyError):
             clusters.add("unparsed:" + row["base_problem_id"])
-    return {"base_problem_ids": sorted(bases), "family_ids": sorted(families),
-            "cluster_ids": sorted(clusters), "records": records}
+    return {
+        "base_problem_ids": sorted(bases),
+        "family_ids": sorted(families),
+        "cluster_ids": sorted(clusters),
+        "records": records,
+    }
 
 
 def default_roots(manifest_path: Path) -> list[Path]:
@@ -95,11 +103,15 @@ def validate_manifest(manifest: dict, roots: list[Path], normalized_hash=None) -
             warnings.append(f"{name}: asset not present locally; sealed hash/count only")
         if ids is not None:
             known[name] = ids
-        summary[name] = {"status": status, "base_problems": entry["base_problems"],
-                         "records": entry["records"], "sha256": entry["sha256"]}
+        summary[name] = {
+            "status": status,
+            "base_problems": entry["base_problems"],
+            "records": entry["records"],
+            "sha256": entry["sha256"],
+        }
     names = list(known)
     for i, a in enumerate(names):
-        for b in names[i + 1:]:
+        for b in names[i + 1 :]:
             for key in KEYS:
                 overlap = set(known[a][key]) & set(known[b][key])
                 if overlap:
@@ -120,6 +132,12 @@ def validate_manifest(manifest: dict, roots: list[Path], normalized_hash=None) -
             f"final assessment has {final_count} base problems (target {TARGET_FINAL}): "
             "limited evidence, wide uncertainty"
         )
-    return {"status": "failed" if violations else "passed", "violations": violations,
-            "warnings": warnings, "splits": summary, "final_base_problems": final_count,
-            "target_final_base_problems": TARGET_FINAL, "limited_evidence": limited}
+    return {
+        "status": "failed" if violations else "passed",
+        "violations": violations,
+        "warnings": warnings,
+        "splits": summary,
+        "final_base_problems": final_count,
+        "target_final_base_problems": TARGET_FINAL,
+        "limited_evidence": limited,
+    }

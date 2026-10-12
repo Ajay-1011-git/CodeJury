@@ -21,8 +21,13 @@ def manifest_for(tmp_path, assets):
         path = tmp_path / f"{name}.jsonl"
         write(path, assets[name])
         bases = {r["base_problem_id"] for r in assets[name]}
-        splits[name] = {"role": ROLES[name], "asset": path.name, "sha256": sha256_file(path),
-                        "base_problems": len(bases), "records": len(assets[name])}
+        splits[name] = {
+            "role": ROLES[name],
+            "asset": path.name,
+            "sha256": sha256_file(path),
+            "base_problems": len(bases),
+            "records": len(assets[name]),
+        }
     return {"splits": splits}
 
 
@@ -31,8 +36,10 @@ def disjoint():
         "train": [row("a", "fa", "def f(x):\n    return x + 1\n")],
         "validation": [row("b", "fb", "def f(x):\n    return x + 2\n")],
         "development_assessment": [row("c", "fc", "def f(x):\n    return x + 3\n")],
-        "final_assessment": [row("d", "fd", "def f(x):\n    return x + 4\n"),
-                             row("d", "fd", "def f(x):\n    return x + 4\n")],
+        "final_assessment": [
+            row("d", "fd", "def f(x):\n    return x + 4\n"),
+            row("d", "fd", "def f(x):\n    return x + 4\n"),
+        ],
     }
 
 
@@ -55,7 +62,9 @@ def test_overlap_in_any_dimension_fails(tmp_path, key, value):
         leaked["correct_source"] = assets["train"][0]["correct_source"]  # near-duplicate source
     assets["final_assessment"] = [leaked]
     report = validate_manifest(manifest_for(tmp_path, assets), [tmp_path])
-    assert report["status"] == "failed" and any("final_assessment" in v for v in report["violations"])
+    assert report["status"] == "failed" and any(
+        "final_assessment" in v for v in report["violations"]
+    )
 
 
 def test_hash_count_and_role_tampering_detected(tmp_path):
