@@ -1,0 +1,46 @@
+{
+  "schema_version": "stage2.v1",
+  "source": "def reverse_letters(text):\n    return text\n",
+  "function_name": "reverse_letters",
+  "contract_text": "Return the input string reversed by Unicode codepoint order.",
+  "domain_schema": [
+    {
+      "name": "text",
+      "domain": {
+        "kind": "string",
+        "alphabet": "ab😀 ",
+        "min_length": 0,
+        "max_length": 6
+      }
+    }
+  ],
+  "helper_interfaces": [],
+  "requirements": [
+    {
+      "schema_version": "stage2.v1",
+      "requirement_id": "unicode-reverse",
+      "description": "Return the input string reversed by Unicode codepoint order.",
+      "source": "reviewed_contract",
+      "approval_status": "approved",
+      "property_template_id": "reverse_string",
+      "parameters": {}
+    }
+  ],
+  "supplied_tests": [
+    {
+      "schema_version": "stage2.v1",
+      "test_id": "test-unicode-reverse",
+      "inputs": [
+        "a😀b"
+      ],
+      "expected": "b😀a",
+      "requirement_ids": [
+        "unicode-reverse"
+      ]
+    }
+  ],
+  "allowed_dependencies": [],
+  "resource_profile": "mac-standard-v1",
+  "policy_mode": "learned",
+  "seed": 11
+}

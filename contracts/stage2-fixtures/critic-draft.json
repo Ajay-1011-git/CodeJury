@@ -1,0 +1,24 @@
+{
+  "mode": "audit_gap",
+  "requirement_ids": [
+    "sum-all"
+  ],
+  "generator_spec": null,
+  "concrete_inputs": [
+    [
+      [
+        -1
+      ]
+    ]
+  ],
+  "oracle_spec": {
+    "kind": "property",
+    "property_id": "sum_ints",
+    "parameters": {}
+  },
+  "target_candidate_ids": [
+    "c-a",
+    "c-b"
+  ],
+  "rationale": "Synthetic approved challenge."
+}

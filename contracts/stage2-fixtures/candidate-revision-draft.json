@@ -1,0 +1,17 @@
+{
+  "schema_version": "stage2.v1",
+  "candidate_id": "c-a-revised",
+  "problem_id": "fixture-problem",
+  "parent_id": "c-a",
+  "origin": "fixer_a_revision",
+  "generation_view": "feedback_revision",
+  "source": "def sum_values(values):\n    return sum(values)\n",
+  "source_hash": "931cb3deac007b3cc2a71663289dc1577b993af1f94970dd2c237d0ab7ab216a",
+  "diagnosis": "Synthetic fixture example; no model inference.",
+  "assumptions": [],
+  "requirement_ids": [
+    "sum-all"
+  ],
+  "model_config_hash": "22865a22a859d4108f33a76b0258f4e3b6bd447ef161f68fd08af512382818b2",
+  "edits": []
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": "stage2.v1",
+  "exchange_id": "fixture-exchange",
+  "owner": "sarvesh",
+  "kind": "critic_adapter",
+  "base_revision_hash": "68828f0b413235f5c2d7d6803a3570a7e3ebd0fd4481be30f82aa490082d788b",
+  "split": "train",
+  "files": [],
+  "record_count": 0,
+  "base_problem_count": 0,
+  "contains_hidden_assessment": false,
+  "note": "Synthetic empty manifest; not a usable trained artifact."
+}

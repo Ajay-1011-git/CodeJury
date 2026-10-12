@@ -1,0 +1,27 @@
+{
+  "schema_version": "stage2.v1",
+  "gap_id": "g-boundary",
+  "candidate_id": "c-a",
+  "candidate_source_hash": "afb55335fb20c76eee9a30a34c8c8c006f66b9bc5149ab07321a93e245dc6579",
+  "location": {
+    "lineno": 4,
+    "col_offset": 19,
+    "end_lineno": 4,
+    "end_col_offset": 20
+  },
+  "operator_family": "boundary_constant",
+  "mutant_ids": [
+    "m-boundary"
+  ],
+  "observed_outcomes": [
+    {
+      "mutant_id": "m-boundary",
+      "outcome": "survived"
+    }
+  ],
+  "requirement_ids": [
+    "sum-all"
+  ],
+  "suite_hash": "5cec3734365ed7f4cc974ee42ca01ae6f3d5d1fd56242da2b7e9bd50b563ee21",
+  "interpretation": "unresolved_test_gap"
+}

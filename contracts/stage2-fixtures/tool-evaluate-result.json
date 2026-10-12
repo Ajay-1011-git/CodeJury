@@ -1,0 +1,71 @@
+{
+  "schema_version": "stage2.v1",
+  "request_id": "tool-evaluate",
+  "status": "ok",
+  "validation": null,
+  "candidates": [],
+  "tests": [],
+  "executions": [
+    {
+      "schema_version": "stage2.v1",
+      "execution_id": "tool-evaluate-e000",
+      "candidate_id": "c-a",
+      "test_id": "t-supplied",
+      "runtime_hash": "087bf5ca75c48138e467aae95a7822de0e76437105bbfdd2163148d047e445db",
+      "actual_output": 5,
+      "input_effects": [
+        {
+          "call_index": 0,
+          "mutated": false,
+          "before_hash": "32df5bcef9fe387f787f39a4f1f0b6bc1514da2929cedc7ee6bddb5578e36f5f",
+          "after_hash": "32df5bcef9fe387f787f39a4f1f0b6bc1514da2929cedc7ee6bddb5578e36f5f"
+        }
+      ],
+      "exception": null,
+      "outcome": "pass",
+      "duration_ms": 1,
+      "trace_ref": null,
+      "trace_truncated": false
+    },
+    {
+      "schema_version": "stage2.v1",
+      "execution_id": "tool-evaluate-e001",
+      "candidate_id": "c-b",
+      "test_id": "t-supplied",
+      "runtime_hash": "087bf5ca75c48138e467aae95a7822de0e76437105bbfdd2163148d047e445db",
+      "actual_output": 5,
+      "input_effects": [
+        {
+          "call_index": 0,
+          "mutated": false,
+          "before_hash": "32df5bcef9fe387f787f39a4f1f0b6bc1514da2929cedc7ee6bddb5578e36f5f",
+          "after_hash": "32df5bcef9fe387f787f39a4f1f0b6bc1514da2929cedc7ee6bddb5578e36f5f"
+        }
+      ],
+      "exception": null,
+      "outcome": "pass",
+      "duration_ms": 1,
+      "trace_ref": null,
+      "trace_truncated": false
+    }
+  ],
+  "mutants": [],
+  "audit_gaps": [],
+  "edit_sources": [],
+  "usage": {
+    "schema_version": "stage2.v1",
+    "output_tokens": 0,
+    "input_tokens": 0,
+    "function_executions": 2,
+    "elapsed_ms": 0,
+    "learned_candidates": 0,
+    "search_candidates": 0,
+    "audit_mutants": 0,
+    "judge_decisions": 0,
+    "peak_memory_mb": null
+  },
+  "warnings": [
+    "Synthetic fixture only; no tool ran."
+  ],
+  "error": null
+}

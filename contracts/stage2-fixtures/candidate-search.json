@@ -1,0 +1,35 @@
+{
+  "schema_version": "stage2.v1",
+  "candidate_id": "c-search",
+  "problem_id": "fixture-problem",
+  "parent_id": "c-original",
+  "origin": "ast_search",
+  "generation_view": "ast_search",
+  "source": "def sum_values(values):\n    total = 0\n    for i in range(len(values) - 0):\n        total += values[i]\n    return total\n",
+  "source_hash": "809a5da60b2cc2fb214375a58e0cc068b520bd2fe0fc14ad8dc3ac6956c05ee8",
+  "diagnosis": "Synthetic fixture example; no model inference.",
+  "assumptions": [],
+  "requirement_ids": [
+    "sum-all"
+  ],
+  "model_config_hash": null,
+  "edits": [
+    {
+      "location": {
+        "lineno": 3,
+        "col_offset": 33,
+        "end_lineno": 3,
+        "end_col_offset": 34
+      },
+      "operator_family": "boundary_constant",
+      "before": "1",
+      "after": "0",
+      "parent_source_hash": "40557ac3e4d9875c40f62048d530ed7d0e9da94b7dbf0169155f5d9c942a7123",
+      "result_source_hash": "809a5da60b2cc2fb214375a58e0cc068b520bd2fe0fc14ad8dc3ac6956c05ee8"
+    }
+  ],
+  "created_event_id": 10,
+  "eligibility": "eligible",
+  "rejection_reason": null,
+  "verification_suite_hash": "63cb711a8761f1d2ac161fec4b17cd5930ddb7ea8a457a0afd3fb04a1ed100df"
+}

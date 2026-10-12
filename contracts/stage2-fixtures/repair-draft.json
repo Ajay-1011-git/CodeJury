@@ -1,0 +1,10 @@
+{
+  "source": "def sum_values(values):\n    return sum(values)\n",
+  "diagnosis": "Synthetic repair target.",
+  "assumptions": [],
+  "requirement_ids": [
+    "sum-all"
+  ],
+  "suspected_sites": [],
+  "suggested_families": []
+}

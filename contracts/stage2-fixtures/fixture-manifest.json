@@ -1,0 +1,202 @@
+{
+  "schema_version": "stage2.v1",
+  "synthetic": true,
+  "fixtures": [
+    {
+      "filename": "run-create.json",
+      "definition": "RunCreate"
+    },
+    {
+      "filename": "problem.json",
+      "definition": "Problem"
+    },
+    {
+      "filename": "test-proposal.json",
+      "definition": "TestProposal"
+    },
+    {
+      "filename": "candidate-search.json",
+      "definition": "Candidate"
+    },
+    {
+      "filename": "candidate-b.json",
+      "definition": "Candidate"
+    },
+    {
+      "filename": "candidate-revision-draft.json",
+      "definition": "CandidateDraft"
+    },
+    {
+      "filename": "audit-mutant.json",
+      "definition": "ProbeMutant"
+    },
+    {
+      "filename": "audit-gap.json",
+      "definition": "AuditGap"
+    },
+    {
+      "filename": "state-snapshot.json",
+      "definition": "StateSnapshot"
+    },
+    {
+      "filename": "judge-draft.json",
+      "definition": "JudgeDraft"
+    },
+    {
+      "filename": "repair-draft.json",
+      "definition": "RepairDraft"
+    },
+    {
+      "filename": "critic-draft.json",
+      "definition": "CriticDraft"
+    },
+    {
+      "filename": "episode-bundle.json",
+      "definition": "EpisodeBundle"
+    },
+    {
+      "filename": "run-accepted.json",
+      "definition": "RunAccepted"
+    },
+    {
+      "filename": "snapshot-supported.json",
+      "definition": "RunSnapshot"
+    },
+    {
+      "filename": "snapshot-running.json",
+      "definition": "RunSnapshot"
+    },
+    {
+      "filename": "snapshot-unresolved.json",
+      "definition": "RunSnapshot"
+    },
+    {
+      "filename": "snapshot-invalid_input.json",
+      "definition": "RunSnapshot"
+    },
+    {
+      "filename": "snapshot-infrastructure_error.json",
+      "definition": "RunSnapshot"
+    },
+    {
+      "filename": "snapshot-cancelled.json",
+      "definition": "RunSnapshot"
+    },
+    {
+      "filename": "health.json",
+      "definition": "Health"
+    },
+    {
+      "filename": "examples.json",
+      "definition": "Examples"
+    },
+    {
+      "filename": "error-version.json",
+      "definition": "Error"
+    },
+    {
+      "filename": "events.json",
+      "definition": "EventPage"
+    },
+    {
+      "filename": "model-request.json",
+      "definition": "ModelRequest"
+    },
+    {
+      "filename": "model-response.json",
+      "definition": "ModelResponse"
+    },
+    {
+      "filename": "tool-validate-request.json",
+      "definition": "ToolRequest"
+    },
+    {
+      "filename": "tool-validate-result.json",
+      "definition": "ToolResult"
+    },
+    {
+      "filename": "tool-evaluate-request.json",
+      "definition": "ToolRequest"
+    },
+    {
+      "filename": "tool-evaluate-result.json",
+      "definition": "ToolResult"
+    },
+    {
+      "filename": "tool-search-request.json",
+      "definition": "ToolRequest"
+    },
+    {
+      "filename": "tool-search-result.json",
+      "definition": "ToolResult"
+    },
+    {
+      "filename": "tool-audit-request.json",
+      "definition": "ToolRequest"
+    },
+    {
+      "filename": "tool-audit-result.json",
+      "definition": "ToolResult"
+    },
+    {
+      "filename": "tool-investigate-request.json",
+      "definition": "ToolRequest"
+    },
+    {
+      "filename": "tool-investigate-result.json",
+      "definition": "ToolResult"
+    },
+    {
+      "filename": "rollout-request.json",
+      "definition": "RolloutRequest"
+    },
+    {
+      "filename": "rollout-result.json",
+      "definition": "RolloutResult"
+    },
+    {
+      "filename": "method-request.json",
+      "definition": "MethodRequest"
+    },
+    {
+      "filename": "method-result.json",
+      "definition": "MethodResult"
+    },
+    {
+      "filename": "training-report.json",
+      "definition": "TrainingReport"
+    },
+    {
+      "filename": "training-not-started.json",
+      "definition": "TrainingReport"
+    },
+    {
+      "filename": "benchmark-report.json",
+      "definition": "BenchmarkReport"
+    },
+    {
+      "filename": "benchmark-not-run.json",
+      "definition": "BenchmarkReport"
+    },
+    {
+      "filename": "artifact-manifest.json",
+      "definition": "ArtifactManifest"
+    },
+    {
+      "filename": "run-create-helper.json",
+      "definition": "RunCreate"
+    },
+    {
+      "filename": "run-create-nested.json",
+      "definition": "RunCreate"
+    },
+    {
+      "filename": "run-create-string.json",
+      "definition": "RunCreate"
+    },
+    {
+      "filename": "run-create-null.json",
+      "definition": "RunCreate"
+    }
+  ]
+}

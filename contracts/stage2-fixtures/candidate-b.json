@@ -1,0 +1,21 @@
+{
+  "schema_version": "stage2.v1",
+  "candidate_id": "c-b",
+  "problem_id": "fixture-problem",
+  "parent_id": "c-original",
+  "origin": "fixer_b",
+  "generation_view": "independent_reconstruction",
+  "source": "def sum_values(values):\n    total = 0\n    for value in values:\n        total += abs(value)\n    return total\n",
+  "source_hash": "99d7d5b6a09c79f493b2328fa74c079fa74fbb768d4aab045df9fbcccca17fdc",
+  "diagnosis": "Synthetic fixture example; no model inference.",
+  "assumptions": [],
+  "requirement_ids": [
+    "sum-all"
+  ],
+  "model_config_hash": "c8991e1089705ffac8e3eec23685726ac75dfbb04ba9479f266409d0444019c6",
+  "edits": [],
+  "created_event_id": 4,
+  "eligibility": "eligible",
+  "rejection_reason": null,
+  "verification_suite_hash": "5cec3734365ed7f4cc974ee42ca01ae6f3d5d1fd56242da2b7e9bd50b563ee21"
+}

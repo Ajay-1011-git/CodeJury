@@ -1,0 +1,69 @@
+{
+  "schema_version": "stage2.v1",
+  "request_id": "method-1",
+  "method": "CJ",
+  "input": {
+    "schema_version": "stage2.v1",
+    "source": "def sum_values(values):\n    total = 0\n    for i in range(len(values) - 1):\n        total += values[i]\n    return total\n",
+    "function_name": "sum_values",
+    "contract_text": "Return the sum of every integer. Empty input returns 0. Do not modify input.",
+    "domain_schema": [
+      {
+        "name": "values",
+        "domain": {
+          "kind": "list",
+          "item_domain": {
+            "kind": "integer",
+            "min": -10,
+            "max": 10
+          },
+          "min_length": 0,
+          "max_length": 8
+        }
+      }
+    ],
+    "helper_interfaces": [],
+    "requirements": [
+      {
+        "schema_version": "stage2.v1",
+        "requirement_id": "sum-all",
+        "description": "Return the integer sum of every value, preserving inputs.",
+        "source": "reviewed_contract",
+        "approval_status": "approved",
+        "property_template_id": "sum_ints",
+        "parameters": {}
+      }
+    ],
+    "supplied_tests": [
+      {
+        "schema_version": "stage2.v1",
+        "test_id": "t-supplied",
+        "inputs": [
+          [
+            2,
+            3
+          ]
+        ],
+        "expected": 5,
+        "requirement_ids": [
+          "sum-all"
+        ]
+      }
+    ],
+    "allowed_dependencies": [],
+    "resource_profile": "mac-standard-v1",
+    "policy_mode": "learned",
+    "seed": 11
+  },
+  "config_hash": "36484ff63fe749285d3f959cee2e68bd17c8de3cf6aebfde37f219e6edaf2100",
+  "resource_caps": {
+    "output_tokens": 10000,
+    "input_tokens": 100000,
+    "function_executions": 3000,
+    "elapsed_ms": 900000,
+    "learned_candidates": 8,
+    "search_candidates": 48,
+    "audit_mutants": 48,
+    "judge_decisions": 8
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "schema_version": "stage2.v1",
+  "error": {
+    "code": "schema_version_mismatch",
+    "message": "Stage2 requires stage2.v1.",
+    "field_errors": [
+      "schema_version"
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "schema_version": "stage2.v1",
+  "service": "codejury-stage2",
+  "runtime_mode": "fixture",
+  "model_ready": true,
+  "tools_ready": true,
+  "trained_roles": [
+    "fixer_a",
+    "fixer_b",
+    "critic",
+    "judge"
+  ],
+  "full_stage2_ready": true,
+  "default_policy": "learned",
+  "contract_hash": "ee62388479918f0e33d4085d530dc210356ed104afe6170b1ff03687e53b6ee6"
+}

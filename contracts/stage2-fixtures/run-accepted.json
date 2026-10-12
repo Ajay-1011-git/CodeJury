@@ -1,0 +1,6 @@
+{
+  "schema_version": "stage2.v1",
+  "run_id": "fixture-run",
+  "status": "queued",
+  "runtime_mode": "fixture"
+}

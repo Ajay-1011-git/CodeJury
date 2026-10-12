@@ -1,0 +1,20 @@
+{
+  "schema_version": "stage2.v1",
+  "request_id": "model-call-1",
+  "run_id": "fixture-run",
+  "role": "fixer_b",
+  "purpose": "reconstruct",
+  "prompt": "Synthetic independent-view prompt; no original source.",
+  "seed": 11,
+  "max_new_tokens": 1024,
+  "remaining_budget": {
+    "output_tokens": 10000,
+    "input_tokens": 100000,
+    "function_executions": 3000,
+    "elapsed_ms": 900000,
+    "learned_candidates": 8,
+    "search_candidates": 48,
+    "audit_mutants": 48,
+    "judge_decisions": 8
+  }
+}

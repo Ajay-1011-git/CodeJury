@@ -1,0 +1,13 @@
+{
+  "schema_version": "stage2.v1",
+  "runtime_mode": "fixture",
+  "status": "not_run",
+  "dataset_id": null,
+  "dataset_manifest_hash": null,
+  "rows": [],
+  "paired_analysis_note": "No evaluation exists.",
+  "limitations": [
+    "Fixture data is not research evidence."
+  ],
+  "research_outcome": "not_measured"
+}

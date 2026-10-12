@@ -1,0 +1,326 @@
+{
+  "schema_version": "stage2.v1",
+  "examples": [
+    {
+      "schema_version": "stage2.v1",
+      "example_id": "sum-values",
+      "title": "Sum every value",
+      "description": "Public input seed; outputs remain synthetic examples.",
+      "request": {
+        "schema_version": "stage2.v1",
+        "source": "def sum_values(values):\n    total = 0\n    for i in range(len(values) - 1):\n        total += values[i]\n    return total\n",
+        "function_name": "sum_values",
+        "contract_text": "Return the sum of every integer. Empty input returns 0. Do not modify input.",
+        "domain_schema": [
+          {
+            "name": "values",
+            "domain": {
+              "kind": "list",
+              "item_domain": {
+                "kind": "integer",
+                "min": -10,
+                "max": 10
+              },
+              "min_length": 0,
+              "max_length": 8
+            }
+          }
+        ],
+        "helper_interfaces": [],
+        "requirements": [
+          {
+            "schema_version": "stage2.v1",
+            "requirement_id": "sum-all",
+            "description": "Return the integer sum of every value, preserving inputs.",
+            "source": "reviewed_contract",
+            "approval_status": "approved",
+            "property_template_id": "sum_ints",
+            "parameters": {}
+          }
+        ],
+        "supplied_tests": [
+          {
+            "schema_version": "stage2.v1",
+            "test_id": "t-supplied",
+            "inputs": [
+              [
+                2,
+                3
+              ]
+            ],
+            "expected": 5,
+            "requirement_ids": [
+              "sum-all"
+            ]
+          }
+        ],
+        "allowed_dependencies": [],
+        "resource_profile": "mac-standard-v1",
+        "policy_mode": "learned",
+        "seed": 11
+      }
+    },
+    {
+      "schema_version": "stage2.v1",
+      "example_id": "gcd-helper",
+      "title": "Reviewed helper and math import",
+      "description": "Public buggy input seed, not a promised live repair.",
+      "request": {
+        "schema_version": "stage2.v1",
+        "source": "from math import gcd\n\ndef pair_gcd(a, b):\n    return gcd(a, b)\n\ndef gcd_values(values):\n    result = 1\n    for value in values:\n        result = pair_gcd(result, value)\n    return result\n",
+        "function_name": "gcd_values",
+        "contract_text": "Return the nonnegative greatest common divisor of all list values, without modifying inputs.",
+        "domain_schema": [
+          {
+            "name": "values",
+            "domain": {
+              "kind": "list",
+              "item_domain": {
+                "kind": "integer",
+                "min": 0,
+                "max": 100
+              },
+              "min_length": 1,
+              "max_length": 8
+            }
+          }
+        ],
+        "helper_interfaces": [
+          {
+            "name": "pair_gcd",
+            "signature": "pair_gcd(a, b)",
+            "contract_text": "Return the nonnegative mathematical gcd of the two nonnegative integer inputs, with gcd(0,0)=0."
+          }
+        ],
+        "requirements": [
+          {
+            "schema_version": "stage2.v1",
+            "requirement_id": "gcd-helper",
+            "description": "Return the nonnegative greatest common divisor of all list values, without modifying inputs.",
+            "source": "user",
+            "approval_status": "approved",
+            "property_template_id": null,
+            "parameters": {}
+          }
+        ],
+        "supplied_tests": [
+          {
+            "schema_version": "stage2.v1",
+            "test_id": "test-gcd-helper",
+            "inputs": [
+              [
+                12,
+                18
+              ]
+            ],
+            "expected": 6,
+            "requirement_ids": [
+              "gcd-helper"
+            ]
+          }
+        ],
+        "allowed_dependencies": [
+          "math.gcd"
+        ],
+        "resource_profile": "mac-standard-v1",
+        "policy_mode": "learned",
+        "seed": 11
+      }
+    },
+    {
+      "schema_version": "stage2.v1",
+      "example_id": "nested-bool-int",
+      "title": "Nested dictionary with bool/int distinction",
+      "description": "Public buggy input seed, not a promised live repair.",
+      "request": {
+        "schema_version": "stage2.v1",
+        "source": "def count_positive_ints(data):\n    count = 0\n    for value in data[\"numbers\"]:\n        if value > 0:\n            count += 1\n    return count\n",
+        "function_name": "count_positive_ints",
+        "contract_text": "Count strictly positive integer values under numbers. Boolean values are not integers for this contract. Do not mutate data.",
+        "domain_schema": [
+          {
+            "name": "data",
+            "domain": {
+              "kind": "dict",
+              "key_domain": {
+                "kind": "string",
+                "alphabet": "numbers",
+                "min_length": 7,
+                "max_length": 7
+              },
+              "value_domain": {
+                "kind": "list",
+                "item_domain": {
+                  "kind": "union",
+                  "options": [
+                    {
+                      "kind": "integer",
+                      "min": -10,
+                      "max": 10
+                    },
+                    {
+                      "kind": "boolean"
+                    }
+                  ]
+                },
+                "min_length": 0,
+                "max_length": 8
+              },
+              "required_keys": [
+                "numbers"
+              ],
+              "min_size": 1,
+              "max_size": 1
+            }
+          }
+        ],
+        "helper_interfaces": [],
+        "requirements": [
+          {
+            "schema_version": "stage2.v1",
+            "requirement_id": "nested-bool-int",
+            "description": "Count strictly positive integer values under numbers. Boolean values are not integers for this contract. Do not mutate data.",
+            "source": "user",
+            "approval_status": "approved",
+            "property_template_id": null,
+            "parameters": {}
+          }
+        ],
+        "supplied_tests": [
+          {
+            "schema_version": "stage2.v1",
+            "test_id": "test-nested-bool-int",
+            "inputs": [
+              {
+                "numbers": [
+                  true,
+                  2,
+                  -1
+                ]
+              }
+            ],
+            "expected": 1,
+            "requirement_ids": [
+              "nested-bool-int"
+            ]
+          }
+        ],
+        "allowed_dependencies": [],
+        "resource_profile": "mac-standard-v1",
+        "policy_mode": "learned",
+        "seed": 11
+      }
+    },
+    {
+      "schema_version": "stage2.v1",
+      "example_id": "unicode-reverse",
+      "title": "Unicode string property",
+      "description": "Public buggy input seed, not a promised live repair.",
+      "request": {
+        "schema_version": "stage2.v1",
+        "source": "def reverse_letters(text):\n    return text\n",
+        "function_name": "reverse_letters",
+        "contract_text": "Return the input string reversed by Unicode codepoint order.",
+        "domain_schema": [
+          {
+            "name": "text",
+            "domain": {
+              "kind": "string",
+              "alphabet": "ab😀 ",
+              "min_length": 0,
+              "max_length": 6
+            }
+          }
+        ],
+        "helper_interfaces": [],
+        "requirements": [
+          {
+            "schema_version": "stage2.v1",
+            "requirement_id": "unicode-reverse",
+            "description": "Return the input string reversed by Unicode codepoint order.",
+            "source": "reviewed_contract",
+            "approval_status": "approved",
+            "property_template_id": "reverse_string",
+            "parameters": {}
+          }
+        ],
+        "supplied_tests": [
+          {
+            "schema_version": "stage2.v1",
+            "test_id": "test-unicode-reverse",
+            "inputs": [
+              "a😀b"
+            ],
+            "expected": "b😀a",
+            "requirement_ids": [
+              "unicode-reverse"
+            ]
+          }
+        ],
+        "allowed_dependencies": [],
+        "resource_profile": "mac-standard-v1",
+        "policy_mode": "learned",
+        "seed": 11
+      }
+    },
+    {
+      "schema_version": "stage2.v1",
+      "example_id": "nullable-zero",
+      "title": "Explicit null input",
+      "description": "Public buggy input seed, not a promised live repair.",
+      "request": {
+        "schema_version": "stage2.v1",
+        "source": "def normalize_number(value):\n    if value is None:\n        return 1\n    return value\n",
+        "function_name": "normalize_number",
+        "contract_text": "Return 0 for null, otherwise return the supplied integer unchanged.",
+        "domain_schema": [
+          {
+            "name": "value",
+            "domain": {
+              "kind": "union",
+              "options": [
+                {
+                  "kind": "null"
+                },
+                {
+                  "kind": "integer",
+                  "min": 0,
+                  "max": 10
+                }
+              ]
+            }
+          }
+        ],
+        "helper_interfaces": [],
+        "requirements": [
+          {
+            "schema_version": "stage2.v1",
+            "requirement_id": "nullable-zero",
+            "description": "Return 0 for null, otherwise return the supplied integer unchanged.",
+            "source": "user",
+            "approval_status": "approved",
+            "property_template_id": null,
+            "parameters": {}
+          }
+        ],
+        "supplied_tests": [
+          {
+            "schema_version": "stage2.v1",
+            "test_id": "test-nullable-zero",
+            "inputs": [
+              null
+            ],
+            "expected": 0,
+            "requirement_ids": [
+              "nullable-zero"
+            ]
+          }
+        ],
+        "allowed_dependencies": [],
+        "resource_profile": "mac-standard-v1",
+        "policy_mode": "learned",
+        "seed": 11
+      }
+    }
+  ]
+}

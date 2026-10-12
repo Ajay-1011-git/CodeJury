@@ -1,0 +1,122 @@
+{
+  "schema_version": "stage2.v1",
+  "runtime_mode": "fixture",
+  "cards": [
+    {
+      "schema_version": "stage2.v1",
+      "role": "fixer_a",
+      "status": "completed",
+      "adapter_hash": "fcd85c069025d0ab874d53161b0e87d1c696bb9ab068722f3cd6b9f0dd7d818a",
+      "base_revision_hash": "68828f0b413235f5c2d7d6803a3570a7e3ebd0fd4481be30f82aa490082d788b",
+      "tokenizer_hash": "ec0ac6d52cd7e7d35c59262357813237cda55781fe0974e9c1f46fa1b7770a8f",
+      "quantization_hash": "698975f585bf9b4dc13c85d55c3b761ef470806de04fa026fed04a9ebd42355d",
+      "topology_hash": "aa6b71809d8f23252ff3ef5ce4d23abe7bb528a069ad66c3b6ce1713b76597ae",
+      "data_manifest_hash": "2d55973c705264565b6900b5762d7a508bf0b51856212fc00a849214a130abff",
+      "config_hash": "f4dca287e2e71f6c9222373f10d487b085d0851d7dc2e0bbdf43b8093dd47e9a",
+      "train_base_problems": 1,
+      "train_records": 2,
+      "steps": 20,
+      "evaluation_summary": "Invented fixture numbers, not model results.",
+      "loss_points": [
+        {
+          "step": 20,
+          "train_loss": 1.5,
+          "validation_loss": null
+        }
+      ]
+    },
+    {
+      "schema_version": "stage2.v1",
+      "role": "fixer_b",
+      "status": "completed",
+      "adapter_hash": "cb7e65456a99d795111a135d8ddebb1aa63f4db40ecf610f3c4f771124109d29",
+      "base_revision_hash": "68828f0b413235f5c2d7d6803a3570a7e3ebd0fd4481be30f82aa490082d788b",
+      "tokenizer_hash": "ec0ac6d52cd7e7d35c59262357813237cda55781fe0974e9c1f46fa1b7770a8f",
+      "quantization_hash": "698975f585bf9b4dc13c85d55c3b761ef470806de04fa026fed04a9ebd42355d",
+      "topology_hash": "aa6b71809d8f23252ff3ef5ce4d23abe7bb528a069ad66c3b6ce1713b76597ae",
+      "data_manifest_hash": "7307d1e3bf7e42a2488f5efb100e71f8bd6f76120718c3acd4c372b700d89198",
+      "config_hash": "7873d55482e676f4b0b787e25eaa3fb7e99b27f04ac87303d958aff121c3ec54",
+      "train_base_problems": 1,
+      "train_records": 2,
+      "steps": 20,
+      "evaluation_summary": "Invented fixture numbers, not model results.",
+      "loss_points": [
+        {
+          "step": 20,
+          "train_loss": 1.5,
+          "validation_loss": null
+        }
+      ]
+    },
+    {
+      "schema_version": "stage2.v1",
+      "role": "critic",
+      "status": "completed",
+      "adapter_hash": "77202bb368178e3e331455fa7a7eac4659c3f53a8a840d4545200d5bd00dd655",
+      "base_revision_hash": "68828f0b413235f5c2d7d6803a3570a7e3ebd0fd4481be30f82aa490082d788b",
+      "tokenizer_hash": "ec0ac6d52cd7e7d35c59262357813237cda55781fe0974e9c1f46fa1b7770a8f",
+      "quantization_hash": "698975f585bf9b4dc13c85d55c3b761ef470806de04fa026fed04a9ebd42355d",
+      "topology_hash": "aa6b71809d8f23252ff3ef5ce4d23abe7bb528a069ad66c3b6ce1713b76597ae",
+      "data_manifest_hash": "0612d3f9d779fa41f961c4b33378d5bc78557777096c70c86c71614ad613d2cc",
+      "config_hash": "a356f39d3e880e2ccf7a376f057c646d604e7a70fcb80f020d4ef04859db5334",
+      "train_base_problems": 1,
+      "train_records": 2,
+      "steps": 20,
+      "evaluation_summary": "Invented fixture numbers, not model results.",
+      "loss_points": [
+        {
+          "step": 20,
+          "train_loss": 1.5,
+          "validation_loss": null
+        }
+      ]
+    },
+    {
+      "schema_version": "stage2.v1",
+      "role": "judge",
+      "status": "completed",
+      "adapter_hash": "1a6a24d888467df072e1977960165bc2952ff30691b0b38725f45694f7a57a1b",
+      "base_revision_hash": "68828f0b413235f5c2d7d6803a3570a7e3ebd0fd4481be30f82aa490082d788b",
+      "tokenizer_hash": "ec0ac6d52cd7e7d35c59262357813237cda55781fe0974e9c1f46fa1b7770a8f",
+      "quantization_hash": "698975f585bf9b4dc13c85d55c3b761ef470806de04fa026fed04a9ebd42355d",
+      "topology_hash": "aa6b71809d8f23252ff3ef5ce4d23abe7bb528a069ad66c3b6ce1713b76597ae",
+      "data_manifest_hash": "bd00f0a496f14a7a63b5ad07646b7adaf5e6305aef39488bd39d1a288a4f13fb",
+      "config_hash": "ebfb7f0519ad6a1ae794b4a0c79c7ba2d0f59973163363d5c7652bbd88414e38",
+      "train_base_problems": 1,
+      "train_records": 2,
+      "steps": 20,
+      "evaluation_summary": "Invented fixture numbers, not model results.",
+      "loss_points": [
+        {
+          "step": 20,
+          "train_loss": 1.5,
+          "validation_loss": null
+        }
+      ]
+    },
+    {
+      "schema_version": "stage2.v1",
+      "role": "general",
+      "status": "completed",
+      "adapter_hash": "da163e09df56e8c93405c98d00fb540f632fff10e44908393ac8db6ef1dd148d",
+      "base_revision_hash": "68828f0b413235f5c2d7d6803a3570a7e3ebd0fd4481be30f82aa490082d788b",
+      "tokenizer_hash": "ec0ac6d52cd7e7d35c59262357813237cda55781fe0974e9c1f46fa1b7770a8f",
+      "quantization_hash": "698975f585bf9b4dc13c85d55c3b761ef470806de04fa026fed04a9ebd42355d",
+      "topology_hash": "aa6b71809d8f23252ff3ef5ce4d23abe7bb528a069ad66c3b6ce1713b76597ae",
+      "data_manifest_hash": "9f9f21736df496d3779e63070d94ee47b312270da13bb429858bd4a0595362c8",
+      "config_hash": "f6aaab40958d0b1e4fe39a92071962ef637dfd1b9ece6d4dde9ada480fdc3811",
+      "train_base_problems": 1,
+      "train_records": 2,
+      "steps": 20,
+      "evaluation_summary": "Invented fixture numbers, not model results.",
+      "loss_points": [
+        {
+          "step": 20,
+          "train_loss": 1.5,
+          "validation_loss": null
+        }
+      ]
+    }
+  ],
+  "note": "All cards and losses are synthetic API examples. No training occurred."
+}
