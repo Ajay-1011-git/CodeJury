@@ -1,0 +1,8 @@
+version: stage2.fixer-a-validation.v1
+source_manifest: data/manifests/stage1.json
+runtime_config: config/stage2_core/runtime.yaml
+report_directory: artifacts/stage2_core/fixer-a-validation
+stage2_final_seal: artifacts/stage2_exchange/final-pool-seal.json
+max_new_tokens: 1024
+seed: 17
+training_enabled: false
