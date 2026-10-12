@@ -28,7 +28,7 @@ Reproducibility: conversion d848c30f6d5419b9892433cf6b1062626d15340e; selected a
 
 TrainingReport shows completed with 300 actual trial steps, selected checkpoint 100, 40/10/10 bases and 80 train records. Missing train/validation loss values remain null; iteration 99 validation loss 0.185604 worsened to 0.321105 at 299. This honest internal prototype result does not establish broader repair accuracy.
 
-Real supported live episode: `artifacts/demo/live-sum-run.json` (public training-family overlap disclosed). Real unresolved episode: `artifacts/demo/live-run.json`, including independently replayed unique input [[0,0]], observed [0,0], approved expected [0]. Also retained: successful live HTTP sum report and cancellation/error paths. Sarvesh UI integration and milestone M5 are pending; no complete integrated release is claimed.
+Real supported live episode: `artifacts/demo/live-sum-run.json` (public training-family overlap disclosed). Real unresolved episode: `artifacts/demo/live-run.json`, including independently replayed unique input [[0,0]], observed [0,0], approved expected [0]. Also retained: successful live HTTP sum report and cancellation/error paths. Live UI integration and milestone M5 acceptance are now recorded in `../../docs/stage1-integration.md`; no Stage 2 capability is claimed.
 
 Commands (from backend with local model/adapter environment variables):
 

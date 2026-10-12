@@ -1,0 +1,134 @@
+{
+  "schema_version": "stage1.v1",
+  "run_id": "run-fixture-unresolved-02",
+  "status": "unresolved",
+  "runtime_mode": "fixture",
+  "phase": "finished",
+  "model_id": "qwen2.5-coder-7b-instruct",
+  "model_revision": "v1.0",
+  "adapter_role": "none",
+  "adapter_sha256": null,
+  "original_failure_reproduced": true,
+  "candidates": [
+    {
+      "candidate_id": "cand-000",
+      "parent_id": null,
+      "origin": "original",
+      "source": "def sort_ints(items):\n    res = list(items)\n    for i in range(len(res)):\n        for j in range(i + 1, len(res)):\n            if res[i] < res[j]:\n                res[i], res[j] = res[j], res[i]\n    return res\n",
+      "source_sha256": "b246b801d41dab7300426e334c310d261550783131bede26c20f80a054715087",
+      "diagnosis": "Original input program under test.",
+      "diff": "",
+      "eligibility": "rejected",
+      "rejection_reason": "Failed test_supplied_1 during reproduction."
+    },
+    {
+      "candidate_id": "cand-002",
+      "parent_id": "cand-000",
+      "origin": "fixer_a",
+      "source": "def sort_ints(items):\n    return items\n",
+      "source_sha256": "22cb7e5c14a8407b2d2e4207ee4f3a775ed2bde6cac6f4aabc469e4598ba449f",
+      "diagnosis": "Attempted no-op return.",
+      "diff": "--- original\n+++ candidate\n@@ -1,7 +1,2 @@\n-def sort_ints(items):\n...\n+def sort_ints(items):\n+    return items\n",
+      "eligibility": "rejected",
+      "rejection_reason": "Failed test_supplied_1: output not sorted."
+    }
+  ],
+  "tests": [
+    {
+      "test_id": "test_supplied_1",
+      "args": [
+        [
+          3,
+          1,
+          2
+        ]
+      ],
+      "oracle_kind": "literal",
+      "expected": [
+        1,
+        2,
+        3
+      ],
+      "property_id": null,
+      "oracle_status": "authoritative",
+      "oracle_source": "user",
+      "requirement_id": null,
+      "provenance": "supplied",
+      "reason": "Supplied literal example test"
+    },
+    {
+      "test_id": "test_supplied_2",
+      "args": [
+        []
+      ],
+      "oracle_kind": "literal",
+      "expected": [],
+      "property_id": null,
+      "oracle_status": "authoritative",
+      "oracle_source": "user",
+      "requirement_id": null,
+      "provenance": "supplied",
+      "reason": "Empty list boundary test"
+    }
+  ],
+  "executions": [
+    {
+      "execution_id": "exec-101",
+      "candidate_id": "cand-000",
+      "test_id": "test_supplied_1",
+      "outcome": "fail",
+      "actual_output": [
+        3,
+        2,
+        1
+      ],
+      "exception_type": null,
+      "input_mutated": false,
+      "duration_ms": 2,
+      "trace": [
+        "AssertionError"
+      ],
+      "trace_truncated": false
+    },
+    {
+      "execution_id": "exec-102",
+      "candidate_id": "cand-002",
+      "test_id": "test_supplied_1",
+      "outcome": "fail",
+      "actual_output": [
+        3,
+        1,
+        2
+      ],
+      "exception_type": null,
+      "input_mutated": false,
+      "duration_ms": 2,
+      "trace": [
+        "AssertionError: [3, 1, 2] != [1, 2, 3]"
+      ],
+      "trace_truncated": false
+    }
+  ],
+  "decision": {
+    "selected_candidate_id": null,
+    "verification_scope": [
+      "test_supplied_1",
+      "test_supplied_2"
+    ],
+    "unresolved_requirements": [
+      "req-sort-ascending"
+    ],
+    "evidence_ids": [
+      "exec-102"
+    ],
+    "reason": "Budget exhausted without discovering an eligible candidate passing all supplied tests."
+  },
+  "usage": {
+    "input_tokens": 1500,
+    "output_tokens": 300,
+    "function_executions": 2,
+    "elapsed_ms": 1540,
+    "peak_memory_mb": 38.0
+  },
+  "termination_reason": "No candidate satisfied the verification requirements within iteration limit."
+}

@@ -1,0 +1,30 @@
+{
+  "schema_version": "stage1.v1",
+  "run_id": "run-fixture-invalid-03",
+  "status": "invalid_input",
+  "runtime_mode": "fixture",
+  "phase": "finished",
+  "model_id": null,
+  "model_revision": null,
+  "adapter_role": "none",
+  "adapter_sha256": null,
+  "original_failure_reproduced": null,
+  "candidates": [],
+  "tests": [],
+  "executions": [],
+  "decision": {
+    "selected_candidate_id": null,
+    "verification_scope": [],
+    "unresolved_requirements": [],
+    "evidence_ids": [],
+    "reason": "Submitted code contained syntax error preventing test execution."
+  },
+  "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "function_executions": 0,
+    "elapsed_ms": 15,
+    "peak_memory_mb": null
+  },
+  "termination_reason": "Invalid input: SyntaxError during AST parsing."
+}

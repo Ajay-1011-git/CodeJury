@@ -1,0 +1,10 @@
+{
+  "schema_version": "stage1.v1",
+  "error": {
+    "code": "INVALID_INPUT",
+    "message": "Input validation failed for RunCreate request.",
+    "field_errors": [
+      "source must be non-empty"
+    ]
+  }
+}

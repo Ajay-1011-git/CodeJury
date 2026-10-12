@@ -4,11 +4,13 @@ import json
 import os
 import re
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from jsonschema import ValidationError
 from starlette.exceptions import HTTPException
 
@@ -47,12 +49,31 @@ def examples() -> dict:
                 "title": "Preserve first-occurrence order",
                 "description": "Public input with a supplied failing order example.",
                 "request": request,
-            }
+            },
+            {
+                "example_id": "sum-ints",
+                "title": "Sum signed integers",
+                "description": (
+                    "Public mechanics demo; sum algorithm family overlaps training. Unscored."
+                ),
+                "request": {
+                    **request,
+                    "source": "def total(values):\n    return 0\n",
+                    "function_name": "total",
+                    "contract_text": (
+                        "Return the sum of all input integers; an empty input returns zero."
+                    ),
+                    "supplied_tests": [
+                        {"test_id": "sum-visible", "args": [[2, -4, 7]], "expected": 5}
+                    ],
+                    "approved_property": "sum_ints",
+                },
+            },
         ],
     }
 
 
-def create_app(store=None, worker=None) -> FastAPI:
+def create_app(store=None, worker=None, *, web_dir=None) -> FastAPI:
     store = store or Store()
     repository = Repository(store)
     worker = worker or LocalWorker(store)
@@ -100,10 +121,6 @@ def create_app(store=None, worker=None) -> FastAPI:
     @app.exception_handler(KeyError)
     async def missing(_request, _exc):
         return response(error("not_found", "Unknown run or candidate"), "Error", 404)
-
-    @app.get("/")
-    def root():
-        return {"service": "codejury-stage1", "api": "/docs"}
 
     @app.get("/health")
     def health():
@@ -216,6 +233,18 @@ def create_app(store=None, worker=None) -> FastAPI:
             return response(load_report(worker.mode), "TrainingReport")
         except (OSError, ValueError, ValidationError):
             return response(error("unavailable", "Public training report is invalid"), "Error", 503)
+
+    # Register the UI last so /health, /runs and the other API routes win.
+    directory = (
+        Path(web_dir) if web_dir is not None else Path(__file__).resolve().parents[4] / "web"
+    )
+    if (directory / "index.html").is_file():
+        app.mount("/", StaticFiles(directory=directory, html=True), name="web")
+    else:
+
+        @app.get("/")
+        def root():
+            return {"service": "codejury-stage1", "api": "/docs"}
 
     return app
 

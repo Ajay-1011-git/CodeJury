@@ -1,0 +1,138 @@
+{
+  "schema_version": "stage1.v1",
+  "run_id": "run-fixture-demo-01",
+  "status": "running",
+  "runtime_mode": "fixture",
+  "phase": "challenge",
+  "model_id": "qwen2.5-coder-7b-instruct",
+  "model_revision": "v1.0",
+  "adapter_role": "none",
+  "adapter_sha256": null,
+  "original_failure_reproduced": true,
+  "candidates": [
+    {
+      "candidate_id": "cand-000",
+      "parent_id": null,
+      "origin": "original",
+      "source": "def sort_ints(items):\n    res = list(items)\n    for i in range(len(res)):\n        for j in range(i + 1, len(res)):\n            if res[i] < res[j]:\n                res[i], res[j] = res[j], res[i]\n    return res\n",
+      "source_sha256": "b246b801d41dab7300426e334c310d261550783131bede26c20f80a054715087",
+      "diagnosis": "Original input program under test.",
+      "diff": "",
+      "eligibility": "rejected",
+      "rejection_reason": "Failed test_supplied_1 during reproduction."
+    },
+    {
+      "candidate_id": "cand-001",
+      "parent_id": "cand-000",
+      "origin": "fixer_a",
+      "source": "def sort_ints(items):\n    return sorted(items)\n",
+      "source_sha256": "0cf0fe18791a33a5777c09f87655066bea06956a51d37db8c8a474faa0a7832c",
+      "diagnosis": "Original implementation reversed the sort order; replaced with non-decreasing sort.",
+      "diff": "--- original\n+++ candidate\n@@ -1,7 +1,2 @@\n-def sort_ints(items):\n-    res = list(items)\n-    for i in range(len(res)):\n-        for j in range(i + 1, len(res)):\n-            if res[i] < res[j]:\n-                res[i], res[j] = res[j], res[i]\n-    return res\n+def sort_ints(items):\n+    return sorted(items)\n",
+      "eligibility": "eligible",
+      "rejection_reason": null
+    }
+  ],
+  "tests": [
+    {
+      "test_id": "test_supplied_1",
+      "args": [
+        [
+          3,
+          1,
+          2
+        ]
+      ],
+      "oracle_kind": "literal",
+      "expected": [
+        1,
+        2,
+        3
+      ],
+      "property_id": null,
+      "oracle_status": "authoritative",
+      "oracle_source": "user",
+      "requirement_id": null,
+      "provenance": "supplied",
+      "reason": "Supplied literal example test"
+    },
+    {
+      "test_id": "test_supplied_2",
+      "args": [
+        []
+      ],
+      "oracle_kind": "literal",
+      "expected": [],
+      "property_id": null,
+      "oracle_status": "authoritative",
+      "oracle_source": "user",
+      "requirement_id": null,
+      "provenance": "supplied",
+      "reason": "Empty list boundary test"
+    },
+    {
+      "test_id": "test_prop_1",
+      "args": [
+        [
+          5,
+          -2,
+          4,
+          -2
+        ]
+      ],
+      "oracle_kind": "property",
+      "expected": null,
+      "property_id": "sort_ascending_ints",
+      "oracle_status": "authoritative",
+      "oracle_source": "reviewed_contract",
+      "requirement_id": "req-sort",
+      "provenance": "property_engine",
+      "reason": "Deterministic challenge using approved sort_ascending_ints property"
+    }
+  ],
+  "executions": [
+    {
+      "execution_id": "exec-001",
+      "candidate_id": "cand-000",
+      "test_id": "test_supplied_1",
+      "outcome": "fail",
+      "actual_output": [
+        3,
+        2,
+        1
+      ],
+      "exception_type": null,
+      "input_mutated": false,
+      "duration_ms": 3,
+      "trace": [
+        "AssertionError: [3, 2, 1] != [1, 2, 3]"
+      ],
+      "trace_truncated": false
+    },
+    {
+      "execution_id": "exec-002",
+      "candidate_id": "cand-001",
+      "test_id": "test_supplied_1",
+      "outcome": "pass",
+      "actual_output": [
+        1,
+        2,
+        3
+      ],
+      "exception_type": null,
+      "input_mutated": false,
+      "duration_ms": 2,
+      "trace": [],
+      "trace_truncated": false
+    }
+  ],
+  "decision": null,
+  "usage": {
+    "input_tokens": 850,
+    "output_tokens": 120,
+    "function_executions": 2,
+    "elapsed_ms": 680,
+    "peak_memory_mb": 34.2
+  },
+  "termination_reason": null
+}

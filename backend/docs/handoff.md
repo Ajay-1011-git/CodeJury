@@ -265,3 +265,7 @@ Training-only joins reject assessment/Stage2 IDs and unmatched visible requests.
 `artifacts/stage2/fixer-a-train-failures-full.jsonl` contains train provenance, source IDs, visible requests and repeated raw A outputs/outcomes. Independently frozen answers and offline training assessment outcomes are separate in `fixer-a-train-failures-full-evidence/offline-training-join.jsonl`; no private assessment test inputs or reference sources appear in the runtime-visible export. This supplies hooks/evidence for future B/Critic/Judge work, without training any Stage2 role. The sealed Stage1 assessment and final Stage2 pools were not opened for mining. Injection cannot claim live mining.
 
 Final verification compares `git diff --name-only c0ef9625f8a7781433d4692222a18cc86a43ae02...HEAD`; all changed paths are under backend. No weights, private datasets, SQLite databases, generated experiments or root Finder metadata are tracked. The frozen schema hash is unchanged. Current tracked work is complete for A.01–A.09; whole-application M5 remains pending partner UI integration.
+
+## Integrated application follow-up
+
+The isolated A.01–A.09 records above remain historical backend evidence. Sarvesh’s frontend is now integrated with live acceptance; see `../../docs/stage1-integration.md` and root `README.md`. Use root `start.sh` for the whole application. The original backend-only handoff ownership check still targets the isolated backend commit and is not an ownership check for the merged application.

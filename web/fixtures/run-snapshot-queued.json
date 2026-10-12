@@ -1,0 +1,73 @@
+{
+  "schema_version": "stage1.v1",
+  "run_id": "run-fixture-demo-01",
+  "status": "queued",
+  "runtime_mode": "fixture",
+  "phase": "queued",
+  "model_id": "qwen2.5-coder-7b-instruct",
+  "model_revision": "v1.0",
+  "adapter_role": "none",
+  "adapter_sha256": null,
+  "original_failure_reproduced": null,
+  "candidates": [
+    {
+      "candidate_id": "cand-000",
+      "parent_id": null,
+      "origin": "original",
+      "source": "def sort_ints(items):\n    res = list(items)\n    for i in range(len(res)):\n        for j in range(i + 1, len(res)):\n            if res[i] < res[j]:\n                res[i], res[j] = res[j], res[i]\n    return res\n",
+      "source_sha256": "b246b801d41dab7300426e334c310d261550783131bede26c20f80a054715087",
+      "diagnosis": "Original input program under test.",
+      "diff": "",
+      "eligibility": "rejected",
+      "rejection_reason": "Failed test_supplied_1 during reproduction."
+    }
+  ],
+  "tests": [
+    {
+      "test_id": "test_supplied_1",
+      "args": [
+        [
+          3,
+          1,
+          2
+        ]
+      ],
+      "oracle_kind": "literal",
+      "expected": [
+        1,
+        2,
+        3
+      ],
+      "property_id": null,
+      "oracle_status": "authoritative",
+      "oracle_source": "user",
+      "requirement_id": null,
+      "provenance": "supplied",
+      "reason": "Supplied literal example test"
+    },
+    {
+      "test_id": "test_supplied_2",
+      "args": [
+        []
+      ],
+      "oracle_kind": "literal",
+      "expected": [],
+      "property_id": null,
+      "oracle_status": "authoritative",
+      "oracle_source": "user",
+      "requirement_id": null,
+      "provenance": "supplied",
+      "reason": "Empty list boundary test"
+    }
+  ],
+  "executions": [],
+  "decision": null,
+  "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "function_executions": 0,
+    "elapsed_ms": 10,
+    "peak_memory_mb": 25.0
+  },
+  "termination_reason": null
+}
