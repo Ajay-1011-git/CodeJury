@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeJury Stage 2 Workbench</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="stage2.css">
+</head>
+<body class="s2">
+  <header class="s2-head">
+    <strong class="brand">codejury<span class="brand-dot">.</span> <small>stage 2</small></strong>
+    <span id="backend-pill" class="pill">Connecting…</span>
+    <code id="api-url" class="dim"></code>
+  </header>
+  <div id="fixture-banner" class="fixture-banner" role="status" hidden>FIXTURE — synthetic data, no live inference or learning evidence</div>
+  <div id="error-box" class="notice" role="alert" hidden></div>
+  <main class="s2-main">
+    <p id="roles" class="dim"></p>
+    <div role="tablist" class="tabs" aria-label="Workspace">
+      <button role="tab" data-tab="case" aria-selected="true">Case</button>
+      <button role="tab" data-tab="reports" aria-selected="false">Training &amp; benchmark</button>
+    </div>
+    <section data-panel="case">
+      <div class="s2-grid">
+        <section class="card"><div class="card-header"><h2>Repair desk</h2></div><div class="card-content" id="input-root"></div></section>
+        <section class="card"><div class="card-header"><h2>Case file</h2><button id="cancel" class="btn" hidden>Cancel run</button></div><div class="card-content" id="run-root"></div></section>
+      </div>
+    </section>
+    <section data-panel="reports" hidden><section class="card"><div class="card-content" id="report-root"></div></section></section>
+  </main>
+  <script type="module" src="src/s2/app.mjs"></script>
+</body>
+</html>
