@@ -94,6 +94,9 @@ class BudgetAccount:
             remaining = self.remaining(final=final)
             if remaining["elapsed_ms"] == 0 or ceiling["elapsed_ms"] == 0:
                 raise BudgetExceeded("Episode wall deadline reached")
+            # Time elapses between creating a request and dispatching it. Tighten the
+            # wall allowance to the live deadline; never reject that ordinary drift.
+            ceiling["elapsed_ms"] = min(ceiling["elapsed_ms"], remaining["elapsed_ms"])
             for key in CAPS:
                 if ceiling[key] + attempts.get(key, 0) > remaining[key]:
                     raise BudgetExceeded(f"Insufficient {key}, including final reserve")
