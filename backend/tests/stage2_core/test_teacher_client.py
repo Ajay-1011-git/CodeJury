@@ -4,8 +4,13 @@ import httpx
 import pytest
 
 from codejury.stage2_core.teacher.budget import CAP, RESERVATION, Halt, Ledger
-from codejury.stage2_core.teacher.client import Teacher
 from codejury.stage2_core.teacher.redaction import clean, credentials
+
+Teacher = pytest.importorskip(
+    "codejury.stage2_core.teacher.client",
+    reason="Install the optional offline teacher requirements to exercise its SDK transport",
+    exc_type=ImportError,
+).Teacher
 
 KEY = "gsk_test_sentinel_secret"
 DRAFT = {
@@ -187,3 +192,19 @@ def test_teacher_not_imported_by_runtime():
         if "teacher" not in path.parts and "training" not in path.parts:
             assert "import groq" not in path.read_text()
             assert "from .teacher" not in path.read_text()
+
+
+@pytest.mark.parametrize("status", [400, 403, 404, 422])
+def test_provider_schema_model_permission_errors_do_not_retry_or_echo(tmp_path, status):
+    calls = []
+
+    def handler(request):
+        calls.append(request)
+        return httpx.Response(status, json={"error": {"message": KEY}})
+
+    teacher = client(tmp_path, handler, [KEY, "gsk_second_sentinel"])
+    with pytest.raises(Halt, match=f"HTTP {status}") as error:
+        teacher.propose("facts", LINEAGE)
+    assert KEY not in str(error.value)
+    assert len(calls) == 1
+    assert teacher.ledger.summary()["charged_or_reserved_usd"] == 0

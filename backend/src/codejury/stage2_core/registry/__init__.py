@@ -25,9 +25,25 @@ class RegistryError(ValueError):
     pass
 
 
-def local_path(value: str) -> Path:
+def unresolved_local_path(value: str) -> Path:
     path = Path(value)
-    return (path if path.is_absolute() else BACKEND / path).resolve()
+    # Resolve archived machine paths without editing hash-bound provenance files.
+    original = os.getenv("CODEJURY_STAGE2_ORIGINAL_ROOT")
+    if original and path.is_absolute():
+        original_root = Path(original)
+        if not original_root.is_absolute() or original_root == Path("/"):
+            raise RegistryError("Original checkout root must be an absolute non-root directory")
+        try:
+            relative = path.relative_to(original_root)
+        except ValueError:
+            pass
+        else:
+            path = REPO_ROOT / relative
+    return path if path.is_absolute() else BACKEND / path
+
+
+def local_path(value: str) -> Path:
+    return unresolved_local_path(value).resolve()
 
 
 def exact_keys(value: dict, keys: set[str]) -> None:
@@ -91,8 +107,9 @@ def role_config(base: dict, topology_hash: str, role: str, adapter_hash: str | N
 
 class Registry:
     def __init__(self, path: Path):
-        self.path = Path(path).resolve()
-        if Path(path).is_symlink():
+        unresolved = unresolved_local_path(path)
+        self.path = unresolved.resolve()
+        if unresolved.is_symlink():
             raise RegistryError("Registry must not be a symlink")
         self.record = json.loads(self.path.read_text())
         exact_keys(

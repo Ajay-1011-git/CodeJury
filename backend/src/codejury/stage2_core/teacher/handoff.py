@@ -19,6 +19,9 @@ def handoff(cfg, out):
     costs = Ledger(local_path(cfg["ledger"])).summary()
     mining_path = root / "b-mining-v1/report.json"
     mining = json.loads(mining_path.read_text()) if mining_path.exists() else None
+    rollout_path = root / "current-continuations-v1/manifest.json"
+    rollouts = json.loads(rollout_path.read_text()) if rollout_path.exists() else None
+    critic_done = (root / "critic-compatibility-v1.json").exists()
     text = (
         "# Completed teacher training handoff\n\n"
         "Native pilot and full candidate completed; "
@@ -44,14 +47,20 @@ def handoff(cfg, out):
         "identity matching; B weights "
         "were not retrained in this comparison.\n\n"
         f"Fresh candidate-A TRAIN mining: {'completed' if mining else 'pending'}.\n\n"
-        "Remaining integration gates: validate Critic on current candidate episodes; "
-        "refresh affected "
-        "executed Judge continuations and train/validate a separate Judge; "
+        f"Current Critic compatibility: {'validated' if critic_done else 'pending'}. "
+        + (
+            f"Judge alternatives: {rollouts['continuations']} actual continuations across "
+            f"{rollouts['states']} states, committed and scored."
+            if rollouts
+            else "Judge alternatives: pending."
+        )
+        + "\n\nRemaining integration gates: generate labels and train/validate a separate Judge; "
         "give General comparable "
         "teacher opportunities and measured exposure; complete all-role "
         "live acceptance and clean "
         "release freeze. Final assessment remains sealed.\n\n"
-        "The core/Sarvesh merge is local. Automatic push and deployment remain disabled.\n"
+        "The core/Sarvesh work is merged on main. See continuation-handoff.md for "
+        "the public adapter snapshot, private transfer, relocation and completion instructions.\n"
     )
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text)

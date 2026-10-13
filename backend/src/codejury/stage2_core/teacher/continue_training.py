@@ -15,8 +15,17 @@ from ..registry import local_path
 
 
 def write_config(path, cfg):
+    def locations(value):
+        if isinstance(value, dict):
+            return {key: locations(item) for key, item in value.items()}
+        if isinstance(value, list):
+            return [locations(item) for item in value]
+        if isinstance(value, str) and value.startswith("/"):
+            return str(local_path(value))
+        return value
+
     if path.exists():
-        if yaml.safe_load(path.read_text()) != cfg:
+        if locations(yaml.safe_load(path.read_text())) != locations(cfg):
             raise ValueError("Existing dependent job configuration changed")
     else:
         path.write_text(yaml.safe_dump(cfg, sort_keys=False))

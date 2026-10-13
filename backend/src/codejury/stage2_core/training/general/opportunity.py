@@ -36,7 +36,7 @@ def audit(
     registry = Registry(Path(registry_path))
     general = json.loads(Path(general_report).read_text())
     judge = json.loads(Path(judge_selection).read_text())
-    judge_report_path = Path(judge["training_report_path"])
+    judge_report_path = local_path(judge["training_report_path"])
     if file_hash(judge_report_path) != judge["training_report_hash"]:
         raise ValueError("Selected Judge training report changed")
     judge_report = json.loads(judge_report_path.read_text())

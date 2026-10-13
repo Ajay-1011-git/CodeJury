@@ -42,7 +42,7 @@ def opportunities(cfg, source_rows, registry_path):
         if Path(name).name != name or file_hash(corpus / name) != digest:
             raise ValueError("Teacher corpus changed")
     for name, digest in manifest["teacher_receipts"].items():
-        if file_hash(Path(name)) != digest:
+        if file_hash(local_path(name)) != digest:
             raise ValueError("Teacher verification receipt changed")
     metadata = json.loads((corpus / "records.json").read_text())
     chats = [json.loads(line) for line in (corpus / "train.jsonl").read_text().splitlines()]
@@ -63,7 +63,7 @@ def opportunities(cfg, source_rows, registry_path):
         if record["target_hash"] != json_hash(target):
             raise ValueError("Teacher opportunity target mismatch")
         if record["origin"] == "groq_verified":
-            receipt = json.loads(Path(record["teacher_receipt"]).read_text())
+            receipt = json.loads(local_path(record["teacher_receipt"]).read_text())
             if receipt["status"] != "accepted" or receipt["draft"] != target:
                 raise ValueError("Unverified teacher target")
         elif (

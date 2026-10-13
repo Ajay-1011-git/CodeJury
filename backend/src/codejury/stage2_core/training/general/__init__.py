@@ -44,7 +44,7 @@ def repairs(directory, role, source_rows):
     session = json.loads((directory / "session.json").read_text())
     if report["phase"] != "full" or not report["updates_verified"] or not report["reload_verified"]:
         raise ValueError("General repair targets require genuine verified native role training")
-    data = Path(session["data_directory"])
+    data = local_path(session["data_directory"])
     if any(file_hash(data / name) != digest for name, digest in session["data_hashes"].items()):
         raise ValueError("Native repair exports changed")
     result = {}

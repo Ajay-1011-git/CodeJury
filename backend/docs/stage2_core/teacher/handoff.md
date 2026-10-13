@@ -12,6 +12,8 @@ B paired evidence: 11/20 union solves versus 10/20 with previous A. Unchanged in
 
 Fresh candidate-A TRAIN mining: completed.
 
-Remaining integration gates: validate Critic on current candidate episodes; refresh affected executed Judge continuations and train/validate a separate Judge; give General comparable teacher opportunities and measured exposure; complete all-role live acceptance and clean release freeze. Final assessment remains sealed.
+Current Critic compatibility: validated. Judge alternatives: 536 actual continuations across 96 states, committed and scored.
 
-The core/Sarvesh merge is local. Automatic push and deployment remain disabled.
+Remaining integration gates: generate labels and train/validate a separate Judge; give General comparable teacher opportunities and measured exposure; complete all-role live acceptance and clean release freeze. Final assessment remains sealed.
+
+The core/Sarvesh work is merged on main. See continuation-handoff.md for the public adapter snapshot, private transfer, relocation and completion instructions.

@@ -133,7 +133,7 @@ def label(rollout_directory, out, *, minimum_margin=0.001):
             or row["selected_source_hash"] != row["response"]["selected_source_hash"]
         ):
             raise ValueError("Score/commit/state identity mismatch")
-        path = Path(row["fork_ledger"]).resolve()
+        path = local_path(row["fork_ledger"])
         if local_path("artifacts") not in path.parents or not (path / "ledger.sqlite3").exists():
             raise ValueError("An actual immutable continuation ledger is required")
         fork = Ledger(path)
