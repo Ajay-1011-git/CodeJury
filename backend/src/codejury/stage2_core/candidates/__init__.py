@@ -191,17 +191,29 @@ def incumbent(projected, original_source):
 
 
 class CandidatePool:
-    def __init__(self, ledger, run_id, model_port, identities):
+    def __init__(self, ledger, run_id, model_port, identities, *, model_roles=None):
         self.ledger, self.run_id = ledger, run_id
         self.port = CheckedModelPort(model_port)
         self.identities = copy.deepcopy(identities)
-        a, b = identities["fixer_a"], identities["fixer_b"]
-        if (
-            not a["adapter_hash"]
-            or not b["adapter_hash"]
-            or a["adapter_hash"] == b["adapter_hash"]
-            or a["model_revision_hash"] != b["model_revision_hash"]
+        self.model_roles = (
+            dict(model_roles)
+            if model_roles is not None
+            else {"fixer_a": "fixer_a", "fixer_b": "fixer_b"}
+        )
+        if set(self.model_roles) != {"fixer_a", "fixer_b"} or any(
+            actual not in {channel, "raw", "general"}
+            for channel, actual in self.model_roles.items()
         ):
+            raise ValueError("Unknown repair-channel model binding")
+        a, b = [identities[self.model_roles[r]] for r in ("fixer_a", "fixer_b")]
+        if (
+            model_roles is None
+            and (
+                not a["adapter_hash"]
+                or not b["adapter_hash"]
+                or a["adapter_hash"] == b["adapter_hash"]
+            )
+        ) or a["model_revision_hash"] != b["model_revision_hash"]:
             raise ValueError("Independent fixers require distinct real adapters on the same base")
         snapshot = ledger.snapshot(run_id)
         self.initial_input_hash = json_hash(
@@ -273,10 +285,11 @@ class CandidatePool:
         b = self.generate("fixer_b", self.views.b, parent=original, seed=seed, cancel=cancel)
         return {"original": original, "fixer_a": a, "fixer_b": b}
 
-    def generate(self, role, prompt, *, parent, seed, cancel, revise=False):
+    def generate(self, role, prompt, *, parent, seed, cancel, revise=False, max_attempts=2):
         if role not in {"fixer_a", "fixer_b"}:
             raise ValueError("Repair generation requires a fixer")
-        identity = self.identities[role]
+        actual_role = self.model_roles[role]
+        identity = self.identities[actual_role]
         if revise and parent["origin"] not in {role, role + "_revision"}:
             raise ValueError("Revision parent role mismatch")
         snapshot = self.ledger.snapshot(self.run_id)
@@ -297,7 +310,9 @@ class CandidatePool:
             expected_prompt = self.views.a if role == "fixer_a" else self.views.b
         if prompt != expected_prompt:
             raise ValueError("Generation prompt differs from the controller role view")
-        for attempt in range(2):
+        if type(max_attempts) is not int or not 1 <= max_attempts <= 2:
+            raise ValueError("Only one generation and at most one schema retry allowed")
+        for attempt in range(max_attempts):
             remaining = self.ledger.accounts[self.run_id].remaining()
             if cancel.is_set():
                 return None
@@ -309,8 +324,10 @@ class CandidatePool:
                     "schema_version": "stage2.v1",
                     "request_id": request_id,
                     "run_id": self.run_id,
-                    "role": role,
-                    "purpose": "revise"
+                    "role": actual_role,
+                    "purpose": "baseline"
+                    if actual_role in {"raw", "general"}
+                    else "revise"
                     if revise
                     else "repair"
                     if role == "fixer_a"
@@ -332,7 +349,7 @@ class CandidatePool:
                     "format_retry": attempt,
                 }
             )
-            self.ledger.dispatch_model(request)
+            self.ledger.dispatch_model(request, candidate_attempt=True)
             response = self.port.generate(request, cancel)
             self.ledger.settle_model(response)
             response_ref = self.archive({"kind": "response", "response": response})

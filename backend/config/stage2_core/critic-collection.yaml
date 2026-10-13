@@ -1,0 +1,7 @@
+version: stage2.fixed-collection.v1
+runtime_config: config/stage2_core/runtime.yaml
+tool_config: ../integration/stage2/tools.yaml
+ledger_directory: artifacts/stage2_core/critic-episodes
+source_manifest: data/manifests/stage1.json
+seed: 17
+policy: fixed-v1

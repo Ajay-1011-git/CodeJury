@@ -459,7 +459,9 @@ class Ledger:
                 "UPDATE checkpoints SET usage=? WHERE run_id=?", (encode(account.usage()), run_id)
             )
 
-    def dispatch_model(self, request: dict) -> None:
+    def dispatch_model(
+        self, request: dict, *, candidate_attempt=False, decision_attempt=False
+    ) -> None:
         request = checked(request, "ModelRequest")
         run_id = request["run_id"]
         account = self.accounts.get(run_id)
@@ -485,6 +487,16 @@ class Ledger:
             if role in {"fixer_a", "fixer_b"}
             else {}
         )
+        if (
+            type(candidate_attempt) is not bool
+            or type(decision_attempt) is not bool
+            or (candidate_attempt and decision_attempt)
+        ):
+            raise ValueError("One explicit model attempt kind is permitted")
+        if candidate_attempt:
+            attempts = {"learned_candidates": 1}
+        elif decision_attempt:
+            attempts = {"judge_decisions": 1}
         ceiling = {
             **dict.fromkeys(CAPS, 0),
             "input_tokens": request["remaining_budget"]["input_tokens"],

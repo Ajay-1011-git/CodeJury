@@ -27,14 +27,21 @@ def choice(draft, state, visible_execution_ids):
 
 class LearnedController(FixedController):
     policy_mode = "learned"
+    decision_role = "judge"
 
     def choose(self, state):
-        if "judge" not in self.identities or not self.identities["judge"]["adapter_hash"]:
+        role = self.decision_role
+        if role not in self.identities or not self.identities[role]["adapter_hash"]:
             raise ValueError("Learned policy requires a genuine Judge adapter")
         snapshot = self.ledger.snapshot(self.run_id)
         ids = {c["candidate_id"] for c in snapshot["candidates"]}
         executions = [e for e in snapshot["executions"] if e["candidate_id"] in ids]
-        prompt = judge(state, snapshot["tests"], snapshot["candidates"], executions)
+        view_state = {
+            **state,
+            "authoritative_counterexample_ids": state["authoritative_counterexample_ids"][:12],
+            "audit_gap_ids": state["audit_gap_ids"][:12] if self.gap_feedback else [],
+        }
+        prompt = judge(view_state, snapshot["tests"], snapshot["candidates"], executions)
         shown = [e["execution_id"] for e in executions[:6]]
         refused = []
         for attempt in range(2):
@@ -46,8 +53,8 @@ class LearnedController(FixedController):
                     "schema_version": "stage2.v1",
                     "request_id": ident("judge"),
                     "run_id": self.run_id,
-                    "role": "judge",
-                    "purpose": "action_choice",
+                    "role": role,
+                    "purpose": "action_choice" if role == "judge" else "baseline",
                     "prompt": prompt,
                     "seed": self.seed,
                     "max_new_tokens": 192,
@@ -55,18 +62,18 @@ class LearnedController(FixedController):
                 },
                 "ModelRequest",
             )
-            self.ledger.dispatch_model(request)
+            self.ledger.dispatch_model(request, decision_attempt=True)
             response = CheckedModelPort(self.model).generate(request, self.cancel)
             self.ledger.settle_model(response)
             self.check_running()
             if any(
-                response[k] != self.identities["judge"][k]
+                response[k] != self.identities[role][k]
                 for k in ("adapter_hash", "model_config_hash", "model_revision_hash")
             ):
                 raise ValueError("Judge response identity differs from frozen adapter")
             try:
                 draft = parse_draft(response["text"], "JudgeDraft")
-                option = choice(draft, state, shown)
+                option = choice(draft, view_state, shown)
                 # Judge generation consumes resources; recheck that the chosen semantic
                 # action is still offered at the current remaining budget.
                 fresh, _ = self.state()

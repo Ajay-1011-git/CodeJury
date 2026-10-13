@@ -152,61 +152,78 @@ def cmd_smoke(args) -> int:
 
 
 def cmd_run(args) -> int:
-    """Real benchmark; needs the live ports (pending without the native stack)."""
-    from .evaluation import Harness, analyze, load_config, write_analysis
-    from .evaluation.tasks import SandboxScorer, load_tasks
+    """Native readiness precedes any sealed assessment read."""
+    from codejury.stage2_core.factory import make_baseline_port, make_model_port
+    from codejury.stage2_core.registry import local_path
+
+    from .evaluation import Harness, analyze, freeze, load_config, sealed, write_analysis
+    from .evaluation.tasks import SandboxScorer
+    from .factory import make_tool_port
     from .runner import InfrastructureError
-    from .runner.docker import DockerSandbox
 
     config = load_config(args.config)
     if args.split != config["split"]:
         print(json.dumps({"status": "refused", "reason": "--split differs from the config split"}))
         return 2
+    out = args.out.resolve()
+    if local_path("artifacts") not in out.parents or out.exists():
+        raise ValueError("Native benchmark output must be a new ignored immutable directory")
+    port, model = None, None
     try:
-        import os
-
-        from codejury.stage2_core.factory import make_baseline_port, make_model_port
-
-        from .factory import make_tool_port
-
-        eval_dir = Path(os.environ["CODEJURY_STAGE2_EVAL_DIR"])
-        core_config = REPO_ROOT / "backend/config/stage2_core/runtime.yaml"
-        tools = make_tool_port(core_config.with_name("../stage2_tools/runtime.yaml").resolve())
+        core_config = local_path("config/stage2_core/runtime.yaml")
+        tools = make_tool_port(local_path("../integration/stage2/tools.yaml"))
         model = make_model_port(core_config)
-        port = make_baseline_port(core_config, model, tools)
-        scorer = SandboxScorer(DockerSandbox(REPO_ROOT / "backend/config/stage2_tools/runner.yaml"))
-        tasks = load_tasks(eval_dir / f"{args.split}.jsonl")
-    except (ImportError, KeyError, OSError, InfrastructureError) as exc:
-        print(
+        port = make_baseline_port(core_config, model, tools, evaluation_config=config)
+        port.preflight()
+        if args.freeze_only:
+            if args.freeze is None:
+                raise ValueError("--freeze-only needs the destination --freeze file")
+            record = freeze.write(args.freeze, config, port)
+            print(json.dumps({"status": "frozen", "registry_hash": record["registry_hash"]}))
+            return 0
+        frozen = False
+        if args.split == "final_assessment":
+            if args.freeze is None:
+                raise ValueError("The final run requires a measured, committed E4 --freeze file")
+            frozen = freeze.verify(args.freeze, config, port)
+        manifest = local_path(config["manifest"])
+        tasks, population = sealed.load(manifest, args.split, methods_ready=True, frozen=frozen)
+        manifest_hash = hashlib.sha256(manifest.read_bytes()).hexdigest()
+        harness = Harness(config, port, SandboxScorer(tools.sandbox), mode="live", out_dir=out)
+        harness.preflight(tasks)
+        records = harness.run(harness.eligible)
+        (out / "run-meta.json").write_text(
             json.dumps(
-                {"status": "pending_native", "reason": f"{type(exc).__name__}: {exc}"}, indent=2
+                {
+                    "mode": "live",
+                    "config": config,
+                    "manifest_hash": manifest_hash,
+                    "dataset_id": args.split,
+                    "commit_digest": harness.commit_digest,
+                    "population": population,
+                    "registry_hash": port.base_registry.manifest_hash,
+                    "freeze_hash": hashlib.sha256(args.freeze.read_bytes()).hexdigest()
+                    if frozen
+                    else None,
+                },
+                indent=2,
+                sort_keys=True,
             )
         )
-        return 3
-    manifest = Path(REPO_ROOT / "backend" / config["manifest"])
-    manifest_hash = hashlib.sha256(manifest.read_bytes()).hexdigest()
-    harness = Harness(config, port, scorer, mode="live", out_dir=args.out)
-    harness.preflight(tasks)
-    records = harness.run(harness.eligible)
-    (args.out / "run-meta.json").write_text(
-        json.dumps(
-            {
-                "mode": "live",
-                "config": config,
-                "manifest_hash": manifest_hash,
-                "dataset_id": args.split,
-                "commit_digest": harness.commit_digest,
-            },
-            indent=2,
-            sort_keys=True,
+        result = analyze(
+            config, records, manifest_hash=manifest_hash, dataset_id=args.split, mode="live"
         )
-    )
-    result = analyze(
-        config, records, manifest_hash=manifest_hash, dataset_id=args.split, mode="live"
-    )
-    write_analysis(result, args.out / "benchmark-report.json")
-    print(json.dumps({"status": result["report"]["status"]}))
-    return 0
+        write_analysis(result, out / "benchmark-report.json")
+        print(json.dumps({"status": result["report"]["status"]}))
+        return 0
+    except (ImportError, OSError, InfrastructureError, ValueError) as exc:
+        print(json.dumps({"status": "refused", "reason": f"{type(exc).__name__}: {exc}"}, indent=2))
+        return 3
+    finally:
+        if port is not None:
+            port.close()
+        elif model is not None:
+            model.close()
 
 
 def cmd_analyze(args) -> int:
@@ -253,6 +270,8 @@ def main(argv=None) -> int:
     r.add_argument("--config", required=True, type=Path)
     r.add_argument("--split", required=True)
     r.add_argument("--out", required=True, type=Path)
+    r.add_argument("--freeze", type=Path)
+    r.add_argument("--freeze-only", action="store_true")
     r.set_defaults(func=cmd_run)
     a = sub.add_parser("analyze")
     a.add_argument("--results", required=True, type=Path)

@@ -26,9 +26,9 @@ tools_full: [validate, evaluate, search, audit, investigate]
 methods:
   B0: {budget: reference, regime: null, tools: [], training_token_opportunity: 0,
        note: "Raw base, one repair; explicitly unmatched reference"}
-  B1: {budget: token_matched, regime: token_matched, tools: [evaluate], training_token_opportunity: 0,
+  B1: {budget: token_matched, regime: token_matched, tools: [validate, evaluate], training_token_opportunity: 0,
        note: "Trained A with execution feedback"}
-  B2: {budget: token_matched, regime: token_matched, tools: [evaluate], training_token_opportunity: 0,
+  B2: {budget: token_matched, regime: token_matched, tools: [validate, evaluate], training_token_opportunity: 0,
        note: "A sampling/revision, up to 8 learned attempts"}
   B3: {budget: token_matched, regime: token_matched, tools: [validate, evaluate, search, audit, investigate],
        training_token_opportunity: 0, note: "Single trained general agent, identical tools/actions"}

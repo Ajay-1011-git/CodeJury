@@ -1,0 +1,11 @@
+version: stage2.live-methods.v1
+evaluation_config: config/stage2_tools/evaluation-validation.yaml
+ledger_directory: artifacts/stage2_core/method-runs
+control_registry_directory: artifacts/stage2_core/baseline-controls
+controls:
+  B-unweighted:
+    training_report: artifacts/stage2_core/fixer-b-training/alpha0-full/report.json
+    step: 200
+  B-same-view:
+    training_report: artifacts/stage2_core/fixer-b-training/same-view-alpha4-full/report.json
+    step: 200

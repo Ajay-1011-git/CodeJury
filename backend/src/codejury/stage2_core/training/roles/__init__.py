@@ -29,11 +29,16 @@ def train(role, corpus, registry_path, runtime_config, recipe, out, *, phase="pi
         "grad_checkpoint",
         "seed",
     }
-    if set(recipe) != required or any(
+    if set(recipe) not in (required, required | {"validation_loss_batches"}) or any(
         type(recipe[k]) is not int
         for k in ("pilot_steps", "steps", "save_every", "batch_size", "max_seq_length", "seed")
     ):
         raise ValueError("Unknown or incorrectly typed training recipe")
+    if "validation_loss_batches" in recipe and (
+        type(recipe["validation_loss_batches"]) is not int
+        or not 4 <= recipe["validation_loss_batches"] <= 64
+    ):
+        raise ValueError("Declare 4–64 loss batches; quality selection still needs full execution")
     if not (
         10 <= recipe["pilot_steps"] <= 20 <= recipe["steps"] <= 2000
         and 1 <= recipe["save_every"] <= recipe["steps"]

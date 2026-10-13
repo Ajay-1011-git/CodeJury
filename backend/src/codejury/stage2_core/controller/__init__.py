@@ -35,11 +35,39 @@ CONTROLLER_SOURCE_HASH = json_hash(
 VIEWS_SOURCE_HASH = source_hash(
     (Path(__file__).resolve().parents[1] / "views/__init__.py").read_text()
 )
+EXECUTION_ROOT = Path(__file__).resolve().parents[1]
+EXECUTION_FILES = (
+    "budgets/__init__.py",
+    "candidates/__init__.py",
+    "contracts/__init__.py",
+    "intake/__init__.py",
+    "ledger/__init__.py",
+    "leases/__init__.py",
+    "model_worker/__init__.py",
+    "model_worker/engine.py",
+    "model_worker/native.py",
+    "registry/__init__.py",
+)
+EXECUTION_SOURCE_HASH = json_hash(
+    {name: source_hash((EXECUTION_ROOT / name).read_text()) for name in EXECUTION_FILES}
+)
 TOOLS_ROOT = Path(__file__).resolve().parents[2] / "stage2_tools"
+RUNTIME_TOOL_PARTS = {
+    "codec",
+    "factory.py",
+    "domains",
+    "oracles",
+    "runner",
+    "search",
+    "auditor",
+    "investigation",
+    "port",
+}
 TOOLS_SOURCE_HASH = json_hash(
     {
         path.relative_to(TOOLS_ROOT).as_posix(): source_hash(path.read_text())
         for path in sorted(TOOLS_ROOT.rglob("*.py"))
+        if path.relative_to(TOOLS_ROOT).parts[0] in RUNTIME_TOOL_PARTS
     }
 )
 
@@ -142,6 +170,7 @@ class Stopped(Exception):
 
 class FixedController:
     policy_mode = "fixed"
+    gap_feedback = True
 
     def __init__(
         self,
@@ -154,6 +183,8 @@ class FixedController:
         runtime_hash,
         mode="fixture",
         critic_bootstrap="raw",
+        model_roles=None,
+        critic_role=None,
     ):
         self.ledger, self.model = ledger, model_port
         self.tool = TraceArchivePort(tool_port, ledger)
@@ -162,6 +193,10 @@ class FixedController:
         if critic_bootstrap not in {"raw", "reviewed"}:
             raise ValueError("Unknown Critic bootstrap mode")
         self.critic_bootstrap = critic_bootstrap
+        self.model_roles = dict(model_roles) if model_roles is not None else None
+        self.critic_role = critic_role
+        if critic_role not in {None, "critic", "raw", "general"}:
+            raise ValueError("Unknown Critic model binding")
         if mode == "live":
             from codejury.stage2_tools.port import ToolPortImpl
             from codejury.stage2_tools.runner.docker import DockerSandbox
@@ -504,7 +539,11 @@ class FixedController:
 
     def criticize(self, action, snapshot):
         targets = [c for c in snapshot["candidates"] if c["candidate_id"] in action["target_ids"]]
-        if "critic" not in self.identities and self.critic_bootstrap == "reviewed":
+        if (
+            self.critic_role is None
+            and "critic" not in self.identities
+            and self.critic_bootstrap == "reviewed"
+        ):
             proposal = reviewed_proposal(
                 self.problem, action["target_ids"], action["parameters"]["mode"], self.seed
             )
@@ -524,10 +563,10 @@ class FixedController:
             [e for e in snapshot["executions"] if e["candidate_id"] in action["target_ids"]],
             action["parameters"]["mode"],
             self.seed,
-            gaps=snapshot["audit_gaps"],
+            gaps=snapshot["audit_gaps"] if self.gap_feedback else (),
             trace_reader=self.ledger.read_object,
         )
-        role = "critic" if "critic" in self.identities else "raw"
+        role = self.critic_role or ("critic" if "critic" in self.identities else "raw")
         request = checked(
             {
                 "schema_version": "stage2.v1",
@@ -549,7 +588,12 @@ class FixedController:
             request["request_id"],
             {
                 "request_id": request["request_id"],
-                "mode": "trained" if role == "critic" else "raw_bootstrap",
+                "mode": "trained"
+                if role == "critic"
+                else "general_baseline"
+                if role == "general"
+                else "raw_bootstrap",
+                "model_role": role,
             },
         )
         self.ledger.dispatch_model(request)
@@ -565,7 +609,7 @@ class FixedController:
             proposal = parse_draft(response["text"], "CriticDraft")
             if (
                 proposal["mode"] != action["parameters"]["mode"]
-                or not set(proposal["target_candidate_ids"]) <= set(action["target_ids"])
+                or set(proposal["target_candidate_ids"]) != set(action["target_ids"])
                 or not set(proposal["requirement_ids"]) <= set(action["requirement_ids"])
                 or (proposal["generator_spec"] is None) == (proposal["concrete_inputs"] is None)
             ):
@@ -585,7 +629,7 @@ class FixedController:
         proposal = checked(proposal, "CriticDraft")
         if (
             proposal["mode"] != action["parameters"]["mode"]
-            or not set(proposal["target_candidate_ids"]) <= set(action["target_ids"])
+            or set(proposal["target_candidate_ids"]) != set(action["target_ids"])
             or not set(proposal["requirement_ids"]) <= set(action["requirement_ids"])
         ):
             raise ValueError("Investigation proposal is outside the chosen action")
@@ -833,7 +877,11 @@ class FixedController:
             "model_manifest_hash": self.manifest_hash,
             "controller_source_hash": CONTROLLER_SOURCE_HASH,
             "views_source_hash": VIEWS_SOURCE_HASH,
+            "execution_source_hash": EXECUTION_SOURCE_HASH,
             "critic_bootstrap": self.critic_bootstrap,
+            "repair_model_bindings": self.model_roles,
+            "critic_model_binding": self.critic_role,
+            "gap_feedback": self.gap_feedback,
             "policy_mode": self.policy_mode,
             "tools_source_hash": TOOLS_SOURCE_HASH,
         }
@@ -912,10 +960,12 @@ class FixedController:
             ):
                 self.check_running()
                 raise Stopped("invalid_input", "Semantic intake refused")
-            self.pool = CandidatePool(self.ledger, self.run_id, self.model, self.identities)
+            self.pool = CandidatePool(
+                self.ledger, self.run_id, self.model, self.identities, model_roles=self.model_roles
+            )
             self.original = self.pool.original()
             self.evaluate_all()  # reproduce before independent generation
-            self.pool.initial_pair(seed=seed, cancel=cancel, original=self.original)
+            self.initial_candidates()
             self.evaluate_all()
             while len(self.actions) < POLICY["max_actions"]:
                 self.check_running()
@@ -932,6 +982,9 @@ class FixedController:
         except Exception as exc:
             self.finish("infrastructure_error", type(exc).__name__ + ": controller failed closed")
             raise
+
+    def initial_candidates(self):
+        return self.pool.initial_pair(seed=self.seed, cancel=self.cancel, original=self.original)
 
     def freeze_episode(self, state):
         episode = self.episode(state)

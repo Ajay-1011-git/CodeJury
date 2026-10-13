@@ -71,7 +71,7 @@ def main():
                 "resume_adapter_file": str(initial / "adapters.safetensors") if initial else None,
                 "steps_per_report": 1 if session["phase"] == "pilot" else 10,
                 "steps_per_eval": session["steps"] if session["phase"] == "pilot" else 50,
-                "val_batches": -1,
+                "val_batches": cfg.get("validation_loss_batches", -1),
                 "save_every": session["steps"]
                 if session["phase"] == "pilot"
                 else cfg["save_every"],

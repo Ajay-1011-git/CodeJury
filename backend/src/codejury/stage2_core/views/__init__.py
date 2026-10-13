@@ -54,7 +54,7 @@ def visible_tests(tests):
     return result
 
 
-def evidence(executions, tests, candidates, *, trace_reader=None):
+def evidence(executions, tests, candidates, *, trace_reader=None, trace_byte_limit=8192):
     """Join registered facts; never derive a guessed expected value from an output."""
     tests = {t["test_id"]: checked(t, "TestCase") for t in tests}
     candidates = {c["candidate_id"]: checked(c, "Candidate") for c in candidates}
@@ -76,8 +76,8 @@ def evidence(executions, tests, candidates, *, trace_reader=None):
         if row["trace_ref"] is not None and trace_reader is not None:
             # Exact bounded trace bytes, with truncation disclosed, never synthesized.
             raw = trace_reader(row["trace_ref"])
-            item["trace"] = raw[:8192].decode("utf-8", errors="replace")
-            item["view_trace_truncated"] = len(raw) > 8192
+            item["trace"] = raw[:trace_byte_limit].decode("utf-8", errors="replace")
+            item["view_trace_truncated"] = len(raw) > trace_byte_limit
         result.append(item)
     return result
 
@@ -148,7 +148,7 @@ def revision(role, problem, tests, candidate, executions, *, trace_reader=None):
     )
 
 
-def critic(problem, tests, candidates, executions, *, trace_reader=None):
+def critic(problem, tests, candidates, executions, *, trace_reader=None, trace_byte_limit=8192):
     problem = checked(problem, "Problem")
     approved = [r for r in problem["requirements"] if r["approval_status"] == "approved"]
     candidates = [checked(c, "Candidate") for c in candidates]
@@ -161,7 +161,13 @@ def critic(problem, tests, candidates, executions, *, trace_reader=None):
             "approved_registry": approved,
             "candidates": candidates,
             "tests": visible_tests(tests),
-            "evidence": evidence(executions, tests, candidates, trace_reader=trace_reader),
+            "evidence": evidence(
+                executions,
+                tests,
+                candidates,
+                trace_reader=trace_reader,
+                trace_byte_limit=trace_byte_limit,
+            ),
         },
     )
 
@@ -179,6 +185,8 @@ def judge(state, tests, candidates, executions):
         if k
         not in {
             "schema_version",
+            "problem_id",
+            "suite_hash",
             "candidate_summaries",
             "available_actions",
             "authoritative_counterexample_ids",
@@ -192,7 +200,6 @@ def judge(state, tests, candidates, executions):
                 "candidate_id",
                 "origin",
                 "eligibility",
-                "source_hash",
                 "hard_passes",
                 "hard_failures",
             )
@@ -215,7 +222,14 @@ def judge(state, tests, candidates, executions):
     payload = {
         "view_format": "judge-summary.v2",
         "state": state_view,
-        "visible_evidence": facts[:6],
+        "visible_evidence": [
+            {
+                k: v
+                for k, v in f.items()
+                if k not in {"candidate_source_hash", "runtime_hash", "trace_ref"}
+            }
+            for f in facts[:6]
+        ],
         "omitted_evidence_count": max(0, len(facts) - 6),
         "omitted_counterexample_ids": max(0, len(state["authoritative_counterexample_ids"]) - 12),
         "omitted_gap_ids": max(0, len(state["audit_gap_ids"]) - 12),

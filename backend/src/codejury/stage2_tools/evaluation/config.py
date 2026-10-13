@@ -66,6 +66,8 @@ def config_hash(config: dict, method: str, regime: str | None) -> str:
         "regime": regime,
         "caps": caps,
         "profile": config["profile"],
+        "seeds": config["seeds"],
+        "public_seed": config["public_seed"],
     }
     return hashlib.sha256(canonical(payload)).hexdigest()
 

@@ -7,7 +7,11 @@ from ..budgets import CAPS, COUNTERS, BudgetExceeded
 from ..candidates import CandidatePool
 from ..contracts import checked, json_hash
 from ..controller import (
+    CONTROLLER_SOURCE_HASH,
+    EXECUTION_SOURCE_HASH,
     POLICY,
+    TOOLS_SOURCE_HASH,
+    VIEWS_SOURCE_HASH,
     FixedController,
     Stopped,
     TraceArchivePort,
@@ -56,6 +60,13 @@ def restore(parent, episode, controller, seed):
         or meta["mode"] != controller.mode
     ):
         raise ValueError("Rollout cannot change parent model/sandbox identities")
+    if (
+        meta["profile"].get("controller_source_hash") != CONTROLLER_SOURCE_HASH
+        or meta["profile"].get("views_source_hash") != VIEWS_SOURCE_HASH
+        or meta["profile"].get("tools_source_hash") != TOOLS_SOURCE_HASH
+        or meta["profile"].get("execution_source_hash") != EXECUTION_SOURCE_HASH
+    ):
+        raise ValueError("Continuation implementation differs from the frozen parent profile")
     inherited = []
     with parent.connection() as db:
         for request_id in anchor["request_ids"]:
@@ -278,6 +289,10 @@ class RolloutPort:
             result = control.finish(exc.status, exc.reason)
         except (BudgetExceeded, InterruptedError) as exc:
             result = control.finish("cancelled" if cancel.is_set() else "unresolved", str(exc))
+        except Exception as exc:
+            result = control.finish(
+                "infrastructure_error", type(exc).__name__ + ": continuation failed closed"
+            )
         if parent_hash != json_hash(self.parent.snapshot(episode["run_id"])):
             raise RuntimeError("Continuation changed its immutable parent")
         selected = result["decision"]["selected_candidate_id"]
