@@ -223,6 +223,7 @@ def select(training_report, cfg, out):
         "excluded": excluded,
         "opportunity": final_audit,
         "training_report_hash": file_hash(training_report),
+        "training_report_path": str(Path(training_report).resolve()),
         "registry_path": str(out / "registry.json"),
         "contains_final_assessment": False,
     }

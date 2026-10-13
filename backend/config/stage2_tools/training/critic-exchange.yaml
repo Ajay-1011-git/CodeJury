@@ -1,0 +1,37 @@
+# Critic data + training configuration (S2.07/S2.08). Real runs read E2 TRAINING episodes only.
+schema: stage2-critic-config.v1
+split_manifest: data/stage2_tools/manifests/stage2.json
+data:
+  split: train                  # validation episodes are collected separately for tuning only
+  episodes_root: artifacts/stage2-exchange/ajay/episodes   # E2 exchange, outside Git
+  out_dir: artifacts/stage2_tools/critic/data
+  mode_priority: [discriminate, challenge_agreement, audit_gap, validate_revision]
+  invalid_variants_per_episode: 2
+  mix_targets:                  # starting targets, tuned on validation; not available counts
+    correct_candidate_min: 0.25
+    invalid_proposal_min: 0.10
+runner_config: runner.yaml
+selection:                      # checkpoint selection; loss alone is never a criterion
+  min_format_validity: 0.95
+  min_domain_validity: 0.90
+  max_false_rejection: 0.05     # correct candidates hard-rejected by the Critic's accepted tests
+training:                       # standalone MLX LoRA; mirrors the inspected mlx-lm 0.32.0 interface
+  model_id: mlx-community/Phi-4-mini-instruct-mlx-4Bit
+  model_revision: d848c30f6d5419b9892433cf6b1062626d15340e
+  model_dir_env: CODEJURY_MODEL_DIR     # absolute local checkpoint path; never committed
+  out_root: artifacts/stage2_tools/critic
+  pilot_steps: 10
+  steps: 300
+  batch_size: 1
+  max_seq_length: 2048
+  num_layers: 4
+  learning_rate: 0.0001
+  seed: 17
+  validation_fraction: 0.2      # split by base problem, never by record
+  lora_parameters:
+    rank: 8
+    dropout: 0.0
+    scale: 16.0
+    keys: [self_attn.qkv_proj, self_attn.o_proj]
+  grad_checkpoint: true
+  grad_accumulation_steps: 1
