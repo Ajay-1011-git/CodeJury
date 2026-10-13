@@ -18,7 +18,7 @@ from ...registry import MODEL_SYSTEM, Registry
 def main():
     path = Path(sys.argv[1])
     session = json.loads(path.read_text())
-    with ComputeLease(owner="ajay", job_id="a-refresh-" + uuid4().hex, kind="training"):
+    with ComputeLease(owner="ajay", job_id="role-training-" + uuid4().hex, kind="training"):
         import mlx.core as mx
         import numpy as np
         from mlx.utils import tree_flatten
@@ -39,7 +39,7 @@ def main():
         if any(file_hash(data / n) != h for n, h in session["data_hashes"].items()):
             raise ValueError("Export changed before native training")
         role = session.get("role", "fixer_a")
-        if role not in {"fixer_a", "fixer_b"}:
+        if role not in {"fixer_a", "fixer_b", "critic", "judge", "general"}:
             raise ValueError("Unsupported native training role")
         initial = registry.verify_adapter("fixer_a") if role == "fixer_a" else None
         if (
@@ -47,8 +47,8 @@ def main():
             and file_hash(initial / "adapters.safetensors") != session["initial_adapter_hash"]
         ):
             raise ValueError("Initialization changed before native training")
-        if role == "fixer_b" and session["initial_adapter_hash"] is not None:
-            raise ValueError("B starts separately from the frozen base, without A weights")
+        if role != "fixer_a" and session["initial_adapter_hash"] is not None:
+            raise ValueError("New roles start separately from the frozen base, without A weights")
         args = SimpleNamespace(
             **{
                 **CONFIG_DEFAULTS,

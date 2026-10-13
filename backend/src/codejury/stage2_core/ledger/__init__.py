@@ -795,6 +795,10 @@ class Ledger:
                 )
                 # Last committed elapsed measurement is a lower bound after a process crash.
             terminal = run["status"] not in ACTIVE
+            metadata_row = db.execute(
+                "SELECT body FROM controller_records WHERE run_id=? AND kind='metadata'", (run_id,)
+            ).fetchone()
+            metadata = json.loads(metadata_row[0]) if metadata_row else {}
             decision = (
                 None
                 if not terminal
@@ -826,8 +830,8 @@ class Ledger:
                 "actions": [],
                 "decision": decision,
                 "resource_usage": usage,
-                "policy_mode": "fixed",
-                "model_manifest_hash": None,
+                "policy_mode": metadata.get("profile", {}).get("policy_mode", "fixed"),
+                "model_manifest_hash": metadata.get("model_manifest_hash"),
                 "profile_hash": run["profile_hash"],
                 "suite_hash": None,
                 "termination_reason": run["reason"],

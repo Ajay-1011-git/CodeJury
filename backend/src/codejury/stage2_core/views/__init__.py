@@ -173,10 +173,52 @@ def judge(state, tests, candidates, executions):
         raise ValueError("Judge candidate problem mismatch")
     # Deterministic bounded summaries; original and candidate bodies stay private here.
     facts = evidence(executions, tests, candidates)
+    state_view = {
+        k: v
+        for k, v in state.items()
+        if k
+        not in {
+            "schema_version",
+            "candidate_summaries",
+            "available_actions",
+            "authoritative_counterexample_ids",
+            "audit_gap_ids",
+        }
+    }
+    state_view["candidate_summaries"] = [
+        {
+            k: c[k]
+            for k in (
+                "candidate_id",
+                "origin",
+                "eligibility",
+                "source_hash",
+                "hard_passes",
+                "hard_failures",
+            )
+        }
+        for c in state["candidate_summaries"]
+    ]
+    for field in ("authoritative_counterexample_ids", "audit_gap_ids"):
+        state_view[field] = state[field][:12]
+    state_view["available_actions"] = [
+        {
+            "option_id": o["option_id"],
+            "prerequisite_summary": o["prerequisite_summary"],
+            "action": {k: o["action"][k] for k in ("kind", "target_ids", "parameters")},
+            "budget_ceiling": {
+                k: v for k, v in o["action"]["requested_budget"].items() if v and k != "elapsed_ms"
+            },
+        }
+        for o in state["available_actions"]
+    ]
     payload = {
-        "state": state,
-        "visible_evidence": facts[:20],
-        "omitted_evidence_count": max(0, len(facts) - 20),
+        "view_format": "judge-summary.v2",
+        "state": state_view,
+        "visible_evidence": facts[:6],
+        "omitted_evidence_count": max(0, len(facts) - 6),
+        "omitted_counterexample_ids": max(0, len(state["authoritative_counterexample_ids"]) - 12),
+        "omitted_gap_ids": max(0, len(state["audit_gap_ids"]) - 12),
     }
     result = prompt("judge", payload)
     if len(result.encode()) > 64000:

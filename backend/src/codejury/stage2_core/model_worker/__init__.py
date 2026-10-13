@@ -233,6 +233,17 @@ class NativeModelPort:
         finally:
             self.lock.release()
 
+    def start(self, cancel):
+        """Acquire the actual cross-process lease before accepting an API run."""
+        if not self.lock.acquire(blocking=False):
+            raise RuntimeError("Native worker is busy")
+        try:
+            if self.closed:
+                raise RuntimeError("Native worker is closed")
+            self._start(cancel, time.monotonic() + self.settings["startup_timeout_s"])
+        finally:
+            self.lock.release()
+
     def inspect(self):
         with self.lock:
             if self.process is None or not self.process.is_alive():

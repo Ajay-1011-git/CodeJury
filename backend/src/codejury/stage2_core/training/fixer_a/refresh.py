@@ -137,11 +137,7 @@ def checkpoint_registry(directory, weights, step, session, original, metrics):
     )
     record = copy.deepcopy(original.record)
     record["adapters"] = {
-        **(
-            {"fixer_a": copy.deepcopy(original.record["adapters"]["fixer_a"])}
-            if role == "fixer_b"
-            else {}
-        ),
+        **copy.deepcopy(original.record["adapters"]),
         role: {
             "path": str(directory.resolve()),
             "files": hashes(directory, ADAPTER_FILES),
@@ -169,10 +165,16 @@ def reload_check(
                 "request_id": "reload-" + uuid4().hex,
                 "run_id": "a-refresh-reload",
                 "role": role,
-                "purpose": "reconstruct" if role == "fixer_b" else "repair",
+                "purpose": {
+                    "fixer_a": "repair",
+                    "fixer_b": "reconstruct",
+                    "critic": "test_proposal",
+                    "judge": "action_choice",
+                    "general": "baseline",
+                }[role],
                 "prompt": prompt,
                 "seed": seed,
-                "max_new_tokens": 256,
+                "max_new_tokens": 192 if role == "judge" else 256,
                 "remaining_budget": CAPS,
             },
             Event(),
@@ -188,7 +190,14 @@ def reload_check(
     from ...candidates import parse_draft
 
     try:
-        parse_draft(response["text"])
+        parse_draft(
+            response["text"],
+            "CriticDraft"
+            if role == "critic"
+            else "JudgeDraft"
+            if role == "judge"
+            else "RepairDraft",
+        )
         schema_valid = True
     except (ValueError, ValidationError):
         schema_valid = False

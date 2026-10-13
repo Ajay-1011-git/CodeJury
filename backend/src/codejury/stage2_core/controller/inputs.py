@@ -11,9 +11,9 @@ REVIEWED_BINDINGS = {
 }
 
 
-def training_input(row):
-    if row["split"] != "train":
-        raise ValueError("Collection consumes training records only")
+def runtime_input(row):
+    if row["split"] not in {"train", "validation"}:
+        raise ValueError("Only authorized train/validation runtime inputs are allowed")
     problem, tests = runtime_example(row)
     template = REVIEWED_BINDINGS.get(problem["contract_text"])
     if template:
@@ -26,3 +26,9 @@ def training_input(row):
                 raise ValueError("Property binding requires an approved contract")
             requirement["property_template_id"] = template
     return checked(problem, "Problem"), tests
+
+
+def training_input(row):
+    if row["split"] != "train":
+        raise ValueError("Collection consumes training records only")
+    return runtime_input(row)

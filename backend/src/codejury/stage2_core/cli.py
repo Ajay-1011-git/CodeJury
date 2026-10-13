@@ -9,7 +9,7 @@ import yaml
 
 from .contracts import checked, json_hash
 from .controller import FixedController
-from .controller.inputs import training_input
+from .controller.inputs import runtime_input
 from .data import load_stage1
 from .factory import make_model_port
 from .intake import prepare
@@ -46,10 +46,12 @@ def main():
     run = sub.add_parser("run")
     run.add_argument("--request", type=Path, required=True)
     collect = sub.add_parser("collect")
-    collect.add_argument("--record-id", action="append", required=True)
+    collect.add_argument("--record-id", action="append")
+    collect.add_argument("--split", choices=["train", "validation"], default="train")
     for command in (run, collect):
         command.add_argument("--config", type=Path, required=True)
         command.add_argument("--policy", choices=["fixed"], default="fixed")
+        command.add_argument("--critic-bootstrap", choices=["raw", "reviewed"], default="raw")
         command.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     if args.out.exists():
@@ -59,20 +61,21 @@ def main():
     inputs = []
     if args.command == "collect":
         manifest, rows = load_stage1(local_path(settings["source_manifest"]))
-        by_id = {r["record_id"]: r for r in rows if r["split"] == "train"}
+        by_id = {r["record_id"]: r for r in rows if r["split"] == args.split}
+        args.record_id = args.record_id or sorted(by_id)
         if len(args.record_id) != len(set(args.record_id)) or any(
             i not in by_id for i in args.record_id
         ):
             raise ValueError("Only unique train record IDs may be collected")
         for record_id in args.record_id:
             row = by_id[record_id]
-            problem, tests = training_input(row)
+            problem, tests = runtime_input(row)
             inputs.append(
                 (
                     problem,
                     tests,
                     {
-                        "split": "train",
+                        "split": args.split,
                         "base_problem_id": row["base_problem_id"],
                         "record_id": record_id,
                         "source_manifest_hash": json_hash(manifest),
@@ -106,6 +109,7 @@ def main():
                 manifest_hash=model.registry.manifest_hash,
                 runtime_hash=tool.sandbox.runtime_hash,
                 mode="live",
+                critic_bootstrap=args.critic_bootstrap,
             )
             result = controller.run(
                 problem, tests, cancel=cancel, seed=settings["seed"], provenance=provenance

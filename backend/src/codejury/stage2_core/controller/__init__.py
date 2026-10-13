@@ -18,18 +18,23 @@ from ..candidates import (
 from ..contracts import (
     CheckedModelPort,
     CheckedToolPort,
-    canonical_json,
     checked,
     json_hash,
     source_hash,
 )
 from ..intake import validate_source
 from ..ledger import encode
-from ..views import critic, revision
+from ..views import revision
+from .bootstrap import critic_input_prompt, reviewed_proposal
 
 # Freeze loaded implementation bytes once. Later disk edits cannot relabel an already
 # imported controller. Tool implementation bytes are captured alongside sandbox identity.
-CONTROLLER_SOURCE_HASH = source_hash(Path(__file__).read_text())
+CONTROLLER_SOURCE_HASH = json_hash(
+    {p.name: source_hash(p.read_text()) for p in sorted(Path(__file__).parent.glob("*.py"))}
+)
+VIEWS_SOURCE_HASH = source_hash(
+    (Path(__file__).resolve().parents[1] / "views/__init__.py").read_text()
+)
 TOOLS_ROOT = Path(__file__).resolve().parents[2] / "stage2_tools"
 TOOLS_SOURCE_HASH = json_hash(
     {
@@ -45,7 +50,7 @@ POLICY = {
     "search_candidates": 8,
     "investigation_inputs": 8,
     "final_reserve": 128,
-    "critic_format": "critic-shape-v2",
+    "critic_format": "critic-shape-v3",
     "priority": [
         "new_counterexample",
         "local_search",
@@ -136,6 +141,8 @@ class Stopped(Exception):
 
 
 class FixedController:
+    policy_mode = "fixed"
+
     def __init__(
         self,
         ledger,
@@ -146,11 +153,15 @@ class FixedController:
         manifest_hash,
         runtime_hash,
         mode="fixture",
+        critic_bootstrap="raw",
     ):
         self.ledger, self.model = ledger, model_port
         self.tool = TraceArchivePort(tool_port, ledger)
         self.identities, self.manifest_hash = identities, manifest_hash
         self.runtime_hash, self.mode = runtime_hash, mode
+        if critic_bootstrap not in {"raw", "reviewed"}:
+            raise ValueError("Unknown Critic bootstrap mode")
+        self.critic_bootstrap = critic_bootstrap
         if mode == "live":
             from codejury.stage2_tools.port import ToolPortImpl
             from codejury.stage2_tools.runner.docker import DockerSandbox
@@ -493,52 +504,28 @@ class FixedController:
 
     def criticize(self, action, snapshot):
         targets = [c for c in snapshot["candidates"] if c["candidate_id"] in action["target_ids"]]
-        prompt = critic(
+        if "critic" not in self.identities and self.critic_bootstrap == "reviewed":
+            proposal = reviewed_proposal(
+                self.problem, action["target_ids"], action["parameters"]["mode"], self.seed
+            )
+            identifier = ident("reviewed-bootstrap")
+            record(
+                self.ledger,
+                self.run_id,
+                "critic_mode",
+                identifier,
+                {"request_id": identifier, "mode": "reviewed_bootstrap", "proposal": proposal},
+            )
+            return self.investigate_proposal(proposal, action, snapshot, targets)
+        prompt = critic_input_prompt(
             self.problem,
             snapshot["tests"],
             targets,
             [e for e in snapshot["executions"] if e["candidate_id"] in action["target_ids"]],
+            action["parameters"]["mode"],
+            self.seed,
+            gaps=snapshot["audit_gaps"],
             trace_reader=self.ledger.read_object,
-        )
-        prompt += (
-            "\nReturn exact CriticDraft fields: mode, requirement_ids, generator_spec, "
-            "concrete_inputs, oracle_spec, target_candidate_ids, rationale. "
-            "Exactly one of generator_spec/concrete_inputs must be non-null. Mode: "
-            + action["parameters"]["mode"]
-        )
-        approved = [
-            r
-            for r in self.problem["requirements"]
-            if r["approval_status"] == "approved" and r["property_template_id"]
-        ]
-        shape = {
-            "mode": action["parameters"]["mode"],
-            "requirement_ids": action["requirement_ids"],
-            "generator_spec": {
-                "family": "general",
-                "argument_index": 0,
-                "parameters": {},
-                "seed": self.seed,
-            },
-            "concrete_inputs": None,
-            "oracle_spec": {
-                "kind": "property",
-                "property_id": approved[0]["property_template_id"],
-                "parameters": {},
-            }
-            if approved
-            else {"kind": "observation", "hypothesis": "Compare outputs on new inputs"},
-            "target_candidate_ids": action["target_ids"],
-            "rationale": "Explore a bounded experiment under the approved contract",
-        }
-        prompt += (
-            "\nRequired output shape (choose a useful registered generator "
-            "or concrete input vectors; "
-            "no Markdown fences, no new literal expectations):\n"
-            + canonical_json(shape).decode()
-            + "\nRegistered generator families: general, empty, singleton, duplicates, ascending, "
-            "descending, boundary, negative, unicode, missing_key, audit_site. "
-            "Keep all seven fields and the nested generator parameters and seed."
         )
         role = "critic" if "critic" in self.identities else "raw"
         request = checked(
@@ -592,6 +579,16 @@ class FixedController:
             )
             # A refused challenge cannot authorize selection.
             return False
+        return self.investigate_proposal(proposal, action, snapshot, targets)
+
+    def investigate_proposal(self, proposal, action, snapshot, targets):
+        proposal = checked(proposal, "CriticDraft")
+        if (
+            proposal["mode"] != action["parameters"]["mode"]
+            or not set(proposal["target_candidate_ids"]) <= set(action["target_ids"])
+            or not set(proposal["requirement_ids"]) <= set(action["requirement_ids"])
+        ):
+            raise ValueError("Investigation proposal is outside the chosen action")
         proposal = checked(
             {
                 "schema_version": "stage2.v1",
@@ -774,6 +771,7 @@ class FixedController:
                 for c in projected["candidates"]
             ]
         snapshot.update(
+            policy_mode=self.policy_mode,
             status=status,
             phase="finished",
             candidates=projected["candidates"],
@@ -823,7 +821,7 @@ class FixedController:
             )
         return snapshot
 
-    def run(self, problem, tests, *, cancel, seed=17, provenance=None, limits=None):
+    def admit(self, problem, tests, *, cancel, seed=17, provenance=None, limits=None):
         self.problem = checked(problem, "Problem")
         self.run_id, self.cancel, self.seed = ident("run"), cancel, seed
         self.actions, self.audited, self.challenged = [], set(), set()
@@ -834,6 +832,9 @@ class FixedController:
             "runtime_hash": self.runtime_hash,
             "model_manifest_hash": self.manifest_hash,
             "controller_source_hash": CONTROLLER_SOURCE_HASH,
+            "views_source_hash": VIEWS_SOURCE_HASH,
+            "critic_bootstrap": self.critic_bootstrap,
+            "policy_mode": self.policy_mode,
             "tools_source_hash": TOOLS_SOURCE_HASH,
         }
         self.ledger.create_run(
@@ -864,6 +865,26 @@ class FixedController:
         )
         for test in tests:
             self.ledger.add_test(self.run_id, test)
+        return self.run_id
+
+    def run(self, problem, tests, *, cancel, seed=17, provenance=None, limits=None, admitted=False):
+        if not admitted:
+            self.admit(
+                problem, tests, cancel=cancel, seed=seed, provenance=provenance, limits=limits
+            )
+        else:
+            snapshot = self.ledger.snapshot(self.run_id)
+            if (
+                self.problem != problem
+                or snapshot["problem"] != problem
+                or snapshot["tests"] != tests
+                or self.cancel is not cancel
+                or self.seed != seed
+                or snapshot["status"] not in {"running", "queued"}
+            ):
+                raise ValueError("Admitted run identity or inputs changed before dispatch")
+            with self.ledger.connection() as db:
+                db.execute("UPDATE runs SET status='running' WHERE id=?", (self.run_id,))
         try:
             self.check_running()
             from codejury.stage2_tools.oracles import OracleError
@@ -899,8 +920,7 @@ class FixedController:
             while len(self.actions) < POLICY["max_actions"]:
                 self.check_running()
                 state, _ = self.state()
-                record(self.ledger, self.run_id, "state", state["state_id"], state)
-                record(self.ledger, self.run_id, "episode", state["state_id"], self.episode(state))
+                self.freeze_episode(state)
                 result = self.execute(state, self.choose(state))
                 if result is not None:
                     return result
@@ -912,6 +932,34 @@ class FixedController:
         except Exception as exc:
             self.finish("infrastructure_error", type(exc).__name__ + ": controller failed closed")
             raise
+
+    def freeze_episode(self, state):
+        episode = self.episode(state)
+        with self.ledger.connection() as db:
+            request_ids = [
+                r[0]
+                for r in db.execute(
+                    "SELECT id FROM requests WHERE run_id=? ORDER BY rowid", (self.run_id,)
+                )
+            ]
+            event_id = db.execute(
+                "SELECT MAX(seq) FROM events WHERE run_id=?", (self.run_id,)
+            ).fetchone()[0]
+        record(self.ledger, self.run_id, "state", state["state_id"], state)
+        record(self.ledger, self.run_id, "episode", state["state_id"], episode)
+        record(
+            self.ledger,
+            self.run_id,
+            "episode_anchor",
+            state["state_id"],
+            {
+                "episode_hash": json_hash(episode),
+                "request_ids": request_ids,
+                "last_event_id": event_id,
+                "remaining_budget": state["remaining_budget"],
+            },
+        )
+        return episode
 
     def episode(self, state):
         snapshot = self.ledger.snapshot(self.run_id)

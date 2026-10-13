@@ -1,0 +1,19 @@
+version: stage2.critic-training.v1
+runtime_config: config/stage2_core/runtime.yaml
+registry: artifacts/stage2_core/fixer-b-training/selected/registry.json
+tool_config: ../integration/stage2/tools.yaml
+ledger: artifacts/stage2_core/fixed-collection
+reports:
+  - artifacts/stage2_core/fixed-collection/reviewed-train-v2.json
+  - artifacts/stage2_core/fixed-collection/reviewed-validation-v2.json
+corpus: artifacts/stage2_tools/critic-training/corpus-v1
+seed: 17
+recipe:
+  pilot_steps: 20
+  steps: 100
+  save_every: 50
+  batch_size: 1
+  max_seq_length: 4096
+  learning_rate: 0.0001
+  grad_checkpoint: true
+  seed: 17
