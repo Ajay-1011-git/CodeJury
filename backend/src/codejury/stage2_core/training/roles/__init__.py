@@ -17,7 +17,7 @@ from ..fixer_a.refresh import checkpoint_registry, reload_check, verify_pilot
 
 
 def train(role, corpus, registry_path, runtime_config, recipe, out, *, phase="pilot", pilot=None):
-    if role not in {"critic", "judge", "general"} or phase not in {"pilot", "full"}:
+    if role not in {"fixer_a", "critic", "judge", "general"} or phase not in {"pilot", "full"}:
         raise ValueError("Unsupported new role or training phase")
     required = {
         "pilot_steps",
@@ -65,6 +65,10 @@ def train(role, corpus, registry_path, runtime_config, recipe, out, *, phase="pi
         if source.is_symlink() or file_hash(source) != manifest["files"][name]:
             raise ValueError("Corpus file identity mismatch")
     registry = Registry(Path(registry_path))
+    initial_hash = None
+    if role == "fixer_a":
+        registry.verify_adapter(role)
+        initial_hash = registry.identity(role)["adapter_hash"]
     training_root = Path(__file__).resolve().parents[1]
     trainer_sources = {
         str(p.relative_to(local_path("."))): file_hash(p)
@@ -81,7 +85,7 @@ def train(role, corpus, registry_path, runtime_config, recipe, out, *, phase="pi
             "data_manifest_hash": file_hash(manifest_path),
             "base_revision_hash": registry.base["base_revision_hash"],
             "topology_hash": registry.record["topology_hash"],
-            "initial_adapter_hash": None,
+            "initial_adapter_hash": initial_hash,
             "trainer_sources": trainer_sources,
         }
     )
@@ -106,7 +110,7 @@ def train(role, corpus, registry_path, runtime_config, recipe, out, *, phase="pi
         "job_identity": identity,
         "registry_path": str(registry.path),
         "registry_hash": registry.manifest_hash,
-        "initial_adapter_hash": None,
+        "initial_adapter_hash": initial_hash,
         "recipe": recipe,
         "steps": steps,
         "data_directory": str(data),
@@ -136,7 +140,15 @@ def train(role, corpus, registry_path, runtime_config, recipe, out, *, phase="pi
             stderr=subprocess.STDOUT,
             text=True,
             bufsize=1,
-            env={**os.environ, "HF_HUB_OFFLINE": "1", "TOKENIZERS_PARALLELISM": "false"},
+            env={
+                **{
+                    key: value
+                    for key, value in os.environ.items()
+                    if key not in {"GROQ_API_KEY", "groq_api_1", "groq_api_2", "groq_api_3"}
+                },
+                "HF_HUB_OFFLINE": "1",
+                "TOKENIZERS_PARALLELISM": "false",
+            },
         )
         try:
             for line in child.stdout:

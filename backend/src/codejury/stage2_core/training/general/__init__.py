@@ -159,6 +159,12 @@ def build(config_path, out):
             chosen.extend(cycle[: count - len(chosen)])
         rows.extend(chosen)
         rows.extend(splits["validation"])
+    if "teacher_training" in cfg:
+        from .teacher import opportunities
+
+        extra, proof = opportunities(cfg["teacher_training"], by_id, local_path(cfg["registry"]))
+        rows.extend(extra)
+        proofs["teacher_fixer_a"] = proof
     train_bases = {r["base_problem_id"] for r in rows if r["split"] == "train"}
     valid_bases = {r["base_problem_id"] for r in rows if r["split"] == "validation"}
     if train_bases & valid_bases:

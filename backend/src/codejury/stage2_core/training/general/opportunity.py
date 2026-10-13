@@ -31,6 +31,7 @@ def audit(
     *,
     relative_tolerance=0.1,
     general_step=None,
+    teacher_training=None,
 ):
     registry = Registry(Path(registry_path))
     general = json.loads(Path(general_report).read_text())
@@ -75,15 +76,41 @@ def audit(
         "critic": exposure(
             local_path("artifacts/stage2_tools/critic-training/full-v1"), critic["selected"]["step"]
         ),
-        "judge": exposure(
-            judge_report_path.parent, judge["selected"]["step"]
-        ),
+        "judge": exposure(judge_report_path.parent, judge["selected"]["step"]),
     }
+    teacher_registry = None
+    if teacher_training is not None:
+        teacher_report_path = local_path(teacher_training["training_report"])
+        teacher_report = json.loads(teacher_report_path.read_text())
+        teacher_session = json.loads(teacher_report_path.with_name("session.json").read_text())
+        old_a = json.loads(
+            local_path("artifacts/stage2_core/fixer-a-refresh/full-seed17/report.json").read_text()
+        )
+        selected_step = teacher_training["selected_step"]
+        candidate = next(
+            (c for c in teacher_report["candidates"] if c["step"] == selected_step), None
+        )
+        if (
+            teacher_report["role"] != "fixer_a"
+            or teacher_report["phase"] != "full"
+            or not teacher_report["updates_verified"]
+            or not teacher_report["reload_verified"]
+            or candidate is None
+            or teacher_session["initial_adapter_hash"] != old_a["adapter_hash"]
+        ):
+            raise ValueError("Teacher A exposure lacks verified warm-start lineage")
+        teacher_registry = Registry(Path(candidate["registry_path"]))
+        if registry.identity("fixer_a") != teacher_registry.identity("fixer_a"):
+            raise ValueError("Teacher A exposure differs from the deployed checkpoint")
+        roles["teacher_fixer_a"] = exposure(teacher_report_path.parent, selected_step)
+        roles["teacher_fixer_a"]["training_report_hash"] = file_hash(teacher_report_path)
     for role, directory in (
         ("fixer_a", "artifacts/stage2_core/fixer-a-refresh/full-seed17"),
         ("fixer_b", "artifacts/stage2_core/fixer-b-training/alpha4-full"),
     ):
         actual = json.loads(local_path(directory + "/report.json").read_text())
+        if role == "fixer_a" and teacher_registry is not None:
+            continue  # Verified inherited A -> actual selected teacher A chain above.
         if registry.identity(role)["adapter_hash"] != actual["adapter_hash"]:
             raise ValueError("Deployed repair role differs from its measured full job")
     comparator = exposure(Path(general_report).parent, general_step)

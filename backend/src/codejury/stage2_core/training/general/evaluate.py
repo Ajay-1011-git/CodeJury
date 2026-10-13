@@ -153,6 +153,7 @@ def select(training_report, cfg, out):
             out / ("opportunity-" + str(candidate["step"]) + ".json"),
             relative_tolerance=cfg["opportunity_relative_tolerance"],
             general_step=candidate["step"],
+            teacher_training=cfg.get("teacher_training"),
         )
         if not opportunity["comparable"]:
             excluded.append(
@@ -215,6 +216,7 @@ def select(training_report, cfg, out):
         out / "opportunity.json",
         relative_tolerance=cfg["opportunity_relative_tolerance"],
         general_step=best["step"],
+        teacher_training=cfg.get("teacher_training"),
     )
     result = {
         "status": "completed_native_general_selection",

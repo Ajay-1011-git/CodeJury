@@ -1,0 +1,2 @@
+# Offline teacher only. Inspected 2026-10-13; no runtime dependency.
+groq==1.7.0

@@ -56,6 +56,7 @@ def main():
             args.out,
             relative_tolerance=cfg["opportunity_relative_tolerance"],
             general_step=args.selected_step,
+            teacher_training=cfg.get("teacher_training"),
         )
     else:
         if args.corpus is None:

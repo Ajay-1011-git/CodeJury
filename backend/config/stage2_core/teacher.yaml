@@ -1,0 +1,23 @@
+version: stage2.teacher.v1
+model: openai/gpt-oss-120b
+source_config: config/stage2_core/training/fixer_a.yaml
+artifact_root: artifacts/stage2_core/teacher
+ledger: artifacts/stage2_core/teacher/budget.sqlite
+max_base_problems: 20
+variants_per_base: 2
+max_http_attempts: 60
+max_cost_usd: 1.0
+max_completion_tokens: 4096
+max_in_flight: 1
+timeout_seconds: 60
+sdk_retries: 0
+additional_attempts_per_example: 2
+student:
+  pilot_steps: 20
+  steps: 100
+  save_every: 50
+  batch_size: 1
+  max_seq_length: 4096
+  learning_rate: 0.00005
+  grad_checkpoint: true
+  seed: 17
