@@ -1,0 +1,83 @@
+{
+  "adapter_hash": "dc7b5c7051ca49b11e8ac377c8d5f0bded8fa6cd1c7ff95cece4366e5e0f61fc",
+  "base_revision_hash": "ea4263251ed95217216052b4ef30af3f7c6a82dbd5f60204f1ff83f301fe877e",
+  "config_hash": "efb183bd4387fb9f4cae70b5054924d93b72f94653dd6bc7e6503731abf72a7f",
+  "data_manifest_hash": "685471636bea532d382515b95b22b23d838a40ce12d9a2cffdf3cb00de108b0f",
+  "evaluation_summary": "Actual held-out menus: 28/28 valid; 21 empirical-label matches. Limited genuine continuations; no final benchmark claim.",
+  "loss_points": [
+    {
+      "step": 0,
+      "train_loss": null,
+      "validation_loss": 1.5946195125579834
+    },
+    {
+      "step": 10,
+      "train_loss": 0.4431910514831543,
+      "validation_loss": null
+    },
+    {
+      "step": 20,
+      "train_loss": 0.0056378010660409926,
+      "validation_loss": null
+    },
+    {
+      "step": 30,
+      "train_loss": 0.0012777697294950486,
+      "validation_loss": null
+    },
+    {
+      "step": 40,
+      "train_loss": 0.025235062837600707,
+      "validation_loss": null
+    },
+    {
+      "step": 49,
+      "train_loss": null,
+      "validation_loss": 0.13704781234264374
+    },
+    {
+      "step": 50,
+      "train_loss": 0.004742660000920296,
+      "validation_loss": null
+    },
+    {
+      "step": 60,
+      "train_loss": 0.0011004808358848095,
+      "validation_loss": null
+    },
+    {
+      "step": 70,
+      "train_loss": 0.023663179576396944,
+      "validation_loss": null
+    },
+    {
+      "step": 80,
+      "train_loss": 0.004278688505291939,
+      "validation_loss": null
+    },
+    {
+      "step": 90,
+      "train_loss": 0.0008515148423612118,
+      "validation_loss": null
+    },
+    {
+      "step": 99,
+      "train_loss": null,
+      "validation_loss": 0.015986643731594086
+    },
+    {
+      "step": 100,
+      "train_loss": 0.000141669565346092,
+      "validation_loss": null
+    }
+  ],
+  "quantization_hash": "4816c1f4598804ce99e6dfb1c2ab084cc1d1cfa3f2daa48df649f7c567f3f3b3",
+  "role": "judge",
+  "schema_version": "stage2.v1",
+  "status": "completed",
+  "steps": 100,
+  "tokenizer_hash": "84b3439c77d6ca58bdcbfaef4c431f133922fbd3bd788a63f790b70d73564ddb",
+  "topology_hash": "6c0627a1530aba8b63207e8dba8269c1ebac731a0f854af31b0608da9bd62a57",
+  "train_base_problems": 38,
+  "train_records": 80
+}

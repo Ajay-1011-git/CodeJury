@@ -1,0 +1,34 @@
+{
+  "version": "stage2.judge-public-validation.v1",
+  "runtime_mode": "live",
+  "split": "validation",
+  "selected_step": 100,
+  "contains_final_assessment": false,
+  "trials": [
+    {
+      "records": 28,
+      "base_problems": 10,
+      "unique_states": 14,
+      "valid_choices": 26,
+      "empirical_label_matches": 22,
+      "adapter_hash": "abbddef18849f958d9f68d658c2db8fd4ca336101bc01fac433a63d3daf07321",
+      "data_manifest_hash": "685471636bea532d382515b95b22b23d838a40ce12d9a2cffdf3cb00de108b0f",
+      "step": 50
+    },
+    {
+      "records": 28,
+      "base_problems": 10,
+      "unique_states": 14,
+      "valid_choices": 28,
+      "empirical_label_matches": 21,
+      "adapter_hash": "dc7b5c7051ca49b11e8ac377c8d5f0bded8fa6cd1c7ff95cece4366e5e0f61fc",
+      "data_manifest_hash": "685471636bea532d382515b95b22b23d838a40ce12d9a2cffdf3cb00de108b0f",
+      "step": 100
+    }
+  ],
+  "limitations": [
+    "Ten validation bases and fourteen states; ID augmentations are not independent samples.",
+    "Menu validity and empirical-label agreement do not establish end-to-end repair gains.",
+    "First full job failed validity and remains retained; two revised checkpoints were compared."
+  ]
+}

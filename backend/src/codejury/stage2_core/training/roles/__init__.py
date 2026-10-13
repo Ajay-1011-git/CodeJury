@@ -65,6 +65,15 @@ def train(role, corpus, registry_path, runtime_config, recipe, out, *, phase="pi
         if source.is_symlink() or file_hash(source) != manifest["files"][name]:
             raise ValueError("Corpus file identity mismatch")
     registry = Registry(Path(registry_path))
+    training_root = Path(__file__).resolve().parents[1]
+    trainer_sources = {
+        str(p.relative_to(local_path("."))): file_hash(p)
+        for p in (
+            Path(__file__).resolve(),
+            training_root / "fixer_a/native.py",
+            training_root / "fixer_a/refresh.py",
+        )
+    }
     identity = json_hash(
         {
             "role": role,
@@ -73,6 +82,7 @@ def train(role, corpus, registry_path, runtime_config, recipe, out, *, phase="pi
             "base_revision_hash": registry.base["base_revision_hash"],
             "topology_hash": registry.record["topology_hash"],
             "initial_adapter_hash": None,
+            "trainer_sources": trainer_sources,
         }
     )
     if phase == "full":
@@ -107,6 +117,7 @@ def train(role, corpus, registry_path, runtime_config, recipe, out, *, phase="pi
         "train_base_problems": manifest["splits"]["train"]["base_problems"],
         "validation_records": manifest["splits"]["validation"]["records"],
         "pilot_proof_hash": file_hash(pilot) if pilot else None,
+        "trainer_sources": trainer_sources,
     }
     session_path = directory / "session.json"
     command = [

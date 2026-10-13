@@ -3,9 +3,9 @@ source_manifest: data/manifests/stage1.json
 a_training: artifacts/stage2_core/fixer-a-refresh/full-seed17
 b_training: artifacts/stage2_core/fixer-b-training/alpha4-full
 critic_corpus: artifacts/stage2_tools/critic-training/corpus-v1
-judge_corpus: artifacts/stage2_core/judge-learning/corpus-v1
-registry: artifacts/stage2_core/judge-learning/selected-v1/registry.json
-judge_selection: artifacts/stage2_core/judge-learning/selected-v1/selection.json
+judge_corpus: artifacts/stage2_core/judge-learning/corpus-v2
+registry: artifacts/stage2_core/judge-learning/selected-v2/registry.json
+judge_selection: artifacts/stage2_core/judge-learning/selected-v2/selection.json
 runtime_config: config/stage2_core/runtime.yaml
 # Sampling weights reflect deployed gradient updates, including A's inherited 100 updates.
 # Actual completion-token exposure must be audited after both native jobs; this is not

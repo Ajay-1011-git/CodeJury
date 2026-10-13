@@ -354,6 +354,10 @@ class FixedController:
             "suite_hash": projected["suite_hash"],
         }
         state["available_actions"] = self.options(state, snapshot, candidates)
+        # Menu identifiers are local to this exact state. The Judge must also return
+        # the unique state_id, so a choice from an older state remains invalid.
+        for index, option in enumerate(state["available_actions"], 1):
+            option["option_id"] = f"option-{index:02d}"
         return checked(state, "StateSnapshot"), candidates
 
     def option(self, kind, targets, params, reason, state):

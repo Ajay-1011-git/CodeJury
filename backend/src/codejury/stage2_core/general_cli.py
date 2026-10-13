@@ -4,18 +4,18 @@ import argparse
 import json
 from pathlib import Path
 
-import yaml
-
 from .registry import local_path
-from .training.general import build
+from .training.general import build, configuration, validate
 from .training.roles import train
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", choices=["build", "train", "evaluate", "select", "audit"])
+    parser.add_argument(
+        "command", choices=["build", "validate", "train", "evaluate", "select", "audit"]
+    )
     parser.add_argument("--config", type=Path, required=True)
-    parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--out", type=Path)
     parser.add_argument("--corpus", type=Path)
     parser.add_argument("--phase", choices=["pilot", "full"], default="pilot")
     parser.add_argument("--pilot-proof", type=Path)
@@ -23,11 +23,15 @@ def main():
     parser.add_argument("--training-report", type=Path)
     parser.add_argument("--selected-step", type=int)
     args = parser.parse_args()
-    cfg = yaml.safe_load(args.config.read_text())
-    if cfg["version"] != "stage2.general-learning.v1":
-        raise ValueError("Unknown General learning configuration")
+    if args.command != "validate" and args.out is None:
+        parser.error("This operation needs --out")
+    cfg = configuration(args.config)
     if args.command == "build":
         result = build(args.config, args.out)
+    elif args.command == "validate":
+        if args.corpus is None:
+            parser.error("validate needs --corpus")
+        result = validate(args.corpus)
     elif args.command == "evaluate":
         if args.registry is None:
             parser.error("evaluate needs --registry")
@@ -56,6 +60,7 @@ def main():
     else:
         if args.corpus is None:
             parser.error("train needs --corpus")
+        validate(args.corpus)
         result = train(
             "general",
             args.corpus,

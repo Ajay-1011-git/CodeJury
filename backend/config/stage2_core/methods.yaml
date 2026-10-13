@@ -2,6 +2,7 @@ version: stage2.live-methods.v1
 evaluation_config: config/stage2_tools/evaluation-validation.yaml
 ledger_directory: artifacts/stage2_core/method-runs
 control_registry_directory: artifacts/stage2_core/baseline-controls
+opportunity_report: artifacts/stage2_core/general-learning/selected-v1/opportunity.json
 controls:
   B-unweighted:
     training_report: artifacts/stage2_core/fixer-b-training/alpha0-full/report.json

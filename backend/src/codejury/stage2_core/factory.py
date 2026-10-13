@@ -76,6 +76,7 @@ def make_baseline_port(config_path, model_port, tool_port, *, evaluation_config=
             "evaluation_config",
             "ledger_directory",
             "control_registry_directory",
+            "opportunity_report",
             "controls",
         }
         or settings["version"] != "stage2.live-methods.v1"
@@ -87,6 +88,8 @@ def make_baseline_port(config_path, model_port, tool_port, *, evaluation_config=
         settings["controls"],
         local_path(settings["control_registry_directory"]) / uuid4().hex,
     )
-    return BaselinePort(
+    port = BaselinePort(
         config, model_port, tool_port, local_path(settings["ledger_directory"]), variants=controls
     )
+    port.opportunity_report = local_path(settings["opportunity_report"])
+    return port

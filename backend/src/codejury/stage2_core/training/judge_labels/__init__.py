@@ -4,6 +4,7 @@ import copy
 import json
 from collections import defaultdict
 from pathlib import Path
+from random import SystemRandom
 from uuid import uuid4
 
 from codejury.models.worker import file_hash
@@ -62,6 +63,13 @@ def augment_ids(episode, target):
                 gather(item)
 
     gather(episode)
+    # Match the state-scoped runtime menu format, while shuffling the labels so
+    # action semantics cannot be learned from a fixed position/identifier.
+    options = episode["state"]["available_actions"]
+    labels = SystemRandom().sample(range(1, len(options) + 1), len(options))
+    for option, index in zip(options, labels, strict=True):
+        mapping[option["option_id"]] = f"option-{index:02d}"
+    mapping[episode["state"]["state_id"]] = "state-" + uuid4().hex
 
     def remap(value):
         if type(value) is dict:
@@ -316,6 +324,7 @@ def label(rollout_directory, out, *, minimum_margin=0.001):
         "files": {n: file_hash(out / n) for n in ("train.jsonl", "valid.jsonl", "records.jsonl")},
         "excluded": excluded,
         "tie_policy": {"minimum_margin": minimum_margin, "action": "exclude"},
+        "identifier_view": "state-scoped option-NN, shuffled bijectively per ID augmentation",
         "limitations": [
             "Limited genuine states; two ID variants are not independent observations.",
             "Greedy seeds are repeated real runs, not independent random samples.",

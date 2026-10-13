@@ -107,6 +107,19 @@ class Harness:
                         record = self._run_one(task, entry, seed, regimes)
                         records.append(record)
                         handle.write(json.dumps(record, sort_keys=True) + "\n")
+                        handle.flush()
+                        if self.mode == "live":
+                            print(
+                                json.dumps(
+                                    {
+                                        "committed_runs": len(records),
+                                        "total_runs": len(plan) * len(tasks) * len(seeds),
+                                        "method": entry["method"],
+                                        "status": record["status"],
+                                    }
+                                ),
+                                flush=True,
+                            )
         self.commit_digest = hashlib.sha256(log.read_bytes()).hexdigest()
         return records
 

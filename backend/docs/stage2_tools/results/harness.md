@@ -21,8 +21,7 @@ method run and no quality claim exists yet (that is S2.12, after S2.08/S2.10).
 Methods: B0, B1, B2, B3, B4, CJ, time-matched B3/B4/CJ and the seven ablations
 (`config/stage2_tools/evaluation.yaml`; validation experiments use `evaluation-validation.yaml`,
 which can never target the final split). Frozen method config hash = SHA-256 of the canonical
-method block + regime caps + profile; the BaselinePort must register the same hash (**to be
-reconciled with the core at integration**).
+method block + regime caps + profile + declared sampling/public seeds. The native BaselinePort now registers those exact hashes and refuses changed caps/configuration.
 
 ## Statistics
 Per base problem the mean over seeds is taken; the resampling unit is the base problem
@@ -49,3 +48,7 @@ event export (null in reports). Peak memory is null unless the runtime measured 
 `python -m codejury.stage2_tools.eval_cli smoke --config config/stage2_tools/evaluation-validation.yaml --mode fixture --out artifacts/stage2_tools/harness-check`
 `... run --config config/stage2_tools/evaluation.yaml --split final_assessment --out artifacts/stage2_tools/evaluation` (needs live ports; exits 3 = pending otherwise)
 `... analyze --results artifacts/stage2_tools/evaluation --out artifacts/stage2_tools/benchmark-report.json`
+
+The real factory requires all four completed roles, the trained General comparator and both native B controls before private assessment access. Final E4 additionally requires the comparable-exposure audit, clean committed source, exact model/control/config/runtime/hardware hashes, and an unconsumed final asset. A per-user Mac marker binds final consumption to the asset hash across checkouts and freeze filenames. The sealed loader rejoins the learning seal and checks base/family/reference disjointness. The declared first lexicographic variant per base keeps variants from inflating the independent sample size. Baseline B4 uses four actual raw prompts, including a raw menu choice inside fixed prerequisites; raw receipts never carry adapter identities. The deterministic Fixed-Judge ablation remains distinct.
+
+The actual final commands now require `--freeze`: run `... run --config config/stage2_tools/evaluation.yaml --split final_assessment --freeze artifacts/stage2_core/e4.json --freeze-only --out artifacts/stage2_tools/final-unused` to write the freeze after validation; omit `--freeze-only` and choose a new `--out` directory for the single final run. No final assessment has run at this checkpoint.

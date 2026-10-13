@@ -1,5 +1,5 @@
 profile: mac-standard-v1
-model_manifest: artifacts/stage2_tools/critic-training/selected-v1/registry.json
+model_manifest: artifacts/stage2_core/judge-learning/selected-v2/registry.json
 # CODEJURY_STAGE2_MODEL_MANIFEST overrides this local, ignored registry path.
 startup_timeout_s: 60
 shutdown_grace_s: 5

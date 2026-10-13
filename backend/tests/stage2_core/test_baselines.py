@@ -95,61 +95,7 @@ def test_general_allocates_its_first_action_and_preserves_physical_role(tmp_path
         "model_revision_hash": "c" * 64,
     }
 
-    class FixtureGeneral:
-        def __init__(self):
-            self.requests = []
-
-        def generate(self, request, cancel):
-            self.requests.append(request)
-            payload = json.JSONDecoder().raw_decode(
-                request["prompt"].split("Runtime-visible facts:\n")[1]
-            )[0]
-            if payload.get("view_format") == "judge-summary.v2":
-                state = payload["state"]
-                priorities = {
-                    "select": 0,
-                    "audit": 1,
-                    "criticize": 2,
-                    "generate": 3,
-                    "search": 4,
-                    "abstain": 5,
-                }
-                selected = min(
-                    state["available_actions"], key=lambda o: priorities[o["action"]["kind"]]
-                )
-                answer = {
-                    "state_id": state["state_id"],
-                    "action_option_id": selected["option_id"],
-                    "evidence_ids": [],
-                    "rationale": "Trusted General policy fixture",
-                }
-            elif "Mode: " in request["prompt"]:
-                answer = {
-                    "mode": request["prompt"].split("Mode: ")[1].split("\n")[0],
-                    "requirement_ids": ["sum-all"],
-                    "generator_spec": None,
-                    "concrete_inputs": [[[-1]]],
-                    "oracle_spec": {
-                        "kind": "property",
-                        "property_id": "sum_ints",
-                        "parameters": {},
-                    },
-                    "target_candidate_ids": [c["candidate_id"] for c in payload["candidates"]],
-                    "rationale": "Trusted General test fixture",
-                }
-            else:
-                answer = {**fixture("repair-draft"), "source": GOOD}
-            response = fixture("model-response")
-            response.update(
-                request_id=request["request_id"],
-                role="general",
-                text=json.dumps(answer),
-                usage={**zero_usage(), "input_tokens": 10, "output_tokens": 20},
-                **identity,
-            )
-            return response
-
-    model = FixtureGeneral()
+    model = FixtureTaskModel(identity, "general")
     control = GeneralController(
         Ledger(tmp_path),
         model,
@@ -169,6 +115,96 @@ def test_general_allocates_its_first_action_and_preserves_physical_role(tmp_path
     assert result["resource_usage"]["judge_decisions"] >= 1
     assert all(
         c["model_config_hash"] == identity["model_config_hash"]
+        for c in result["candidates"]
+        if c["origin"] != "original"
+    )
+
+
+class FixtureTaskModel:
+    def __init__(self, identity, role):
+        self.identity, self.role, self.requests = identity, role, []
+
+    def generate(self, request, cancel):
+        assert request["role"] == self.role
+        self.requests.append(request)
+        payload = json.JSONDecoder().raw_decode(
+            request["prompt"].split("Runtime-visible facts:\n")[1]
+        )[0]
+        if payload.get("view_format") == "judge-summary.v2":
+            state = payload["state"]
+            priorities = {
+                "select": 0,
+                "audit": 1,
+                "criticize": 2,
+                "generate": 3,
+                "search": 4,
+                "abstain": 5,
+            }
+            selected = min(
+                state["available_actions"], key=lambda o: priorities[o["action"]["kind"]]
+            )
+            answer = {
+                "state_id": state["state_id"],
+                "action_option_id": selected["option_id"],
+                "evidence_ids": [],
+                "rationale": "Trusted General policy fixture",
+            }
+        elif "Mode: " in request["prompt"]:
+            answer = {
+                "mode": request["prompt"].split("Mode: ")[1].split("\n")[0],
+                "requirement_ids": ["sum-all"],
+                "generator_spec": None,
+                "concrete_inputs": [[[-1]]],
+                "oracle_spec": {
+                    "kind": "property",
+                    "property_id": "sum_ints",
+                    "parameters": {},
+                },
+                "target_candidate_ids": [c["candidate_id"] for c in payload["candidates"]],
+                "rationale": "Trusted General test fixture",
+            }
+        else:
+            answer = {**fixture("repair-draft"), "source": GOOD}
+        response = fixture("model-response")
+        response.update(
+            request_id=request["request_id"],
+            role=self.role,
+            text=json.dumps(answer),
+            usage={**zero_usage(), "input_tokens": 10, "output_tokens": 20},
+            **self.identity,
+        )
+        return response
+
+
+def test_four_prompted_roles_use_raw_weights_and_fixed_guarded_menus(tmp_path):
+    from stage2_tools.hostsandbox import FixtureHostSandbox
+
+    from codejury.stage2_core.baselines.prompted import PromptedController
+    from codejury.stage2_core.ledger import Ledger
+    from codejury.stage2_tools.port import ToolPortImpl
+
+    model = FixtureTaskModel(RAW, "raw")
+    control = PromptedController(
+        Ledger(tmp_path),
+        model,
+        ToolPortImpl(FixtureHostSandbox()),
+        {"raw": RAW},
+        manifest_hash="a" * 64,
+        runtime_hash=FixtureHostSandbox.runtime_hash,
+        mode="fixture",
+        model_roles={"fixer_a": "raw", "fixer_b": "raw"},
+        critic_role="raw",
+    )
+    result = run(control)
+    assert result["status"] == "supported_patch" and result["policy_mode"] == "fixed"
+    assert all(r["role"] == "raw" for r in model.requests)
+    assert result["resource_usage"]["judge_decisions"] >= 1
+    assert result["resource_usage"]["learned_candidates"] == 2
+    assert all(
+        c["mode"] == "raw_prompted" for c in records(control.ledger, control.run_id, "judge_choice")
+    )
+    assert all(
+        c["model_config_hash"] == RAW["model_config_hash"]
         for c in result["candidates"]
         if c["origin"] != "original"
     )

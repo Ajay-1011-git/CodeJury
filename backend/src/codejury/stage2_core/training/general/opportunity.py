@@ -35,6 +35,18 @@ def audit(
     registry = Registry(Path(registry_path))
     general = json.loads(Path(general_report).read_text())
     judge = json.loads(Path(judge_selection).read_text())
+    judge_report_path = Path(judge["training_report_path"])
+    if file_hash(judge_report_path) != judge["training_report_hash"]:
+        raise ValueError("Selected Judge training report changed")
+    judge_report = json.loads(judge_report_path.read_text())
+    if (
+        judge_report["role"] != "judge"
+        or judge_report["phase"] != "full"
+        or not judge_report["updates_verified"]
+        or not judge_report["reload_verified"]
+        or not any(c["step"] == judge["selected"]["step"] for c in judge_report["candidates"])
+    ):
+        raise ValueError("Selected Judge must match a saved verified full training checkpoint")
     critic = json.loads(
         local_path("artifacts/stage2_tools/critic-training/selected-v1/selection.json").read_text()
     )
@@ -64,7 +76,7 @@ def audit(
             local_path("artifacts/stage2_tools/critic-training/full-v1"), critic["selected"]["step"]
         ),
         "judge": exposure(
-            Path(judge_selection).parent.parent / "full-v1", judge["selected"]["step"]
+            judge_report_path.parent, judge["selected"]["step"]
         ),
     }
     for role, directory in (

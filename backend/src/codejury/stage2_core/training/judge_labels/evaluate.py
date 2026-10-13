@@ -179,6 +179,7 @@ def select(training_report, cfg, out):
         "selected": best,
         "trials": trials,
         "training_report_hash": file_hash(training_report),
+        "training_report_path": str(Path(training_report).resolve()),
         "registry_path": str(out / "registry.json"),
         "registry_hash": file_hash(out / "registry.json"),
         "contains_final_assessment": False,

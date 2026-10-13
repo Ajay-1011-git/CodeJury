@@ -8,13 +8,24 @@ import yaml
 
 from codejury.models.worker import file_hash
 
-from ...contracts import canonical_json, json_hash
+from ...contracts import canonical_json, checked, json_hash
 from ...data import learning_example, load_stage1, write_report
 from ...registry import MODEL_SYSTEM, local_path
 
 
 def read_lines(path):
     return [json.loads(line) for line in Path(path).read_text().splitlines()]
+
+
+def configuration(path):
+    cfg = yaml.safe_load(Path(path).read_text())
+    if cfg.get("version") == "stage2.general-entrypoint.v1":
+        if set(cfg) != {"version", "config"}:
+            raise ValueError("Invalid General entrypoint alias")
+        cfg = yaml.safe_load(local_path(cfg["config"]).read_text())
+    if cfg.get("version") != "stage2.general-learning.v1":
+        raise ValueError("Unknown General learning configuration")
+    return cfg
 
 
 def chat(prompt, target):
@@ -119,9 +130,7 @@ def learned(directory, role):
 
 
 def build(config_path, out):
-    cfg = yaml.safe_load(Path(config_path).read_text())
-    if cfg["version"] != "stage2.general-learning.v1":
-        raise ValueError("Unknown General learning configuration")
+    cfg = configuration(config_path)
     out = Path(out).resolve()
     if local_path("artifacts") not in out.parents or out.exists():
         raise ValueError("Immutable ignored General corpus output required")
@@ -154,6 +163,7 @@ def build(config_path, out):
     valid_bases = {r["base_problem_id"] for r in rows if r["split"] == "validation"}
     if train_bases & valid_bases:
         raise ValueError("General base-problem split contamination")
+    rows = [{**r, "chat": {**r["chat"], "task_tag": r["task"]}} for r in rows]
     out.mkdir(parents=True)
     stats = {}
     for split, name in (("train", "train.jsonl"), ("validation", "valid.jsonl")):
@@ -183,3 +193,61 @@ def build(config_path, out):
     }
     write_report(out / "manifest.json", manifest)
     return manifest
+
+
+def validate_row(row):
+    tags = {"fixer_a": "repair", "fixer_b": "repair", "critic": "test", "judge": "action"}
+    schemas = {"repair": "RepairDraft", "test": "CriticDraft", "action": "JudgeDraft"}
+    if (
+        row["component"] not in tags
+        or row["task"] != tags[row["component"]]
+        or row["chat"]["task_tag"] != row["task"]
+    ):
+        raise ValueError("General task-tag/source mismatch")
+    messages = row["chat"]["messages"]
+    if [m["role"] for m in messages] != ["system", "user", "assistant"] or messages[0] != {
+        "role": "system",
+        "content": MODEL_SYSTEM,
+    }:
+        raise ValueError("General chat prefix differs from runtime")
+    checked(json.loads(messages[2]["content"]), schemas[row["task"]])
+
+
+def validate(corpus):
+    corpus = Path(corpus).resolve()
+    manifest = json.loads((corpus / "manifest.json").read_text())
+    if (
+        manifest["role"] != "general"
+        or manifest["runtime_mode"] != "live"
+        or manifest["contains_final_assessment"] is not False
+    ):
+        raise ValueError("Genuine final-free General corpus required")
+    for name, digest in manifest["files"].items():
+        if Path(name).name != name or file_hash(corpus / name) != digest:
+            raise ValueError("Changed General corpus")
+    rows = read_lines(corpus / "records.jsonl")
+    if any(r["split"] not in {"train", "validation"} for r in rows):
+        raise ValueError("Final data cannot enter General learning")
+    for row in rows:
+        validate_row(row)
+    for split, name in (("train", "train.jsonl"), ("validation", "valid.jsonl")):
+        subset = [r for r in rows if r["split"] == split]
+        if (
+            [r["chat"] for r in subset] != read_lines(corpus / name)
+            or len(subset) != manifest["splits"][split]["records"]
+            or len({r["base_problem_id"] for r in subset})
+            != manifest["splits"][split]["base_problems"]
+        ):
+            raise ValueError("General source/chat/count rejoin failed")
+    if {r["base_problem_id"] for r in rows if r["split"] == "train"} & {
+        r["base_problem_id"] for r in rows if r["split"] == "validation"
+    }:
+        raise ValueError("General base split contamination")
+    return {
+        "status": "passed",
+        "role": "general",
+        "runtime_mode": "live",
+        "manifest_hash": file_hash(corpus / "manifest.json"),
+        "splits": manifest["splits"],
+        "native_masking_and_training": "separate mandatory pilot/full checks",
+    }

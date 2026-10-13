@@ -235,6 +235,14 @@ def judge(state, tests, candidates, executions):
         "omitted_gap_ids": max(0, len(state["audit_gap_ids"]) - 12),
     }
     result = prompt("judge", payload)
+    result += "\nResponse constraints: " + canonical_json(
+        {
+            "state_id": state["state_id"],
+            "allowed_action_option_ids": [o["option_id"] for o in state["available_actions"]],
+            "instruction": "Copy this state_id and exactly one allowed action_option_id. "
+            "Use evidence_ids=[] if no visible evidence is needed. Never invent an identifier.",
+        }
+    ).decode()
     if len(result.encode()) > 64000:
         raise ValueError("Judge view exceeds bound; reduce visible summaries explicitly")
     return result

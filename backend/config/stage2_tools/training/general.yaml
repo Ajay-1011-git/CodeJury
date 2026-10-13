@@ -1,0 +1,2 @@
+version: stage2.general-entrypoint.v1
+config: config/stage2_core/training/general.yaml

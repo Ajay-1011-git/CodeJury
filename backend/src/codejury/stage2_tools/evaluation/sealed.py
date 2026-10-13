@@ -5,9 +5,11 @@ import hashlib
 import json
 from pathlib import Path
 
+from codejury.models.worker import file_hash
 from codejury.stage2_core.contracts import checked
-from codejury.stage2_core.data import domain
+from codejury.stage2_core.data import domain, load_stage1
 from codejury.stage2_core.registry import local_path
+from codejury.training.data import assert_disjoint
 
 from .tasks import EvalTask
 
@@ -73,6 +75,10 @@ def load(manifest_path, split, *, methods_ready=False, frozen=False):
         raise ValueError("Research runner permits only the declared validation/final split")
     manifest_path = Path(manifest_path).resolve()
     manifest = json.loads(manifest_path.read_text())
+    source = local_path("data/manifests/stage1.json")
+    if manifest["derived_from"]["sha256"] != file_hash(source):
+        raise ValueError("Assessment manifest no longer derives from the authorized learning seal")
+    _, learning_rows = load_stage1(source)
     entry = manifest["splits"][split]
     if entry["asset"] != PATHS[split] or entry.get("inspected_in_development", False):
         raise ValueError("Assessment asset differs from the unconsumed sealed path")
@@ -90,6 +96,7 @@ def load(manifest_path, split, *, methods_ready=False, frozen=False):
         or any(r["split"] != asset_split for r in rows)
     ):
         raise ValueError("Assessment split/population identity differs from the seal")
+    assert_disjoint([*learning_rows, *rows])
     grouped = {}
     for row in sorted(rows, key=lambda r: r["record_id"]):
         grouped.setdefault(row["base_problem_id"], row)

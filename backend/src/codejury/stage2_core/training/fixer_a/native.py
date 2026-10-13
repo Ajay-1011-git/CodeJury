@@ -12,12 +12,17 @@ from codejury.models.worker import file_hash
 
 from ...data import write_report
 from ...leases import ComputeLease
-from ...registry import MODEL_SYSTEM, Registry
+from ...registry import MODEL_SYSTEM, Registry, local_path
 
 
 def main():
     path = Path(sys.argv[1])
     session = json.loads(path.read_text())
+    if any(
+        file_hash(local_path(name)) != digest
+        for name, digest in session.get("trainer_sources", {}).items()
+    ):
+        raise ValueError("Native trainer implementation changed after the verified pilot/session")
     with ComputeLease(owner="ajay", job_id="role-training-" + uuid4().hex, kind="training"):
         import mlx.core as mx
         import numpy as np
@@ -117,6 +122,12 @@ def main():
                     }:
                         raise ValueError("Exported chat differs from the frozen runtime format")
                     tokens, offset = dataset.process(row)
+                    if role == "general":
+                        if row.get("task_tag") not in {"repair", "test", "action"}:
+                            raise ValueError("General training requires explicit task tags")
+                        reserve = {"repair": 1024, "test": 512, "action": 192}[row["task_tag"]]
+                    else:
+                        reserve = 512 if role == "critic" else 192 if role == "judge" else 1024
                     runtime = backend.tokenizer.apply_chat_template(
                         messages[:-1],
                         tokenize=True,
@@ -126,6 +137,7 @@ def main():
                         tokens[:offset] != runtime
                         or offset != len(runtime)
                         or not 0 < offset < len(tokens) <= args.max_seq_length
+                        or offset + reserve > 4096
                     ):
                         raise ValueError("Mask/prefix/truncation mismatch in native dataset")
                     masking.append(
@@ -134,6 +146,8 @@ def main():
                             "index": index,
                             "prompt_tokens": offset,
                             "total_tokens": len(tokens),
+                            "runtime_completion_reserve": reserve,
+                            "task_tag": row.get("task_tag"),
                         }
                     )
             write_report(

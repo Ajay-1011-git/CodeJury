@@ -27,6 +27,7 @@ from .controllers import (
     RepairBaseline,
     SampleBaseline,
 )
+from .prompted import PromptedController
 
 
 class SameViewController(LearnedController):
@@ -176,7 +177,7 @@ class BaselinePort:
             "B1": RepairBaseline,
             "B2": SampleBaseline,
             "B3": GeneralController,
-            "B4": FixedController,
+            "B4": PromptedController,
             "CJ": LearnedController,
             "B-unweighted": LearnedController,
             "B-same-view": SameViewController,

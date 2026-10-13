@@ -2,7 +2,7 @@
 
 Local Python repair prototype on an Apple Silicon Mac: trained Fixer A, raw/prompted Critic, fixed controller, isolated ARM64 sandbox, SQLite evidence store, and browser interface. The UI and API share one server. No mock server or frontend build is needed for live use.
 
-Stage 2 work is integrated on `main`: selected native A/B/Critic adapters, isolated search/audit/investigation tools, canonical evidence/API/UI, real alternative continuations and research method implementations. Judge continuation collection is running; the learned Judge, trained General comparison, native browser acceptance and final benchmark remain unfinished. See [the current completion record](integration/stage2/COMPLETION.md).
+Stage 2 work is integrated on `main`: selected native A/B/Critic/Judge adapters, isolated search/audit/investigation tools, canonical evidence/API/UI, 538 real alternative continuations and research method implementations. The selected Judge passes 28/28 held-out exact-menu checks. General training, native browser acceptance and the final benchmark remain unfinished. See [the current completion record](integration/stage2/COMPLETION.md).
 
 ## Stage 2 build docs
 

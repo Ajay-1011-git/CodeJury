@@ -25,6 +25,9 @@ def test_identifier_augmentation_is_consistent_and_preserves_source_and_template
     augmented, draft = augment_ids(episode, target)
     assert augmented["state"]["state_id"] == draft["state_id"] != target["state_id"]
     assert draft["action_option_id"] == augmented["state"]["available_actions"][0]["option_id"]
+    assert {o["option_id"] for o in augmented["state"]["available_actions"]} == {
+        f"option-{i:02d}" for i in range(1, len(state["available_actions"]) + 1)
+    }
     assert augmented["problem"]["source"] == episode["problem"]["source"]
     assert augmented["problem"]["requirements"][0]["property_template_id"] == "sum_ints"
     assert all(
