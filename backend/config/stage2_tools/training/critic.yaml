@@ -11,3 +11,7 @@ data:
     correct_candidate_min: 0.25
     invalid_proposal_min: 0.10
 runner_config: runner.yaml
+selection:                      # checkpoint selection; loss alone is never a criterion
+  min_format_validity: 0.95
+  min_domain_validity: 0.90
+  max_false_rejection: 0.05     # correct candidates hard-rejected by the Critic's accepted tests

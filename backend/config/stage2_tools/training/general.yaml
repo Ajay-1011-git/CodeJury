@@ -1,0 +1,5 @@
+# General single-agent comparator (S2.10). Trained only after the four role datasets freeze.
+schema: stage2-general-config.v1
+parity_tolerance: 0.10          # chosen by the task owner; tune only before any final result exists
+role_manifests_dir: artifacts/stage2_tools/general/role-manifests
+out_dir: artifacts/stage2_tools/general
