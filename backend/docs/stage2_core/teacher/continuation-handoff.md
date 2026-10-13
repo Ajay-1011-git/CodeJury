@@ -7,17 +7,25 @@ validated four-role registry.
 
 ## Files to receive
 
-1. Pull `https://github.com/Ajay-1011-git/CodeJury` main. The release
-   `training-snapshot-2026-10-13` contains the public
-   `codejury-trained-adapters-2026-10-13.tar.gz` and its SHA-256 sidecar. It includes all
-   saved adapter weights, adapter configurations, freeze metadata and an inventory.
-   It excludes private datasets, ledgers and the base model. It is not the final release.
-2. Ajay must separately send `codejury-training-private-2026-10-13.tar.gz` and its
-   `.sha256` file through a private channel. This contains the complete ignored backend
+1. Pull `https://github.com/Ajay-1011-git/CodeJury` main for the merged source and tools.
+   Saved adapter weights are transferred through the **private** repository
+   `https://github.com/Ajay-1011-git/CodeJury-training-handoff`, release
+   `training-snapshot-2026-10-13`. Ajay must grant Sarvesh access or send the files
+   directly. No collaborator invitation has been sent. The release contains all
+   127 saved weight files, configurations and freeze metadata; it omits case data.
+2. Ajay must send `codejury-training-private-2026-10-13.tar.gz` (2.1 GB) and its
+   `.sha256` sidecar by **direct local transfer, such as AirDrop or USB**. This
+   contains the complete ignored backend
    artifacts, base model, private data, budget/cache databases, actual continuation
    ledgers, dependency inventory and the two exact Docker execution images. Do not
-   upload this bundle to the public repository or a public release. A Git pull or the
-   public adapter archive alone cannot resume this experiment exactly.
+   upload this bundle to the public repository or a public release. A Git pull alone
+   cannot resume this experiment exactly. An adapter-only snapshot is prepared
+   locally, but public distribution was blocked by automatic approval review because
+   explicit permission to distribute the weights publicly was unclear. The training
+   adapter-only GitHub transfer remains private. Automatic review also rejected
+   remote upload of the full-state bundle under the amendment's private
+   validation/final/reference restrictions. The full bundle remains local for direct
+   transfer. This is not the final project release.
 3. Groq keys are deliberately absent. **No Groq key is needed for the next training
    phases:** the teacher collection and verified corpus are finished. If a separately
    justified future offline collection needs keys, obtain them privately and place
@@ -61,10 +69,10 @@ git pull --ff-only origin main
 ```
 
 For an existing checkout, omit cloning and first inspect its branch and working tree.
-Then verify the privately received archive against the separately received checksum:
+Then verify the directly received full archive:
 
 ```sh
-# Run in the folder containing the two privately received files.
+# Run in the folder containing the locally received archive and sidecar.
 shasum -a 256 -c codejury-training-private-2026-10-13.tar.gz.sha256
 ```
 
@@ -218,9 +226,11 @@ send private validation/final/reference data remotely, or add Groq to live repai
 
    Require all five actual completed role cards, matching final run metadata/freeze
    and archive integrity. Keep private corpora/ledgers, credentials and base weights
-   out of the public project release. The public training snapshot is not this release.
+   out of the public project release. The private training snapshot is not this release.
 7. Merge any remaining local fixes safely, commit documentation with the final state,
-   push main and the appropriate public release. Give Ajay the commit/release links,
+   push main and aggregate reports. Keep weight releases private until Ajay explicitly
+   approves public distribution; preserve the local-only private-case transfer restriction.
+   Give Ajay the commit/release links,
    actual test/native evidence, measured benchmark outcome and any real limitations.
 
 Proceed autonomously through authorized implementation, audits, fixes, merge and push.
