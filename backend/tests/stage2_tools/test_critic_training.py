@@ -135,3 +135,74 @@ def test_export_manifest_hashes_files_and_refuses_git(tmp_path):
     empty.mkdir()
     with pytest.raises(CardError):
         export_manifest("critic", empty, exchange_id="x", base_revision_hash=H, records=1, bases=1)
+
+
+# -- SFT export and launch guards (no MLX needed) ------------------------------------------------
+import json  # noqa: E402
+
+from codejury.stage2_tools.critic_training.data.pipeline import OUT_MANIFEST, OUT_RECORDS  # noqa: E402
+from codejury.stage2_tools.critic_training.launch import launch  # noqa: E402
+from codejury.stage2_tools.critic_training.sft import SftError, export  # noqa: E402
+
+
+def write_data(path, bases, split="train", fixture=True):
+    path.mkdir(parents=True, exist_ok=True)
+    rows = [
+        {"base_problem_id": b, "system": "s", "prompt": f"{b}-p{i}", "completion": "{}"}
+        for b in bases
+        for i in range(2)
+    ]
+    (path / OUT_RECORDS).write_text("".join(json.dumps(r) + "\n" for r in rows))
+    (path / OUT_MANIFEST).write_text(json.dumps({"split": split, "fixture": fixture}))
+
+
+def test_sft_split_is_by_base_problem_and_never_leaks(tmp_path):
+    write_data(tmp_path / "d", [f"bp{i}" for i in range(8)])
+    info = export(tmp_path / "d", tmp_path / "o", validation_fraction=0.25, seed=1)
+    train = {
+        json.loads(x)["messages"][1]["content"]
+        for x in (tmp_path / "o/train.jsonl").read_text().splitlines()
+    }
+    valid = {
+        json.loads(x)["messages"][1]["content"]
+        for x in (tmp_path / "o/valid.jsonl").read_text().splitlines()
+    }
+    assert info["train_records"] + info["valid_records"] == 16 and info["valid_records"] > 0
+    assert not train & valid
+    first = json.loads((tmp_path / "o/train.jsonl").read_text().splitlines()[0])
+    assert [m["role"] for m in first["messages"]] == ["system", "user", "assistant"]
+
+
+def test_sft_needs_two_bases_and_train_split(tmp_path):
+    write_data(tmp_path / "one", ["bp0"])
+    with pytest.raises(SftError):
+        export(tmp_path / "one", tmp_path / "o1", validation_fraction=0.2, seed=1)
+    write_data(tmp_path / "val", ["a", "b"], split="validation")
+    with pytest.raises(SftError):
+        export(tmp_path / "val", tmp_path / "o2", validation_fraction=0.2, seed=1)
+
+
+def test_full_training_is_blocked_by_missing_or_fixture_pilot(tmp_path, monkeypatch):
+    config = {
+        "training": {
+            "model_dir_env": "CJ_TEST_MODEL",
+            "out_root": "out",
+            "pilot_steps": 10,
+            "steps": 300,
+            "validation_fraction": 0.2,
+            "seed": 1,
+        }
+    }
+    with pytest.raises(ValueError):
+        launch(config, tmp_path, tmp_path, "x", pilot=True, fixture=True)  # no model dir set
+    model = tmp_path / "m"
+    model.mkdir()
+    monkeypatch.setenv("CJ_TEST_MODEL", str(model))
+    write_data(tmp_path / "d", [f"bp{i}" for i in range(6)], fixture=False)
+    pilot = tmp_path / "out" / "pilot"
+    pilot.mkdir(parents=True)
+    (pilot / "session.json").write_text(
+        json.dumps({"completed_steps": 10, "reload_verified": True, "fixture": True})
+    )
+    with pytest.raises(ValueError, match="fixture pilots cannot unlock"):
+        launch(config, tmp_path, tmp_path / "d", "full", pilot=False, fixture=False)

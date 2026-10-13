@@ -48,6 +48,21 @@ def _validate(args) -> int:
     return 1 if problems else 0
 
 
+def _train(args) -> int:
+    from .critic_training.launch import launch
+
+    _, config, _ = _paths(args)
+    data = Path(args.data) if args.data else BACKEND / config["data"]["out_dir"]
+    try:
+        session = launch(config, BACKEND, data, args.name, pilot=args.pilot, fixture=args.fixture)
+    except (ValueError, RuntimeError) as exc:
+        print(json.dumps({"status": "failed_or_blocked", "reason": str(exc)}))
+        return 1
+    print(json.dumps({k: session[k] for k in ("kind", "fixture", "completed_steps",
+          "reload_verified", "adapter_sha256", "peak_memory_mb")}, indent=2))  # fmt: skip
+    return 0
+
+
 def _pending(name: str):
     def run(args) -> int:
         print(
@@ -74,7 +89,14 @@ def main(argv=None) -> int:
         p.add_argument("--episodes")
         p.add_argument("--out")
         p.set_defaults(fn=fn)
-    for name in ("train", "evaluate", "export"):
+    p = sub.add_parser("train")
+    p.add_argument("--config", required=True)
+    p.add_argument("--data")
+    p.add_argument("--name", required=True)
+    p.add_argument("--pilot", action="store_true")
+    p.add_argument("--fixture", action="store_true")
+    p.set_defaults(fn=_train)
+    for name in ("evaluate", "export"):
         p = sub.add_parser(name)
         p.add_argument("--config")
         p.add_argument("--out")

@@ -10,7 +10,7 @@ never converts a missing artifact into a pass.
 | Critic data (real) | **missing** | no collected Critic data manifest |
 | Critic adapter card | **missing** | artifacts/stage2_tools/critic/card.json not found (no real training run) |
 | General adapter card | **missing** | artifacts/stage2_tools/general/card.json not found (no real training run) |
-| Docker/native sandbox | **pending** | docker present but daemon unreachable |
+| Docker/native sandbox | **pending** | docker reachable; native self-tests must still be run and recorded |
 | MLX hardware | **pending** | mlx is not installed; no native training/reload possible here |
 | Final live benchmark report | **missing** | no final benchmark report (the sealed final run has not happened) |
 | Joint Mac browser/system acceptance | **pending** | joint Mac browser/system acceptance with Ajay has not been recorded |

@@ -273,6 +273,6 @@ def test_teacher_drafts_without_sandbox_are_pending_not_accepted(tmp_path, base)
 def test_cli_train_evaluate_export_report_pending(capsys):
     from codejury.stage2_tools import critic_cli
 
-    for cmd in ("train", "evaluate", "export"):
+    for cmd in ("evaluate", "export"):
         assert critic_cli.main([cmd]) == 3
     assert "pending" in capsys.readouterr().out
