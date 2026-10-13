@@ -1,0 +1,13 @@
+# Critic data + training configuration (S2.07/S2.08). Real runs read E2 TRAINING episodes only.
+schema: stage2-critic-config.v1
+split_manifest: data/stage2_tools/manifests/stage2.json
+data:
+  split: train                  # validation episodes are collected separately for tuning only
+  episodes_root: artifacts/stage2-exchange/ajay/episodes   # E2 exchange, outside Git
+  out_dir: artifacts/stage2_tools/critic/data
+  mode_priority: [discriminate, challenge_agreement, audit_gap, validate_revision]
+  invalid_variants_per_episode: 2
+  mix_targets:                  # starting targets, tuned on validation; not available counts
+    correct_candidate_min: 0.25
+    invalid_proposal_min: 0.10
+runner_config: runner.yaml
