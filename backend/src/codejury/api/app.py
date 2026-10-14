@@ -20,7 +20,8 @@ from ..controller.worker import LocalWorker
 from ..storage import Store
 from .repository import Busy, Repository
 from .stage2_bridge import PREFIX as STAGE2_PREFIX
-from .stage2_bridge import load_stage2_app, stage2_busy, transcript as stage2_transcript
+from .stage2_bridge import load_stage2_app, stage2_busy
+from .stage2_bridge import transcript as stage2_transcript
 from .training_report import load_report
 from .types import TERMINAL, error
 
@@ -75,7 +76,7 @@ def examples() -> dict:
     }
 
 
-def create_app(store=None, worker=None, *, web_dir=None, stage2=None) -> FastAPI:
+def create_app(store=None, worker=None, *, web_dir=None, stage2=None, intake_store=None) -> FastAPI:
     """stage2: an optional Stage 2 app, served under /s2 with one model run across stages."""
     store = store or Store()
     repository = Repository(store)
@@ -164,7 +165,11 @@ def create_app(store=None, worker=None, *, web_dir=None, stage2=None) -> FastAPI
                 if app.state.stage2_error:
                     body["error"].update(code="unavailable", message=app.state.stage2_error)
                     return JSONResponse(body, status_code=503)
-                if request.method == "POST" and path == STAGE2_PREFIX + "/runs" and repository.busy():
+                if (
+                    request.method == "POST"
+                    and path == STAGE2_PREFIX + "/runs"
+                    and repository.busy()
+                ):
                     body["error"].update(code="busy", message="A Stage 1 repair is running")
                     return JSONResponse(body, status_code=409)
             return await call_next(request)
@@ -296,12 +301,49 @@ def create_app(store=None, worker=None, *, web_dir=None, stage2=None) -> FastAPI
             return response(error("unavailable", "Public training report is invalid"), "Error", 503)
 
     if stage2 is not None:
+        from ..intake.interpreter import Interpreter
+        from ..intake.store import DraftStore
+        from .intake import local_request
+        from .intake import router as intake_router
+
+        intake_store = intake_store or DraftStore(
+            stage2.state.ledger.directory / "intake", Interpreter()
+        )
+        app.state.intake_store = intake_store
+        app.include_router(intake_router(intake_store, stage2, app, repository))
 
         @app.get(STAGE2_PREFIX + "/runs/{run_id}/transcript")
-        def stage2_run_transcript(run_id: str):
+        def stage2_run_transcript(run_id: str, request: Request):
+            if not local_request(request, fixture=app.state.worker.mode == "fixture"):
+                return JSONResponse(
+                    {
+                        "schema_version": "stage2.v1",
+                        "error": {
+                            "code": "invalid_input",
+                            "message": "Transcripts are available only to the local dashboard",
+                            "field_errors": [],
+                        },
+                    },
+                    status_code=403,
+                    headers={"Cache-Control": "no-store"},
+                )
             # Fails with the Stage 2 not-found envelope for unknown runs.
             stage2.state.ledger.snapshot(run_id)
             body = stage2_transcript(stage2.state.ledger.directory, run_id)
+            provenance = intake_store.provenance_for_run(run_id)
+            if provenance:
+                body.update(provenance)
+            from .turns import turn_records
+
+            snapshot = stage2.state.ledger.snapshot(run_id)
+            events = (
+                stage2.state.ledger.events(run_id)
+                if hasattr(stage2.state.ledger, "events")
+                else []
+            )
+            body["turns"] = turn_records(
+                snapshot, events, body["calls"], (provenance or {}).get("interpreter")
+            )
             return JSONResponse(body, headers={"Cache-Control": "no-store"})
 
         app.mount(STAGE2_PREFIX, stage2, name="stage2")

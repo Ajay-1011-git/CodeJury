@@ -1,4 +1,4 @@
-# CodeJury — Stage 1
+# CodeJury
 
 Local Python repair prototype on an Apple Silicon Mac: trained Fixer A, raw/prompted Critic, fixed controller, isolated ARM64 sandbox, SQLite evidence store, and browser interface. The UI and API share one server. No mock server or frontend build is needed for live use.
 
@@ -44,6 +44,36 @@ export CODEJURY_ADAPTER_DIR="$PWD/artifacts/training/fixer_a_selected"
 cd ..
 ./start.sh
 ```
+
+## Quick case and jury conversation
+
+The Repair desk starts with **Quick case**: paste the buggy code, enter the
+function name, and describe the intended behavior. **Draft the specification**
+uses the configured Groq interpreter to suggest argument domains, requirements
+and examples. Only the description, signature and bounded AST facts leave the
+Mac; the buggy body stays local. The existing root `.env` credentials and shared
+teacher budget are reused, with the configured $1 cap unchanged.
+
+Review the draft, then click **Approve all & start the jury**, or edit/reject
+individual items. Corroborated examples match a registered property check but
+still require approval. **Trust the interpreter** is off by default; selecting
+it gives the verdict a visible interpreted-specification label. Keep an eye on
+inferred bounds and examples: they define what the jury verifies. If cloud
+interpretation is unavailable, **Advanced case** accepts your own domains and
+tests.
+
+Run evidence shows the **jury conversation** with actual model replies, tool
+counterexamples, parent diffs and token counts. Expand an evidence chip to inspect
+the input and observed output, or open its execution cell. The clickable timeline
+remains available. No dialogue is generated for display.
+
+Quick case uses additional `/s2x/intake` draft/approval endpoints beside the frozen
+Stage 2 contract. The [bounded local route](docs/bounded-local-route.md) records
+the user's time limit, local training choice, and unmeasured acceptance checks.
+
+The bounded local 100-step Fixer A trial verified real updates and a fresh reload.
+Both new checkpoints accepted more wrong repairs on validation, so the existing
+adapter was retained. See the [executed training results](docs/local-logic-trial.md).
 
 Custom model and adapter directories can be supplied through the same environment variables. Missing weights, invalid adapter proof, or unavailable sandbox fails readiness; the launcher requires trained A.
 

@@ -157,12 +157,12 @@ export function buildDebate(snap, events, transcript) {
           const option = (c.options || []).find((o) => o.option_id === draft?.action_option_id);
           return option ? option.summary === p.message : draft?.rationale === p.message;
         });
-      } else if (learned) {
+      } else if (learned && /judge/i.test(p.message || '')) {
         found = take(judge, () => true);
       }
       const round = {
         key: `act-${p.action_id || ev.event_id}`,
-        actor: learned && !/fixed fallback/i.test(p.message) ? 'judge' : 'controller',
+        actor: ev.type === 'action_selected' && learned && !/fixed fallback/i.test(p.message) ? 'judge' : 'controller',
         kind: ev.type === 'action_refused' ? 'refused' : 'decision',
         message: p.message, action, call: found.call, refusedCalls: found.skipped,
       };
@@ -267,7 +267,7 @@ function summarize(round, snap) {
       const who = round.actor === 'judge' ? 'Judge' : 'Controller';
       return [`${who} ${JUDGE_VERB[kind] || 'acts'}`, round.message || ''];
     }
-    case 'refused': return ['Judge draft refused', round.message || ''];
+    case 'refused': return ['Draft refused', round.message || ''];
     case 'challenge': {
       const draft = parse(round.call?.text || '');
       const mode = draft?.mode || round.action?.parameters?.mode || 'challenge';
@@ -471,4 +471,62 @@ export function renderDebate(container, snap, events, transcript) {
     list.appendChild(item);
   }
   container.appendChild(list);
+}
+
+/** Chat records come from the ledger projection; no synthetic dialogue is generated here. */
+export function buildTurns(snap, events, transcript) {
+  if (!snap) return [];
+  const roles = new Set(['fixer_a', 'fixer_b', 'raw', 'general', 'judge', 'critic', 'tools', 'controller', 'interpreter']);
+  const kinds = new Set(['proposal', 'challenge', 'counterexample', 'rebuttal', 'revision', 'verdict']);
+  return (transcript?.turns || []).filter((turn) => roles.has(turn.role) && kinds.has(turn.kind)).map((turn) => ({ ...turn }));
+}
+
+const conversationModes = new Map();
+const evidenceOpen = new Set();
+const CHAT_ROLES = { fixer_a: 'Fixer A', fixer_b: 'Fixer B', raw: 'Base model', general: 'General', judge: 'Judge', critic: 'Critic', tools: 'Sandbox', controller: 'Controller', interpreter: 'Interpreter (cloud, spec only)' };
+
+export function renderConversation(container, snap, events, transcript, onEvidence) {
+  container.replaceChildren();
+  const run = snap?.run_id || 'empty';
+  const mode = conversationModes.get(run) || 'chat';
+  const controls = el('div', 'debate-mode-controls');
+  for (const [value, label] of [['chat', 'Conversation'], ['timeline', 'Timeline']]) {
+    const button = el('button', 'btn', label); button.type = 'button';
+    button.setAttribute('aria-pressed', String(mode === value));
+    button.addEventListener('click', () => { conversationModes.set(run, value); renderConversation(container, snap, events, transcript, onEvidence); });
+    controls.appendChild(button);
+  }
+  container.appendChild(controls);
+  const body = el('div'); container.appendChild(body);
+  if (mode === 'timeline') { renderDebate(body, snap, events, transcript); return; }
+  const turns = buildTurns(snap, events, transcript);
+  if (!turns.length) { body.appendChild(el('p', 'placeholder-label', snap ? 'Waiting for recorded model replies and sandbox evidence…' : 'The conversation appears when the jury starts.')); return; }
+  const list = el('ol', 'debate-chat');
+  for (const turn of turns) {
+    const bubble = el('li', `chat-turn role-${turn.role} kind-${turn.kind}`);
+    const head = el('div', 'chat-turn-head');
+    head.appendChild(el('strong', null, CHAT_ROLES[turn.role]));
+    head.appendChild(el('span', 'badge badge-neutral', turn.kind));
+    head.appendChild(el('small', 'text-dim', `Turn ${turn.turn}${turn.tokens === null || turn.tokens === undefined ? '' : ` · ${turn.tokens} tokens`}`));
+    bubble.appendChild(head);
+    if (turn.claim) bubble.appendChild(el('p', 'chat-claim', turn.claim));
+    const evidence = turn.evidence;
+    if (evidence) {
+      const id = `${run}:${evidence.exec_id}`;
+      const chip = el('button', 'btn evidence-chip', `${evidence.outcome} · ${evidence.tier}`); chip.type = 'button';
+      chip.setAttribute('aria-expanded', String(evidenceOpen.has(id)));
+      const detail = el('div', 'chat-evidence'); detail.hidden = !evidenceOpen.has(id);
+      detail.appendChild(field('Input', json(evidence.input)));
+      detail.appendChild(field(evidence.property_template_id ? 'Approved property' : 'Expected', evidence.property_template_id || json(evidence.expected)));
+      detail.appendChild(field('Actual', evidence.exception ? `${evidence.exception.type}: ${evidence.exception.message}` : json(evidence.actual)));
+      const cell = el('button', 'btn', 'Open execution cell'); cell.type = 'button';
+      cell.addEventListener('click', () => onEvidence?.(evidence.exec_id)); detail.appendChild(cell);
+      chip.addEventListener('click', () => { detail.hidden = !detail.hidden; chip.setAttribute('aria-expanded', String(!detail.hidden)); if (detail.hidden) evidenceOpen.delete(id); else evidenceOpen.add(id); });
+      bubble.append(chip, detail);
+    }
+    if (turn.patch_diff) bubble.appendChild(raw(turn.kind === 'revision' ? 'Revision against parent' : 'Proposed change', turn.patch_diff));
+    if (turn.raw_reply && turn.raw_reply !== turn.claim) bubble.appendChild(raw('Stored response', turn.raw_reply));
+    list.appendChild(bubble);
+  }
+  body.appendChild(list);
 }

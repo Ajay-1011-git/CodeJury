@@ -8,8 +8,10 @@ import { Store } from './s2/state.mjs';
 import { mountInput, renderReports, renderDownload } from './s2/views.mjs';
 import { downloadFor, resourceView, TERMINAL, ROLE_CARDS, lineage } from './s2/model.mjs';
 import { formatOutcomeBadge } from './evidence.mjs';
-import { renderDebate, candidateLabel, hardRecord, lineDiff } from './stage2-debate.mjs';
+import { renderConversation, candidateLabel, hardRecord, lineDiff } from './stage2-debate.mjs';
 import { DEMO_CASES } from './stage2-demos.mjs';
+import { mountQuickCase } from './quick-case.mjs';
+import { TranscriptFeed } from './transcript-feed.mjs';
 
 const ACTIVE = ['queued', 'running'];
 
@@ -184,6 +186,7 @@ function renderMatrix(root, snap, selection, onSelect) {
       btn.type = 'button';
       btn.appendChild(formatOutcomeBadge(ex ? ex.outcome : 'pending'));
       btn.setAttribute('aria-label', `Execution of ${candidateLabel(cand)} on ${labels.get(t.test_id)}`);
+      if (ex) btn.id = `execution-${ex.execution_id}`;
       if (ex) btn.addEventListener('click', () => onSelect({ ex, test: t, cand }));
       td.appendChild(btn);
       row.appendChild(td);
@@ -239,24 +242,20 @@ export function mountStage2(globalStore, tabs) {
   window.addEventListener('pagehide', () => store.dispose());
 
   let transcript = null;
-  let transcriptRun = null;
-  let transcriptAt = 0;
   let selection = null;
   let selectionRun = null;
   let seenRun = null;
   let input = null;
+  let quickInput = null;
+  let authorityLabel = null;
   let downloadToken = 0;
 
 
-  const fetchTranscript = async (runId) => {
-    transcriptAt = Date.now();
-    try {
-      const res = await fetch(`${base}/runs/${encodeURIComponent(runId)}/transcript`, { cache: 'no-store' });
-      if (!res.ok) return;
-      const body = await res.json();
-      if (store.state.runId === runId) { transcript = body; transcriptRun = runId; paint(store.state); }
-    } catch { /* the debate still renders from events alone */ }
-  };
+  const transcriptFeed = new TranscriptFeed({
+    base,
+    getRunId: () => store.state.runId,
+    onUpdate: (body) => { transcript = body; paint(store.state); },
+  });
 
   const toolbar = (state) => {
     const snap = state.snapshot;
@@ -277,13 +276,23 @@ export function mountStage2(globalStore, tabs) {
   function paint(state) {
     const snap = state.snapshot;
     if (snap && snap.run_id !== selectionRun) { selection = null; selectionRun = snap.run_id; }
-    if (snap && snap.run_id !== transcriptRun && transcript?.run_id !== snap.run_id) transcript = null;
+    if (snap && transcript?.run_id !== snap.run_id) transcript = null;
     toolbar(state);
     renderVerdict(containers.result, state, (slot, s) => {
       const mine = ++downloadToken;
       downloadFor(s).then((dl) => { if (mine === downloadToken) renderDownload(slot, dl); });
     });
-    renderDebate(containers.debate, snap, state.events, transcript);
+    const label = transcript?.authority_label || authorityLabel;
+    if (label && snap) containers.result.appendChild(el('p', 'callout callout-info', label));
+    renderConversation(containers.debate, snap, state.events, transcript, (execId) => {
+      const execution = snap?.executions?.find((ex) => ex.execution_id === execId);
+      if (!execution) return;
+      selection = { ex: execution, test: snap.tests.find((t) => t.test_id === execution.test_id), cand: snap.candidates.find((c) => c.candidate_id === execution.candidate_id) };
+      renderMatrix(containers.matrix, snap, selection, (pick) => { selection = pick; paint(store.state); });
+      const cell = document.getElementById(`execution-${execId}`);
+      cell?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      cell?.focus({ preventScroll: true });
+    });
     renderCandidates(containers.candidates, snap);
     const onSelect = (pick) => { selection = pick; renderMatrix(containers.matrix, snap, selection, onSelect); };
     renderMatrix(containers.matrix, snap, selection, onSelect);
@@ -293,13 +302,10 @@ export function mountStage2(globalStore, tabs) {
     const snap = state.snapshot;
     if (state.runId && state.runId !== seenRun) { seenRun = state.runId; tabs?.activate('evidence', true); }
     input?.setBusy(state.submitting || (snap && ACTIVE.includes(snap.status)));
+    quickInput?.setBusy(state.submitting || (snap && ACTIVE.includes(snap.status)));
     // Replies are stored as the debate runs; refresh them while it is live and once at the end.
     if (snap) {
-      const terminal = TERMINAL.includes(snap.status);
-      if ((terminal && transcriptRun !== snap.run_id) || (!terminal && Date.now() - transcriptAt > 2500)) {
-        if (terminal) transcriptRun = snap.run_id;
-        fetchTranscript(snap.run_id);
-      }
+      transcriptFeed.refresh(snap, TERMINAL.includes(snap.status));
     }
     paint(state);
   });
@@ -330,10 +336,33 @@ export function mountStage2(globalStore, tabs) {
     }
     let examples = [];
     try { examples = (await client.getExamples()).examples; } catch (err) { store.set({ error: err }); }
-    input = mountInput(containers.input, {
+    const quick = el('section', 'quick-case');
+    quick.appendChild(el('h2', null, 'Quick case'));
+    const advanced = el('details', 'advanced-case');
+    advanced.appendChild(el('summary', null, 'Advanced case: supply domains and tests yourself'));
+    const advancedBody = el('div'); advanced.appendChild(advancedBody);
+    containers.input.replaceChildren(quick, advanced);
+    quickInput = mountQuickCase(quick, {
+      canSubmit: () => store.state.healthOk,
+      onAccepted: async (result) => {
+        authorityLabel = result.authority_label;
+        // Join the existing Store lifecycle after /s2x has admitted exactly one run.
+        const alreadyAccepted = {
+          createRun: async () => result.accepted,
+          getRun: (...args) => client.getRun(...args),
+          getEvents: (...args) => client.getEvents(...args),
+          getReport: (...args) => client.getReport(...args),
+          cancelRun: (...args) => client.cancelRun(...args),
+        };
+        await store.submit(alreadyAccepted, { schema_version: 'stage2.v1' });
+      },
+    });
+    window.addEventListener('pagehide', () => quickInput.dispose());
+    input = mountInput(advancedBody, {
       examples: [...DEMO_CASES, ...examples],
       canSubmit: () => store.state.healthOk,
       onSubmit: async (payload) => {
+        authorityLabel = null;
         try { await store.submit(client, payload); } catch { /* shown in the verdict card */ }
       },
     });

@@ -57,10 +57,44 @@ test('fixed policy decisions are attributed to the Controller', () => {
   assert.ok(rounds.filter((r) => r.kind === 'decision').every((r) => r.actor === 'controller'));
 });
 
+test('a Critic refusal belongs to the Controller and does not consume the next Judge reply', () => {
+  const withRefusal = [...events.slice(0, 7),
+    ev(71, 'action_refused', { message: 'Malformed or out-of-scope Critic draft' }),
+    ...events.slice(7)];
+  const rounds = buildDebate(snap, withRefusal, transcript);
+  const refused = rounds.find((r) => r.kind === 'refused');
+  assert.equal(refused.actor, 'controller');
+  assert.equal(refused.call, null);
+  assert.equal(rounds.filter((r) => r.kind === 'decision')[1].call.options[0].summary, 'Select it');
+});
+
 test('hard record counts only authoritative checks', () => {
   assert.deepEqual([hardRecord(snap, 'c-b').pass, hardRecord(snap, 'c-a').fail], [1, 1]);
 });
 
 test('line diff marks changed lines', () => {
   assert.deepEqual(lineDiff('a\nb\n', 'a\nc\n').map((r) => r.op), [' ', '-', '+']);
+});
+
+test('conversation keeps recorded claims, tokens, evidence and revision diffs unchanged', async () => {
+  const { buildTurns } = await import('../src/stage2-debate.mjs');
+  const turns = [
+    { turn: 1, role: 'fixer_a', kind: 'proposal', claim: 'The accumulator skipped negatives.', tokens: 42 },
+    { turn: 2, role: 'tools', kind: 'counterexample', claim: 'Sandbox evidence committed', evidence: { exec_id: 'e1', input: [-2], expected: -2, actual: 0, tier: 'authoritative' }, tokens: 0 },
+    { turn: 3, role: 'fixer_a', kind: 'revision', claim: 'Include negative values.', patch_diff: '- old\n+ new', tokens: 20 },
+  ];
+  assert.deepEqual(buildTurns(snap, events, { turns }), turns);
+  assert.equal(buildTurns(snap, events, { turns })[0].claim, turns[0].claim);
+  assert.deepEqual(buildTurns(snap, events, { calls: transcript.calls }), [], 'never invent a conversation when turn records are absent');
+});
+
+test('conversation ignores unknown role/kind records and keeps cloud interpretation labelled', async () => {
+  const { buildTurns } = await import('../src/stage2-debate.mjs');
+  const turns = [
+    { turn: 1, role: 'interpreter', kind: 'proposal', claim: '{"requirements":[]}', label: 'Interpreter (cloud, spec only)' },
+    { turn: 2, role: 'invented', kind: 'proposal', claim: 'not recorded' },
+  ];
+  assert.equal(buildTurns(snap, [], { turns }).length, 1);
+  assert.equal(buildTurns(snap, [], { turns })[0].label, 'Interpreter (cloud, spec only)');
+  assert.deepEqual(buildTurns(null, [], { turns }), []);
 });

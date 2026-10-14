@@ -70,7 +70,9 @@ def transcript(ledger_directory, run_id: str) -> dict:
         except ValueError:
             continue
         call = {
+            "request_id": request.get("request_id"),
             "role": request.get("role"),
+            "output_tokens": (response.get("usage") or {}).get("output_tokens"),
             "purpose": request.get("purpose"),
             "status": response.get("status") or status,
             "text": response.get("text"),
