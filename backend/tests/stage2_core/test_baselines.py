@@ -120,9 +120,39 @@ def test_general_allocates_its_first_action_and_preserves_physical_role(tmp_path
     )
 
 
+def test_general_menu_lists_prerequisite_steps_before_extra_allocations(tmp_path):
+    """A first-option policy must still reach audit/challenge/select, as in the council menu."""
+    from stage2_tools.hostsandbox import FixtureHostSandbox
+
+    from codejury.stage2_core.ledger import Ledger
+    from codejury.stage2_tools.port import ToolPortImpl
+
+    identity = {
+        "adapter_hash": "7" * 64,
+        "model_config_hash": "6" * 64,
+        "model_revision_hash": "c" * 64,
+    }
+    model = FixtureTaskModel(identity, "general", first_option=True)
+    control = GeneralController(
+        Ledger(tmp_path),
+        model,
+        ToolPortImpl(FixtureHostSandbox()),
+        {"general": identity},
+        manifest_hash="a" * 64,
+        runtime_hash=FixtureHostSandbox.runtime_hash,
+        mode="fixture",
+        model_roles={"fixer_a": "general", "fixer_b": "general"},
+        critic_role="general",
+    )
+    result = run(control)
+    assert result["status"] == "supported_patch"
+    assert result["resource_usage"]["learned_candidates"] <= 2
+
+
 class FixtureTaskModel:
-    def __init__(self, identity, role):
+    def __init__(self, identity, role, first_option=False):
         self.identity, self.role, self.requests = identity, role, []
+        self.first_option = first_option
 
     def generate(self, request, cancel):
         assert request["role"] == self.role
@@ -140,8 +170,10 @@ class FixtureTaskModel:
                 "search": 4,
                 "abstain": 5,
             }
-            selected = min(
-                state["available_actions"], key=lambda o: priorities[o["action"]["kind"]]
+            selected = (
+                state["available_actions"][0]
+                if self.first_option
+                else min(state["available_actions"], key=lambda o: priorities[o["action"]["kind"]])
             )
             answer = {
                 "state_id": state["state_id"],

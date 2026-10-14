@@ -135,7 +135,11 @@ class GeneralController(LearnedController):
         result = []
         from ..contracts import json_hash
 
-        for option in [*extra, *offered]:
+        # Canonical prerequisite options (revise/search/challenge/audit/select) keep the same order
+        # as the council's menu; the single agent's extra allocations follow them. Listing extras
+        # first made a first-option-biased agent regenerate until the action cap, never reaching
+        # the audit/challenge steps that make selection available.
+        for option in [*offered, *extra]:
             key = json_hash({k: option["action"][k] for k in ("kind", "target_ids", "parameters")})
             if key not in semantic:
                 semantic.add(key)
