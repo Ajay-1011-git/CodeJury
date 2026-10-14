@@ -31,6 +31,16 @@ class Repository:
             )
         return snapshot
 
+    def busy(self) -> bool:
+        with self.store.connection() as db:
+            return (
+                db.execute(
+                    "SELECT 1 FROM runs WHERE "
+                    "json_extract(snapshot,'$.status') IN ('queued','running') LIMIT 1"
+                ).fetchone()
+                is not None
+            )
+
     def update(self, run_id: str, transform) -> dict:
         with self.store.connection() as db:
             db.execute("BEGIN IMMEDIATE")

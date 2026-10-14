@@ -29,8 +29,9 @@ export function mountWorkspace(store, client) {
   let seenRunId = null;
   const activity = document.getElementById('workspace-activity');
   const cancel = document.getElementById('btn-cancel-live');
-  cancel.addEventListener('click', () => store.cancelRun(client));
+  cancel.addEventListener('click', () => { if (store.get().stage !== 2) store.cancelRun(client); });
   store.subscribe(state => {
+    if (state.stage === 2) return;
     if (state.currentRunId && state.currentRunId !== seenRunId) {
       seenRunId = state.currentRunId;
       tabs.activate('evidence', true);
@@ -52,4 +53,5 @@ export function mountWorkspace(store, client) {
   const orientation = () => tablist.setAttribute('aria-orientation', mobile.matches ? 'horizontal' : 'vertical');
   orientation();
   mobile.addEventListener('change', orientation);
+  return { tabs, navigate };
 }

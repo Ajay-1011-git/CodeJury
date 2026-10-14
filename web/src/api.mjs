@@ -84,6 +84,12 @@ export class ApiClient {
     return data;
   }
 
+  async getTranscript(runId) {
+    const data = await this._request(`/runs/${encodeURIComponent(runId)}/transcript`);
+    this._guardSchemaVersion(data, 'Transcript');
+    return data;
+  }
+
   async cancelRun(runId) {
     const data = await this._request(`/runs/${encodeURIComponent(runId)}/cancel`, {
       method: 'POST',

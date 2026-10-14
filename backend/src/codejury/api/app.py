@@ -19,6 +19,8 @@ from ..contracts.intake import IntakeError, validate_request
 from ..controller.worker import LocalWorker
 from ..storage import Store
 from .repository import Busy, Repository
+from .stage2_bridge import PREFIX as STAGE2_PREFIX
+from .stage2_bridge import load_stage2_app, stage2_busy, transcript as stage2_transcript
 from .training_report import load_report
 from .types import TERMINAL, error
 
@@ -73,7 +75,8 @@ def examples() -> dict:
     }
 
 
-def create_app(store=None, worker=None, *, web_dir=None) -> FastAPI:
+def create_app(store=None, worker=None, *, web_dir=None, stage2=None) -> FastAPI:
+    """stage2: an optional Stage 2 app, served under /s2 with one model run across stages."""
     store = store or Store()
     repository = Repository(store)
     worker = worker or LocalWorker(store)
@@ -81,12 +84,20 @@ def create_app(store=None, worker=None, *, web_dir=None) -> FastAPI:
     @asynccontextmanager
     async def lifespan(_app):
         repository.recover()
+        if stage2 is not None:
+            try:
+                stage2.state.worker.recover()
+            except Exception:  # e.g. a standalone Stage 2 server already owns the ledger
+                app.state.stage2_error = "Stage 2 is unavailable: another server owns its ledger"
         yield
         worker.close()
+        if stage2 is not None and app.state.stage2_error is None:
+            stage2.state.worker.close()
 
     app = FastAPI(title="CodeJury Stage 1", lifespan=lifespan)
     app.state.store, app.state.worker = store, worker
     app.state.repository = repository
+    app.state.stage2_error = None
     origins = os.getenv("CODEJURY_ALLOWED_ORIGINS", "http://localhost:8080").split(",")
     if any(
         not re.fullmatch(r"http://(?:localhost|127\.0\.0\.1):[0-9]{1,5}", origin)
@@ -135,6 +146,29 @@ def create_app(store=None, worker=None, *, web_dir=None) -> FastAPI:
             "Health",
         )
 
+    @app.middleware("http")
+    async def revalidate_static(request: Request, call_next):
+        # Browsers otherwise reuse stale UI modules after an update; ETags keep this cheap.
+        response = await call_next(request)
+        if request.method == "GET" and "cache-control" not in response.headers:
+            response.headers["Cache-Control"] = "no-cache"
+        return response
+
+    if stage2 is not None:
+
+        @app.middleware("http")
+        async def stage2_gate(request: Request, call_next):
+            path = request.url.path
+            if path == STAGE2_PREFIX or path.startswith(STAGE2_PREFIX + "/"):
+                body = {"schema_version": "stage2.v1", "error": {"field_errors": []}}
+                if app.state.stage2_error:
+                    body["error"].update(code="unavailable", message=app.state.stage2_error)
+                    return JSONResponse(body, status_code=503)
+                if request.method == "POST" and path == STAGE2_PREFIX + "/runs" and repository.busy():
+                    body["error"].update(code="busy", message="A Stage 1 repair is running")
+                    return JSONResponse(body, status_code=409)
+            return await call_next(request)
+
     @app.get("/examples")
     def get_examples():
         return response(examples(), "Examples")
@@ -171,6 +205,8 @@ def create_app(store=None, worker=None, *, web_dir=None) -> FastAPI:
                 error("unavailable", "Local model or isolated sandbox is not ready"), "Error", 503
             )
         try:
+            if stage2 is not None and stage2_busy(stage2):
+                raise Busy("A Stage 2 debate is running")
             snapshot = repository.claim(payload, worker.mode)
         except Busy:
             return response(
@@ -227,12 +263,48 @@ def create_app(store=None, worker=None, *, web_dir=None) -> FastAPI:
             )
         return response(snapshot, "RunSnapshot")
 
+    @app.get("/runs/{run_id}/transcript")
+    def transcript(run_id: str):
+        # Model outputs and engine reports for the Action history; written when a run finishes.
+        snapshot = store.snapshot(run_id)
+        body = {"schema_version": "stage1.v1", "run_id": run_id, "available": False}
+        path = store.directory / f"{run_id}-episode.json"
+        if (
+            snapshot["status"] in TERMINAL
+            and re.fullmatch(r"[0-9a-f]{32}", run_id)
+            and path.is_file()
+        ):
+            try:
+                episode = json.loads(path.read_text())
+                body.update(
+                    available=True,
+                    generations=[
+                        {"role": g["role"], "format_retry": g["format_retry"], "text": g["text"]}
+                        for g in episode.get("generations", [])
+                    ],
+                    actions=episode.get("actions", []),
+                )
+            except (OSError, ValueError, KeyError, TypeError):
+                pass
+        return JSONResponse(body, headers={"Cache-Control": "no-store"})
+
     @app.get("/stage1/training-report")
     def training_report():
         try:
             return response(load_report(worker.mode), "TrainingReport")
         except (OSError, ValueError, ValidationError):
             return response(error("unavailable", "Public training report is invalid"), "Error", 503)
+
+    if stage2 is not None:
+
+        @app.get(STAGE2_PREFIX + "/runs/{run_id}/transcript")
+        def stage2_run_transcript(run_id: str):
+            # Fails with the Stage 2 not-found envelope for unknown runs.
+            stage2.state.ledger.snapshot(run_id)
+            body = stage2_transcript(stage2.state.ledger.directory, run_id)
+            return JSONResponse(body, headers={"Cache-Control": "no-store"})
+
+        app.mount(STAGE2_PREFIX, stage2, name="stage2")
 
     # Register the UI last so /health, /runs and the other API routes win.
     directory = (
@@ -249,4 +321,4 @@ def create_app(store=None, worker=None, *, web_dir=None) -> FastAPI:
     return app
 
 
-app = create_app()
+app = create_app(stage2=load_stage2_app())

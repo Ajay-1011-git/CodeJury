@@ -26,7 +26,8 @@ export class AppState {
       nextAfter: 0,
       trainingReport: null,
       isSubmitting: false,
-      errorNotice: null
+      errorNotice: null,
+      stage: 1
     };
   }
 

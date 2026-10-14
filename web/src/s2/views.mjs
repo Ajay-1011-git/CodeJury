@@ -199,8 +199,8 @@ export function renderRun(root, state, handlers) {
 
   if (snap.decision) {
     const d = snap.decision;
-    root.append(el('h3', { text: 'Decision' }), el('p', { text: d.reason }), el('p', {}, 'Verification scope: ', d.verification_scope.join(' · ') || NOT_MEASURED),
-      d.unresolved_requirements.length > 0 && el('p', { text: `Unresolved requirements: ${d.unresolved_requirements.join(', ')}` }));
+    root.append(el('h3', { text: 'Decision' }), el('p', { text: d.reason }), el('p', {}, 'Verification scope: ', d.verification_scope.join(' · ') || NOT_MEASURED));
+    if (d.unresolved_requirements.length > 0) root.append(el('p', { text: `Unresolved requirements: ${d.unresolved_requirements.join(', ')}` }));
     handlers.mountDownload(root, snap);
   }
 }
@@ -216,7 +216,8 @@ export function renderDownload(root, dl) {
 export function renderReports(root, { training, benchmark }) {
   clear(root);
   if (training) {
-    root.append(el('h3', { text: 'Adapter cards' }), training.runtime_mode === 'fixture' && el('p', { class: 'notice', text: 'SYNTHETIC fixture report: not evidence of learning.' }));
+    root.append(el('h3', { text: 'Adapter cards' }));
+    if (training.runtime_mode === 'fixture') root.append(el('p', { class: 'notice', text: 'SYNTHETIC fixture report: not evidence of learning.' }));
     for (const v of trainingView(training)) {
       const c = v.card;
       root.append(el('article', { class: 'cand' }, el('header', {}, el('strong', { text: v.label }), badge(v.status, v.status === 'completed' ? 'success' : 'warn')),

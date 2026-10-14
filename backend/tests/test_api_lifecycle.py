@@ -146,3 +146,23 @@ def test_live_default_never_exposes_fake_health(tmp_path):
         body = checked(client.get("/health"), "Health")
         assert body["runtime_mode"] == "live"
         assert not body["model_ready"] and not body["fixer_a_trained"]
+
+
+def test_transcript_only_after_termination(setup, request_body):
+    client, store, _, _ = setup
+    run_id = checked(client.post("/runs", json=request_body), "RunAccepted", 202)["run_id"]
+    episode = {
+        "generations": [
+            {"role": "fixer_a", "format_retry": False, "text": "{}", "input_tokens": 9},
+            {"role": "critic", "format_retry": False, "text": "not json", "input_tokens": 9},
+        ],
+        "actions": [{"action": "challenge_proposal", "source": "deterministic_fallback"}],
+    }
+    (store.directory / f"{run_id}-episode.json").write_text(json.dumps(episode))
+    assert client.get(f"/runs/{run_id}/transcript").json()["available"] is False
+    client.post(f"/runs/{run_id}/cancel")
+    body = client.get(f"/runs/{run_id}/transcript").json()
+    assert body["available"] is True
+    assert body["generations"][1] == {"role": "critic", "format_retry": False, "text": "not json"}
+    assert body["actions"] == episode["actions"]
+    assert client.get("/runs/missing/transcript").status_code == 404

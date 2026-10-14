@@ -1,0 +1,814 @@
+{
+  "note": "Paste-ready CodeJury Stage 1 inputs. Each 'request' is a valid POST /runs body (source, contract, input domain, supplied tests, approved property). 'reference_fix' is for your own checking and is never sent to the models. 'live_result' is from runs on 2026-10-14 against the stage1-demo Fixer A adapter; the model is non-deterministic, so results can vary.",
+  "how_to_run": "curl -s -X POST http://127.0.0.1:8000/runs -H 'Content-Type: application/json' -d \"$(jq -c '.verified[0].request' samples/demo-samples.json)\"",
+  "verified": [
+    {
+      "id": "sort-returns-input",
+      "why_it_argues": "Approved sort property: the test engine generates extra lists that become authoritative tests, so every candidate is checked against random inputs, not just yours.",
+      "request": {
+        "schema_version": "stage1.v1",
+        "source": "def sort_values(values):\n    return values\n",
+        "function_name": "sort_values",
+        "contract_text": "Return a new list with the integers in ascending order, keeping duplicates.",
+        "input_domain": [
+          {
+            "kind": "list_integer",
+            "min": -1000,
+            "max": 1000,
+            "min_length": 0,
+            "max_length": 30
+          }
+        ],
+        "supplied_tests": [
+          {
+            "test_id": "unsorted",
+            "args": [
+              [
+                3,
+                -1,
+                2
+              ]
+            ],
+            "expected": [
+              -1,
+              2,
+              3
+            ]
+          },
+          {
+            "test_id": "dupes",
+            "args": [
+              [
+                5,
+                0,
+                5,
+                -4
+              ]
+            ],
+            "expected": [
+              -4,
+              0,
+              5,
+              5
+            ]
+          }
+        ],
+        "approved_property": "sort_ascending_ints",
+        "resource_profile": "stage1-demo"
+      },
+      "reference_fix": "def sort_values(values):\n    return sorted(values)\n",
+      "live_result": "2/2 supported_patch. First candidate rejected by a generated counterexample, revision accepted after 82 tests."
+    },
+    {
+      "id": "dedupe-loses-order",
+      "why_it_argues": "Approved unique property: set() gives the right members in the wrong order. Candidates that sort instead of keeping first-seen order fail the generated property checks.",
+      "request": {
+        "schema_version": "stage1.v1",
+        "source": "def dedupe(values):\n    return list(set(values))\n",
+        "function_name": "dedupe",
+        "contract_text": "Return the first occurrence of each integer, in the order the integers first appear.",
+        "input_domain": [
+          {
+            "kind": "list_integer",
+            "min": -1000,
+            "max": 1000,
+            "min_length": 0,
+            "max_length": 30
+          }
+        ],
+        "supplied_tests": [
+          {
+            "test_id": "order",
+            "args": [
+              [
+                9,
+                1,
+                9,
+                -3,
+                1
+              ]
+            ],
+            "expected": [
+              9,
+              1,
+              -3
+            ]
+          }
+        ],
+        "approved_property": "unique_preserve_order_ints",
+        "resource_profile": "stage1-demo"
+      },
+      "reference_fix": "def dedupe(values):\n    return list(dict.fromkeys(values))\n",
+      "live_result": "2/2 supported_patch. First candidate (return values) rejected, revision accepted after 82 tests."
+    },
+    {
+      "id": "count-even-uses-odd",
+      "why_it_argues": "Parity flipped. Negative numbers and zero test whether a candidate's parity check is right.",
+      "request": {
+        "schema_version": "stage1.v1",
+        "source": "def count_even(values):\n    return len([v for v in values if v % 2 == 1])\n",
+        "function_name": "count_even",
+        "contract_text": "Count the integers divisible by two, including zero and negatives.",
+        "input_domain": [
+          {
+            "kind": "list_integer",
+            "min": -1000,
+            "max": 1000,
+            "min_length": 0,
+            "max_length": 30
+          }
+        ],
+        "supplied_tests": [
+          {
+            "test_id": "mixed",
+            "args": [
+              [
+                1,
+                2,
+                3,
+                4
+              ]
+            ],
+            "expected": 2
+          },
+          {
+            "test_id": "neg-and-zero",
+            "args": [
+              [
+                -4,
+                0,
+                -3
+              ]
+            ],
+            "expected": 2
+          },
+          {
+            "test_id": "empty",
+            "args": [
+              []
+            ],
+            "expected": 0
+          }
+        ],
+        "approved_property": null,
+        "resource_profile": "stage1-demo"
+      },
+      "reference_fix": "def count_even(values):\n    return len([v for v in values if v % 2 == 0])\n",
+      "live_result": "2/2 supported_patch on the first candidate."
+    },
+    {
+      "id": "largest-uses-min",
+      "why_it_argues": "One wrong builtin. No property, so only your tests are authoritative and generated extra cases are only observations.",
+      "request": {
+        "schema_version": "stage1.v1",
+        "source": "def largest(values):\n    return min(values)\n",
+        "function_name": "largest",
+        "contract_text": "Return the largest integer in the non-empty list.",
+        "input_domain": [
+          {
+            "kind": "list_integer",
+            "min": -1000,
+            "max": 1000,
+            "min_length": 1,
+            "max_length": 30
+          }
+        ],
+        "supplied_tests": [
+          {
+            "test_id": "mixed",
+            "args": [
+              [
+                4,
+                -2,
+                9,
+                1
+              ]
+            ],
+            "expected": 9
+          },
+          {
+            "test_id": "negatives",
+            "args": [
+              [
+                -7,
+                -3,
+                -5
+              ]
+            ],
+            "expected": -3
+          },
+          {
+            "test_id": "single",
+            "args": [
+              [
+                6
+              ]
+            ],
+            "expected": 6
+          }
+        ],
+        "approved_property": null,
+        "resource_profile": "stage1-demo"
+      },
+      "reference_fix": "def largest(values):\n    return max(values)\n",
+      "live_result": "2/2 supported_patch."
+    },
+    {
+      "id": "area-adds",
+      "why_it_argues": "Two-argument arithmetic bug: + instead of *.",
+      "request": {
+        "schema_version": "stage1.v1",
+        "source": "def area(width, height):\n    return width + height\n",
+        "function_name": "area",
+        "contract_text": "Return the area of a rectangle: width multiplied by height.",
+        "input_domain": [
+          {
+            "kind": "integer",
+            "min": 0,
+            "max": 100,
+            "min_length": null,
+            "max_length": null
+          },
+          {
+            "kind": "integer",
+            "min": 0,
+            "max": 100,
+            "min_length": null,
+            "max_length": null
+          }
+        ],
+        "supplied_tests": [
+          {
+            "test_id": "basic",
+            "args": [
+              3,
+              4
+            ],
+            "expected": 12
+          },
+          {
+            "test_id": "zero",
+            "args": [
+              0,
+              7
+            ],
+            "expected": 0
+          },
+          {
+            "test_id": "square",
+            "args": [
+              5,
+              5
+            ],
+            "expected": 25
+          }
+        ],
+        "approved_property": null,
+        "resource_profile": "stage1-demo"
+      },
+      "reference_fix": "def area(width, height):\n    return width * height\n",
+      "live_result": "2/2 supported_patch."
+    },
+    {
+      "id": "in-range-missing",
+      "why_it_argues": "Stub body (like the training data): the fixer has to write the function from the contract, and the inclusive edges are tested.",
+      "request": {
+        "schema_version": "stage1.v1",
+        "source": "def in_range(x, lo, hi):\n    return None\n",
+        "function_name": "in_range",
+        "contract_text": "Return True if lo <= x <= hi (both ends inclusive), otherwise False.",
+        "input_domain": [
+          {
+            "kind": "integer",
+            "min": -100,
+            "max": 100,
+            "min_length": null,
+            "max_length": null
+          },
+          {
+            "kind": "integer",
+            "min": -100,
+            "max": 100,
+            "min_length": null,
+            "max_length": null
+          },
+          {
+            "kind": "integer",
+            "min": -100,
+            "max": 100,
+            "min_length": null,
+            "max_length": null
+          }
+        ],
+        "supplied_tests": [
+          {
+            "test_id": "inside",
+            "args": [
+              5,
+              1,
+              9
+            ],
+            "expected": true
+          },
+          {
+            "test_id": "low-edge",
+            "args": [
+              1,
+              1,
+              9
+            ],
+            "expected": true
+          },
+          {
+            "test_id": "high-edge",
+            "args": [
+              9,
+              1,
+              9
+            ],
+            "expected": true
+          },
+          {
+            "test_id": "outside",
+            "args": [
+              10,
+              1,
+              9
+            ],
+            "expected": false
+          }
+        ],
+        "approved_property": null,
+        "resource_profile": "stage1-demo"
+      },
+      "reference_fix": "def in_range(x, lo, hi):\n    return lo <= x <= hi\n",
+      "live_result": "2/2 supported_patch."
+    },
+    {
+      "id": "double-each-missing",
+      "why_it_argues": "Stub list transform: has to return a new list with every value doubled.",
+      "request": {
+        "schema_version": "stage1.v1",
+        "source": "def double_each(values):\n    return 0\n",
+        "function_name": "double_each",
+        "contract_text": "Return a new list with every integer multiplied by two, in the same order.",
+        "input_domain": [
+          {
+            "kind": "list_integer",
+            "min": -500,
+            "max": 500,
+            "min_length": 0,
+            "max_length": 30
+          }
+        ],
+        "supplied_tests": [
+          {
+            "test_id": "basic",
+            "args": [
+              [
+                1,
+                -2,
+                3
+              ]
+            ],
+            "expected": [
+              2,
+              -4,
+              6
+            ]
+          },
+          {
+            "test_id": "empty",
+            "args": [
+              []
+            ],
+            "expected": []
+          }
+        ],
+        "approved_property": null,
+        "resource_profile": "stage1-demo"
+      },
+      "reference_fix": "def double_each(values):\n    return [v * 2 for v in values]\n",
+      "live_result": "2/2 supported_patch."
+    },
+    {
+      "id": "count-in-range-exclusive",
+      "why_it_argues": "Three arguments and a boundary bug: strict comparisons drop the endpoints. Candidates that only fix one side fail a supplied test.",
+      "request": {
+        "schema_version": "stage1.v1",
+        "source": "def count_in_range(values, lo, hi):\n    count = 0\n    for value in values:\n        if lo < value < hi:\n            count += 1\n    return count\n",
+        "function_name": "count_in_range",
+        "contract_text": "Count the integers v with lo <= v <= hi (both ends inclusive). If lo is greater than hi, return zero.",
+        "input_domain": [
+          {
+            "kind": "list_integer",
+            "min": -100,
+            "max": 100,
+            "min_length": 0,
+            "max_length": 30
+          },
+          {
+            "kind": "integer",
+            "min": -100,
+            "max": 100,
+            "min_length": null,
+            "max_length": null
+          },
+          {
+            "kind": "integer",
+            "min": -100,
+            "max": 100,
+            "min_length": null,
+            "max_length": null
+          }
+        ],
+        "supplied_tests": [
+          {
+            "test_id": "inclusive",
+            "args": [
+              [
+                1,
+                2,
+                3,
+                4,
+                5
+              ],
+              2,
+              4
+            ],
+            "expected": 3
+          },
+          {
+            "test_id": "low-edge",
+            "args": [
+              [
+                2,
+                2,
+                9
+              ],
+              2,
+              5
+            ],
+            "expected": 2
+          },
+          {
+            "test_id": "high-edge",
+            "args": [
+              [
+                5,
+                6
+              ],
+              0,
+              5
+            ],
+            "expected": 1
+          },
+          {
+            "test_id": "inverted",
+            "args": [
+              [
+                1,
+                2,
+                3
+              ],
+              3,
+              1
+            ],
+            "expected": 0
+          }
+        ],
+        "approved_property": null,
+        "resource_profile": "stage1-demo"
+      },
+      "reference_fix": "def count_in_range(values, lo, hi):\n    count = 0\n    for value in values:\n        if lo <= value <= hi:\n            count += 1\n    return count\n",
+      "live_result": "1/1 supported_patch (lo < v < hi changed to lo <= v <= hi)."
+    }
+  ],
+  "stretch_currently_unresolved": [
+    {
+      "id": "sum-positives-only",
+      "why_it_argues": "Approved sum property: correct on all-positive input, so generated inputs with negatives are what expose wrong candidates.",
+      "request": {
+        "schema_version": "stage1.v1",
+        "source": "def total(values):\n    return sum(v for v in values if v > 0)\n",
+        "function_name": "total",
+        "contract_text": "Return the sum of all integers including negatives; an empty list returns zero.",
+        "input_domain": [
+          {
+            "kind": "list_integer",
+            "min": -1000,
+            "max": 1000,
+            "min_length": 0,
+            "max_length": 30
+          }
+        ],
+        "supplied_tests": [
+          {
+            "test_id": "mixed",
+            "args": [
+              [
+                5,
+                -3,
+                2
+              ]
+            ],
+            "expected": 4
+          }
+        ],
+        "approved_property": "sum_ints",
+        "resource_profile": "stage1-demo"
+      },
+      "reference_fix": "def total(values):\n    return sum(values)\n",
+      "live_result": "0/2 unresolved. First candidate kept skipping negatives and was rejected; the revision's output was invalid JSON."
+    },
+    {
+      "id": "sum-skips-negatives",
+      "why_it_argues": "Approved sum property: passes on all-positive inputs, so generated negatives and zeros are what break candidates.",
+      "request": {
+        "schema_version": "stage1.v1",
+        "source": "def total(values):\n    result = 0\n    for value in values:\n        if value > 0:\n            result += value\n    return result\n",
+        "function_name": "total",
+        "contract_text": "Return the sum of all integers, including negative ones; an empty list returns zero.",
+        "input_domain": [
+          {
+            "kind": "list_integer",
+            "min": -1000,
+            "max": 1000,
+            "min_length": 0,
+            "max_length": 30
+          }
+        ],
+        "supplied_tests": [
+          {
+            "test_id": "mixed-signs",
+            "args": [
+              [
+                5,
+                -3,
+                2
+              ]
+            ],
+            "expected": 4
+          }
+        ],
+        "approved_property": "sum_ints",
+        "resource_profile": "stage1-demo"
+      },
+      "reference_fix": "def total(values):\n    result = 0\n    for value in values:\n        result += value\n    return result\n",
+      "live_result": "0/1 unresolved. Candidates such as -sum(values) and starting from -1 were rejected."
+    },
+    {
+      "id": "bubble-sort-off-by-one",
+      "why_it_argues": "Approved sort property: the generated lists become authoritative tests, so a partial fix (e.g. only fixing short inputs) gets caught and rejected.",
+      "request": {
+        "schema_version": "stage1.v1",
+        "source": "def sort_values(values):\n    result = list(values)\n    for i in range(len(result)):\n        for j in range(len(result) - i - 2):\n            if result[j] > result[j + 1]:\n                result[j], result[j + 1] = result[j + 1], result[j]\n    return result\n",
+        "function_name": "sort_values",
+        "contract_text": "Return a new list with the integers sorted in ascending order, keeping duplicates. Do not modify the input list.",
+        "input_domain": [
+          {
+            "kind": "list_integer",
+            "min": -1000,
+            "max": 1000,
+            "min_length": 0,
+            "max_length": 30
+          }
+        ],
+        "supplied_tests": [
+          {
+            "test_id": "three-items",
+            "args": [
+              [
+                3,
+                1,
+                2
+              ]
+            ],
+            "expected": [
+              1,
+              2,
+              3
+            ]
+          },
+          {
+            "test_id": "duplicates",
+            "args": [
+              [
+                5,
+                -2,
+                5,
+                0
+              ]
+            ],
+            "expected": [
+              -2,
+              0,
+              5,
+              5
+            ]
+          }
+        ],
+        "approved_property": "sort_ascending_ints",
+        "resource_profile": "stage1-demo"
+      },
+      "reference_fix": "def sort_values(values):\n    result = list(values)\n    for i in range(len(result)):\n        for j in range(len(result) - i - 1):\n            if result[j] > result[j + 1]:\n                result[j], result[j + 1] = result[j + 1], result[j]\n    return result\n",
+      "live_result": "0/1 unresolved. The fixer rewrote the loops and broke them; both candidates rejected."
+    },
+    {
+      "id": "dedupe-reversed-order",
+      "why_it_argues": "Approved unique property: output looks plausible (right members) but in the wrong order, so only order-sensitive counterexamples catch it.",
+      "request": {
+        "schema_version": "stage1.v1",
+        "source": "def dedupe(values):\n    seen = []\n    for value in values:\n        if value not in seen:\n            seen.insert(0, value)\n    return seen\n",
+        "function_name": "dedupe",
+        "contract_text": "Return the first occurrence of each integer, in the order they first appear in the input.",
+        "input_domain": [
+          {
+            "kind": "list_integer",
+            "min": -1000,
+            "max": 1000,
+            "min_length": 0,
+            "max_length": 30
+          }
+        ],
+        "supplied_tests": [
+          {
+            "test_id": "repeats",
+            "args": [
+              [
+                4,
+                4,
+                2,
+                7,
+                2
+              ]
+            ],
+            "expected": [
+              4,
+              2,
+              7
+            ]
+          }
+        ],
+        "approved_property": "unique_preserve_order_ints",
+        "resource_profile": "stage1-demo"
+      },
+      "reference_fix": "def dedupe(values):\n    seen = []\n    for value in values:\n        if value not in seen:\n            seen.append(value)\n    return seen\n",
+      "live_result": "0/1 unresolved. Both candidates rejected."
+    },
+    {
+      "id": "longest-run-misses-last",
+      "why_it_argues": "No approved property: only your supplied tests are authoritative. Generated extra cases are only observations, so the decision rests on limited evidence.",
+      "request": {
+        "schema_version": "stage1.v1",
+        "source": "def longest_run(values):\n    best = 0\n    current = 0\n    previous = None\n    for value in values:\n        if value == previous:\n            current += 1\n        else:\n            best = max(best, current)\n            current = 1\n        previous = value\n    return best\n",
+        "function_name": "longest_run",
+        "contract_text": "Return the length of the longest block of equal adjacent integers. An empty list returns zero.",
+        "input_domain": [
+          {
+            "kind": "list_integer",
+            "min": -1000,
+            "max": 1000,
+            "min_length": 0,
+            "max_length": 30
+          }
+        ],
+        "supplied_tests": [
+          {
+            "test_id": "run-at-end",
+            "args": [
+              [
+                1,
+                1,
+                2,
+                2,
+                2
+              ]
+            ],
+            "expected": 3
+          },
+          {
+            "test_id": "run-at-start",
+            "args": [
+              [
+                7,
+                7,
+                7,
+                1
+              ]
+            ],
+            "expected": 3
+          },
+          {
+            "test_id": "single",
+            "args": [
+              [
+                4
+              ]
+            ],
+            "expected": 1
+          },
+          {
+            "test_id": "empty",
+            "args": [
+              []
+            ],
+            "expected": 0
+          }
+        ],
+        "approved_property": null,
+        "resource_profile": "stage1-demo"
+      },
+      "reference_fix": "def longest_run(values):\n    best = 0\n    current = 0\n    previous = None\n    for value in values:\n        if value == previous:\n            current += 1\n        else:\n            current = 1\n        previous = value\n        best = max(best, current)\n    return best\n",
+      "live_result": "0/1 unresolved."
+    },
+    {
+      "id": "rotate-left-large-k",
+      "why_it_argues": "Fails only when k exceeds the length. The obvious fix (k % len(values)) crashes on the empty list, so a careless candidate gets rejected by the 'empty' test.",
+      "request": {
+        "schema_version": "stage1.v1",
+        "source": "def rotate_left(values, k):\n    return values[k:] + values[:k]\n",
+        "function_name": "rotate_left",
+        "contract_text": "Rotate the list left by k positions, wrapping around (k may exceed the length). Return a new list; an empty list returns an empty list.",
+        "input_domain": [
+          {
+            "kind": "list_integer",
+            "min": -1000,
+            "max": 1000,
+            "min_length": 0,
+            "max_length": 30
+          },
+          {
+            "kind": "integer",
+            "min": 0,
+            "max": 100,
+            "min_length": null,
+            "max_length": null
+          }
+        ],
+        "supplied_tests": [
+          {
+            "test_id": "simple",
+            "args": [
+              [
+                1,
+                2,
+                3,
+                4
+              ],
+              1
+            ],
+            "expected": [
+              2,
+              3,
+              4,
+              1
+            ]
+          },
+          {
+            "test_id": "wraps",
+            "args": [
+              [
+                1,
+                2,
+                3
+              ],
+              5
+            ],
+            "expected": [
+              3,
+              1,
+              2
+            ]
+          },
+          {
+            "test_id": "full-turn",
+            "args": [
+              [
+                9,
+                8
+              ],
+              4
+            ],
+            "expected": [
+              9,
+              8
+            ]
+          },
+          {
+            "test_id": "empty",
+            "args": [
+              [],
+              3
+            ],
+            "expected": []
+          }
+        ],
+        "approved_property": null,
+        "resource_profile": "stage1-demo"
+      },
+      "reference_fix": "def rotate_left(values, k):\n    if not values:\n        return []\n    k = k % len(values)\n    return values[k:] + values[:k]\n",
+      "live_result": "0/1 unresolved."
+    }
+  ]
+}

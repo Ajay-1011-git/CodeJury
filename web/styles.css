@@ -360,3 +360,99 @@ textarea.form-control { line-height: 1.7; }
   .app-footer > a { width: 100%; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *,*::before,*::after { animation: none !important; transition: none !important; } }
+
+/* Action history rounds */
+.history { list-style: none; margin: 0; padding: 0 0 0 6px; border-left: 1px solid #dbe6ee; display: grid; gap: 8px; }
+.history-step { position: relative; padding-left: 14px; }
+.history-step::before { content: ''; position: absolute; top: 14px; left: -4px; width: 7px; height: 7px; background: #d0dde6; }
+.history-step.actor-fixer::before { background: #ff5e24; }
+.history-step.actor-critic::before { background: #6b5bd2; }
+.history-step.actor-engine::before { background: #2a7fb8; }
+.history-step.is-good::before { background: #2a6746; }
+.history-step.is-bad::before { background: #b44637; }
+.history-head { width: 100%; display: flex; align-items: flex-start; gap: 8px; text-align: left; background: #fff; border: 1px solid #e3ebf0; border-radius: 8px; padding: 7px 9px; cursor: pointer; font: inherit; color: inherit; }
+.history-head:hover { border-color: #c9d7e1; background: #fafcfd; }
+.history-head:focus-visible { outline: 2px solid #ff5e24; outline-offset: 2px; }
+.history-actor { flex: none; font: 600 9px/1.6 var(--font-mono); letter-spacing: .05em; text-transform: uppercase; padding: 1px 6px; border-radius: 4px; background: #f1f5f8; color: #5c6066; }
+.actor-fixer .history-actor { background: #fff0e9; color: #b0400f; }
+.actor-critic .history-actor { background: #f0eefc; color: #4c3fa8; }
+.actor-engine .history-actor { background: #eaf3fa; color: #1f628e; }
+.is-good .history-actor { background: #eef7f0; color: #2a6746; }
+.is-bad .history-actor { background: #fff0ec; color: #b44637; }
+.history-text { flex: 1; min-width: 0; display: grid; gap: 1px; }
+.history-title { font-size: 11px; line-height: 1.45; }
+.history-summary { font-size: 10px; line-height: 1.5; color: #5c6066; overflow-wrap: anywhere; }
+.history-chevron { flex: none; color: #98a4ad; transition: transform .15s; font-size: 14px; line-height: 1; }
+.history-head[aria-expanded="true"] .history-chevron { transform: rotate(90deg); }
+.history-detail { margin: 6px 0 2px; padding: 9px 10px; border: 1px dashed #dbe6ee; border-radius: 8px; display: grid; gap: 6px; font-size: 10px; min-width: 0; }
+.history-field { display: grid; grid-template-columns: minmax(70px, max-content) 1fr; gap: 8px; align-items: baseline; }
+.history-label { font: 600 9px/1.5 var(--font-mono); text-transform: uppercase; letter-spacing: .04em; color: #7c8c96; }
+.history-value { font-family: var(--font-mono); overflow-wrap: anywhere; min-width: 0; }
+.history-note { margin: 0; color: #5c6066; line-height: 1.55; }
+.history-cases { display: grid; gap: 6px; }
+.history-case { display: grid; gap: 3px; padding: 6px 8px; background: #f7fafc; border-radius: 6px; }
+.history-case-hit { background: #fff4ef; }
+.history-pre { margin: 0; padding: 7px 9px; background: #f5f7f8; border-radius: 6px; font: 10px/1.5 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 220px; overflow: auto; }
+.history-raw summary, .history-rawlog summary { cursor: pointer; font: 600 9px/1.6 var(--font-mono); text-transform: uppercase; letter-spacing: .04em; color: #5c6066; }
+.history-rawlog { margin-top: 14px; }
+.history-rawlog > div { margin-top: 10px; max-height: 360px; overflow: auto; }
+.history-detail .diff-view { font-size: 10px; }
+@media (prefers-reduced-motion: reduce) { .history-chevron { transition: none; } }
+.history-warn { color: #92541e; }
+
+.role-fixer_b .system-dot { background: #12867a; }
+.role-critic .system-dot { background: #6b5bd2; }
+.role-judge .system-dot { background: #232629; }
+
+/* Stage 2 debate roles */
+.history-step.actor-fixer_a::before { background: #ff5e24; }
+.history-step.actor-fixer_b::before { background: #12867a; }
+.history-step.actor-judge::before { background: #232629; }
+.history-step.actor-tools::before { background: #2a7fb8; }
+.actor-fixer_a .history-actor { background: #fff0e9; color: #b0400f; }
+.actor-fixer_b .history-actor { background: #e5f5f2; color: #0d6a60; }
+.actor-judge .history-actor { background: #232629; color: #fff; }
+.actor-tools .history-actor { background: #eaf3fa; color: #1f628e; }
+.actor-verdict .history-actor { background: #f1f5f8; color: #232629; }
+#card-progress #s2-progress-container { max-height: 640px; }
+.debate-menu, .debate-score { display: grid; gap: 4px; }
+.debate-option { display: grid; grid-template-columns: 14px max-content 1fr; gap: 8px; align-items: baseline; padding: 4px 7px; border-radius: 6px; background: #f7fafc; font-size: 10px; }
+.debate-option.is-chosen { background: #232629; color: #fff; }
+.debate-option-mark { font-weight: 700; }
+.debate-option-kind { font: 600 9px/1.6 var(--font-mono); text-transform: uppercase; letter-spacing: .04em; }
+.debate-option-text { overflow-wrap: anywhere; min-width: 0; }
+.s2-cand.origin-fixer_b, .s2-cand.origin-fixer_b_revision { border-left: 3px solid #12867a; }
+.s2-cand.origin-fixer_a, .s2-cand.origin-fixer_a_revision { border-left: 3px solid #ff5e24; }
+.s2-cand.origin-ast_search { border-left: 3px solid #2a7fb8; }
+.s2-cand.is-selected { box-shadow: 0 0 0 2px #d8e8db; }
+.s2-cand .edits { font: 10px/1.6 var(--font-mono); padding-left: 18px; margin: 6px 0; }
+
+/* Stage 2 repair form and reports, scoped so they never restyle Stage 1 */
+.s2-scope .case-form fieldset { border: 1px solid #e9eff3; border-radius: 8px; margin: 12px 0; padding: 8px 12px; min-width: 0; }
+.s2-scope .case-form legend { font: 600 10px var(--font-mono); letter-spacing: .04em; color: #5c6066; padding: 0 4px; }
+.s2-scope .field { display: block; margin: 8px 0; }
+.s2-scope .field-label { display: block; font: 600 9px var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: #5c6066; margin-bottom: 4px; }
+.s2-scope .case-form input, .s2-scope .case-form textarea, .s2-scope .case-form select { width: 100%; max-width: 100%; padding: 7px 9px; border: 1px solid #dce6ec; border-radius: 6px; background: #fff; font: inherit; font-size: 12px; }
+.s2-scope .case-form .check input { width: auto; }
+.s2-scope .code-input, .s2-scope .code-block { font-family: var(--font-mono); font-size: 11px; }
+.s2-scope .code-block { background: #f5f7f8; padding: 8px; overflow: auto; border-radius: 6px; max-height: 320px; }
+.s2-scope .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.s2-scope .row { display: grid; gap: 6px; padding: 8px; border: 1px dashed #dce6ec; border-radius: 6px; margin-bottom: 8px; }
+.s2-scope .btn-link { background: none; border: 0; color: #b43b34; cursor: pointer; justify-self: start; font-size: 11px; }
+.s2-scope .check { display: inline-flex; gap: 4px; align-items: center; margin-right: 12px; font-size: 11px; }
+.s2-scope .problems { color: #b43b34; padding-left: 18px; font-size: 11px; }
+.s2-scope .problems:empty { display: none; }
+.s2-scope .wording { color: #5c6066; font-size: 10px; }
+.s2-scope .cand { border: 1px solid #dce6ec; border-radius: 10px; padding: 10px 12px; margin: 10px 0; background: #fff; font-size: 11px; }
+.s2-scope .cand header { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.s2-scope .hash { font-family: var(--font-mono); background: #f5f7f8; padding: 0 4px; border-radius: 4px; }
+.s2-scope .scroll { overflow-x: auto; }
+.s2-scope .table { border-collapse: collapse; width: 100%; font-size: 11px; }
+.s2-scope .table th, .s2-scope .table td { border-bottom: 1px solid #e9eff3; padding: 4px 8px; text-align: left; vertical-align: top; }
+.s2-scope .dim { color: #5c6066; }
+.s2-scope .notice { background: #fff6e5; border-left: 4px solid #8a4a12; padding: 8px 12px; margin: 8px 0; border-radius: 4px; font-size: 11px; }
+.s2-scope h3 { font-size: 13px; margin: 18px 0 8px; }
+.s2-scope .btn { padding: 6px 12px; border: 1px solid #dce6ec; background: #fff; border-radius: 6px; cursor: pointer; font-size: 11px; }
+.s2-scope .btn-primary { background: #232629; color: #fff; border-color: #232629; }
+.s2-scope .case-form > .btn-primary { margin-top: 12px; padding: 10px 18px; }
+@media (max-width: 760px) { .s2-scope .two { grid-template-columns: 1fr; } }

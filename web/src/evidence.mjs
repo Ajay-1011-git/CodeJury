@@ -2,6 +2,8 @@
  * CodeJury Evidence Matrix, Candidate Inspector, and Event Timeline (stage1.v1)
  * Strictly renders code via textContent; handles property oracles and execution outcomes.
  */
+import { renderHistory } from './history.mjs';
+import { TERMINAL_STATUSES } from './state.mjs';
 
 export function renderDiffLines(diffText) {
   const container = document.createElement('div');
@@ -70,12 +72,32 @@ export function mountEvidenceView(candidatesContainer, executionContainer, store
 
   let selectedExecution = null;
   let inspectedRunId = null;
+  let transcript = null;
+  let transcriptRunId = null;
+  let lastState = null;
+
+  const drawHistory = (state) => {
+    renderHistory(document.getElementById('progress-container'), state.events, state.runSnapshot, transcript,
+      (box) => renderTimeline(box, state.events, state.runSnapshot));
+  };
 
   store.subscribe((state) => {
+    lastState = state;
     const snap = state.runSnapshot;
     if ((snap?.run_id || null) !== inspectedRunId) {
       selectedExecution = null;
       inspectedRunId = snap?.run_id || null;
+      transcript = null;
+    }
+    // Model outputs are stored when the run finishes; fetch them once per run.
+    if (snap && TERMINAL_STATUSES.includes(snap.status) && transcriptRunId !== snap.run_id && client?.getTranscript) {
+      transcriptRunId = snap.run_id;
+      const runId = snap.run_id;
+      client.getTranscript(runId).then((data) => {
+        if (inspectedRunId !== runId) return;
+        transcript = data;
+        if (lastState) drawHistory(lastState);
+      }).catch((err) => console.warn('Transcript unavailable:', err.message));
     }
     renderCandidates(candidatesContainer, snap);
     const onSelect = (exec, test, cand) => {
@@ -83,7 +105,7 @@ export function mountEvidenceView(candidatesContainer, executionContainer, store
       renderExecutionMatrix(executionContainer, snap, selectedExecution, onSelect);
     };
     renderExecutionMatrix(executionContainer, snap, selectedExecution, onSelect);
-    renderTimeline(document.getElementById('progress-container'), state.events, snap);
+    drawHistory(state);
   });
 }
 
