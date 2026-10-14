@@ -109,15 +109,22 @@ def test_present_wrong_state_id_still_refuses_and_falls_back(tmp_path):
 
 def test_parse_judge_only_forgives_a_state_id_only_omission():
     ok = '{"action_option_id":"o1","evidence_ids":[],"rationale":"r"}'
-    draft, filled = parse_judge(ok, "s-1")
-    assert filled and draft["state_id"] == "s-1"
+    draft, repair = parse_judge(ok, "s-1")
+    assert repair == "omitted" and draft["state_id"] == "s-1"
     full = '{"state_id":"s-1","action_option_id":"o1","evidence_ids":[],"rationale":"r"}'
-    assert parse_judge(full, "s-1")[1] is False
+    assert parse_judge(full, "s-1")[1] is None
+    dangling = '{"action_option_id":"o1","evidence_ids":[],"rationale":"r","}'
+    draft, repair = parse_judge(dangling, "s-1")
+    assert repair == "dangling_key" and draft["state_id"] == "s-1"
     for bad in (
         '{"action_option_id":"o1","evidence_ids":[]}',
         '{"action_option_id":"o1","evidence_ids":[],"rationale":"r","extra":1}',
         '{"action_option_id":"o1","action_option_id":"o2","evidence_ids":[],"rationale":"r"}',
-        '{"action_option_id":"o1","evidence_ids":[],"rationale":"r","}',
+        '{"action_option_id":"o1","evidence_ids":[],"rationale":"r",',
+        '{"action_option_id":"o1","evidence_ids":[],"rationale":"r","state_id":"}',
+        '{"action_option_id":"o1","evidence_ids":[],","}',
+        '{"action_option_id":"o1","evidence_ids":[],"rationale":"r","x":1,"}',
+        "e72e72e72",
         "[]",
     ):
         with pytest.raises(ValueError):
