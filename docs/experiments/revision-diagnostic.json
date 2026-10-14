@@ -1,0 +1,595 @@
+{
+  "after": [
+    {
+      "bases": 12,
+      "method": "J-current",
+      "outcomes": {
+        "solved": 4,
+        "unresolved": 7,
+        "wrong_accepted": 1
+      },
+      "seed": 17,
+      "solve_rate": 0.3333333333333333,
+      "solved": 4,
+      "tier": "all",
+      "wilson_95": [
+        0.13812009109121315,
+        0.6093779111272004
+      ]
+    },
+    {
+      "bases": 6,
+      "method": "J-current",
+      "outcomes": {
+        "solved": 2,
+        "unresolved": 4
+      },
+      "seed": 17,
+      "solve_rate": 0.3333333333333333,
+      "solved": 2,
+      "tier": "T2",
+      "wilson_95": [
+        0.09677141110578041,
+        0.700006684861608
+      ]
+    },
+    {
+      "bases": 6,
+      "method": "J-current",
+      "outcomes": {
+        "solved": 2,
+        "unresolved": 3,
+        "wrong_accepted": 1
+      },
+      "seed": 17,
+      "solve_rate": 0.3333333333333333,
+      "solved": 2,
+      "tier": "T3",
+      "wilson_95": [
+        0.09677141110578041,
+        0.700006684861608
+      ]
+    },
+    {
+      "bases": 12,
+      "method": "J-current",
+      "outcomes": {
+        "solved": 3,
+        "unresolved": 9
+      },
+      "seed": 29,
+      "solve_rate": 0.25,
+      "solved": 3,
+      "tier": "all",
+      "wilson_95": [
+        0.08894166839405471,
+        0.5323053349335657
+      ]
+    },
+    {
+      "bases": 6,
+      "method": "J-current",
+      "outcomes": {
+        "solved": 2,
+        "unresolved": 4
+      },
+      "seed": 29,
+      "solve_rate": 0.3333333333333333,
+      "solved": 2,
+      "tier": "T2",
+      "wilson_95": [
+        0.09677141110578041,
+        0.700006684861608
+      ]
+    },
+    {
+      "bases": 6,
+      "method": "J-current",
+      "outcomes": {
+        "solved": 1,
+        "unresolved": 5
+      },
+      "seed": 29,
+      "solve_rate": 0.16666666666666666,
+      "solved": 1,
+      "tier": "T3",
+      "wilson_95": [
+        0.030053369748306635,
+        0.5635028221864702
+      ]
+    },
+    {
+      "bases": 12,
+      "method": "J-current",
+      "outcomes": {
+        "solved": 4,
+        "unresolved": 7,
+        "wrong_accepted": 1
+      },
+      "seed": 43,
+      "solve_rate": 0.3333333333333333,
+      "solved": 4,
+      "tier": "all",
+      "wilson_95": [
+        0.13812009109121315,
+        0.6093779111272004
+      ]
+    },
+    {
+      "bases": 6,
+      "method": "J-current",
+      "outcomes": {
+        "solved": 3,
+        "unresolved": 3
+      },
+      "seed": 43,
+      "solve_rate": 0.5,
+      "solved": 3,
+      "tier": "T2",
+      "wilson_95": [
+        0.1876163064826506,
+        0.8123836935173494
+      ]
+    },
+    {
+      "bases": 6,
+      "method": "J-current",
+      "outcomes": {
+        "solved": 1,
+        "unresolved": 4,
+        "wrong_accepted": 1
+      },
+      "seed": 43,
+      "solve_rate": 0.16666666666666666,
+      "solved": 1,
+      "tier": "T3",
+      "wilson_95": [
+        0.030053369748306635,
+        0.5635028221864702
+      ]
+    }
+  ],
+  "base_problems": 12,
+  "before": [
+    {
+      "bases": 12,
+      "method": "J-current",
+      "outcomes": {
+        "solved": 4,
+        "unresolved": 8
+      },
+      "seed": 17,
+      "solve_rate": 0.3333333333333333,
+      "solved": 4,
+      "tier": "all",
+      "wilson_95": [
+        0.13812009109121315,
+        0.6093779111272004
+      ]
+    },
+    {
+      "bases": 6,
+      "method": "J-current",
+      "outcomes": {
+        "solved": 2,
+        "unresolved": 4
+      },
+      "seed": 17,
+      "solve_rate": 0.3333333333333333,
+      "solved": 2,
+      "tier": "T2",
+      "wilson_95": [
+        0.09677141110578041,
+        0.700006684861608
+      ]
+    },
+    {
+      "bases": 6,
+      "method": "J-current",
+      "outcomes": {
+        "solved": 2,
+        "unresolved": 4
+      },
+      "seed": 17,
+      "solve_rate": 0.3333333333333333,
+      "solved": 2,
+      "tier": "T3",
+      "wilson_95": [
+        0.09677141110578041,
+        0.700006684861608
+      ]
+    },
+    {
+      "bases": 12,
+      "method": "J-current",
+      "outcomes": {
+        "solved": 4,
+        "unresolved": 7,
+        "wrong_accepted": 1
+      },
+      "seed": 29,
+      "solve_rate": 0.3333333333333333,
+      "solved": 4,
+      "tier": "all",
+      "wilson_95": [
+        0.13812009109121315,
+        0.6093779111272004
+      ]
+    },
+    {
+      "bases": 6,
+      "method": "J-current",
+      "outcomes": {
+        "solved": 3,
+        "unresolved": 3
+      },
+      "seed": 29,
+      "solve_rate": 0.5,
+      "solved": 3,
+      "tier": "T2",
+      "wilson_95": [
+        0.1876163064826506,
+        0.8123836935173494
+      ]
+    },
+    {
+      "bases": 6,
+      "method": "J-current",
+      "outcomes": {
+        "solved": 1,
+        "unresolved": 4,
+        "wrong_accepted": 1
+      },
+      "seed": 29,
+      "solve_rate": 0.16666666666666666,
+      "solved": 1,
+      "tier": "T3",
+      "wilson_95": [
+        0.030053369748306635,
+        0.5635028221864702
+      ]
+    },
+    {
+      "bases": 12,
+      "method": "J-current",
+      "outcomes": {
+        "solved": 3,
+        "unresolved": 8,
+        "wrong_accepted": 1
+      },
+      "seed": 43,
+      "solve_rate": 0.25,
+      "solved": 3,
+      "tier": "all",
+      "wilson_95": [
+        0.08894166839405471,
+        0.5323053349335657
+      ]
+    },
+    {
+      "bases": 6,
+      "method": "J-current",
+      "outcomes": {
+        "solved": 2,
+        "unresolved": 4
+      },
+      "seed": 43,
+      "solve_rate": 0.3333333333333333,
+      "solved": 2,
+      "tier": "T2",
+      "wilson_95": [
+        0.09677141110578041,
+        0.700006684861608
+      ]
+    },
+    {
+      "bases": 6,
+      "method": "J-current",
+      "outcomes": {
+        "solved": 1,
+        "unresolved": 4,
+        "wrong_accepted": 1
+      },
+      "seed": 43,
+      "solve_rate": 0.16666666666666666,
+      "solved": 1,
+      "tier": "T3",
+      "wilson_95": [
+        0.030053369748306635,
+        0.5635028221864702
+      ]
+    }
+  ],
+  "eligible_for_default": false,
+  "fixer_a_weights_changed": false,
+  "gate_failures": [
+    {
+      "seed": 17,
+      "tier": "all"
+    },
+    {
+      "seed": 17,
+      "tier": "T3"
+    },
+    {
+      "seed": 29,
+      "tier": "all"
+    },
+    {
+      "seed": 29,
+      "tier": "T2"
+    }
+  ],
+  "intervals": "Wilson per seed; twelve independent bases, not 36.",
+  "runs_per_condition": 36,
+  "scope": "Concrete-failure revision changes with retained Fixer A weights; the local trial selected the original adapter. No full-population claim.",
+  "seeds": [
+    17,
+    29,
+    43
+  ],
+  "status": "paired_development_diagnostic",
+  "transitions": [
+    {
+      "after": "unresolved",
+      "base_problem_id": "balanced_parentheses",
+      "before": "unresolved",
+      "seed": 17
+    },
+    {
+      "after": "unresolved",
+      "base_problem_id": "balanced_parentheses",
+      "before": "unresolved",
+      "seed": 29
+    },
+    {
+      "after": "unresolved",
+      "base_problem_id": "balanced_parentheses",
+      "before": "unresolved",
+      "seed": 43
+    },
+    {
+      "after": "unresolved",
+      "base_problem_id": "transpose_ragged",
+      "before": "unresolved",
+      "seed": 17
+    },
+    {
+      "after": "unresolved",
+      "base_problem_id": "transpose_ragged",
+      "before": "unresolved",
+      "seed": 29
+    },
+    {
+      "after": "unresolved",
+      "base_problem_id": "transpose_ragged",
+      "before": "unresolved",
+      "seed": 43
+    },
+    {
+      "after": "solved",
+      "base_problem_id": "chunk_list",
+      "before": "solved",
+      "seed": 17
+    },
+    {
+      "after": "solved",
+      "base_problem_id": "chunk_list",
+      "before": "solved",
+      "seed": 29
+    },
+    {
+      "after": "solved",
+      "base_problem_id": "chunk_list",
+      "before": "solved",
+      "seed": 43
+    },
+    {
+      "after": "unresolved",
+      "base_problem_id": "interleave_unequal",
+      "before": "unresolved",
+      "seed": 17
+    },
+    {
+      "after": "unresolved",
+      "base_problem_id": "interleave_unequal",
+      "before": "unresolved",
+      "seed": 29
+    },
+    {
+      "after": "unresolved",
+      "base_problem_id": "interleave_unequal",
+      "before": "unresolved",
+      "seed": 43
+    },
+    {
+      "after": "unresolved",
+      "base_problem_id": "sliding_window_sums",
+      "before": "unresolved",
+      "seed": 17
+    },
+    {
+      "after": "unresolved",
+      "base_problem_id": "sliding_window_sums",
+      "before": "solved",
+      "seed": 29
+    },
+    {
+      "after": "solved",
+      "base_problem_id": "sliding_window_sums",
+      "before": "unresolved",
+      "seed": 43
+    },
+    {
+      "after": "solved",
+      "base_problem_id": "word_frequencies",
+      "before": "solved",
+      "seed": 17
+    },
+    {
+      "after": "solved",
+      "base_problem_id": "word_frequencies",
+      "before": "solved",
+      "seed": 29
+    },
+    {
+      "after": "solved",
+      "base_problem_id": "word_frequencies",
+      "before": "solved",
+      "seed": 43
+    },
+    {
+      "after": "unresolved",
+      "base_problem_id": "bracket_types",
+      "before": "unresolved",
+      "seed": 17
+    },
+    {
+      "after": "unresolved",
+      "base_problem_id": "bracket_types",
+      "before": "unresolved",
+      "seed": 29
+    },
+    {
+      "after": "unresolved",
+      "base_problem_id": "bracket_types",
+      "before": "unresolved",
+      "seed": 43
+    },
+    {
+      "after": "unresolved",
+      "base_problem_id": "edit_distance",
+      "before": "unresolved",
+      "seed": 17
+    },
+    {
+      "after": "unresolved",
+      "base_problem_id": "edit_distance",
+      "before": "unresolved",
+      "seed": 29
+    },
+    {
+      "after": "unresolved",
+      "base_problem_id": "edit_distance",
+      "before": "unresolved",
+      "seed": 43
+    },
+    {
+      "after": "solved",
+      "base_problem_id": "max_subarray",
+      "before": "solved",
+      "seed": 17
+    },
+    {
+      "after": "solved",
+      "base_problem_id": "max_subarray",
+      "before": "solved",
+      "seed": 29
+    },
+    {
+      "after": "solved",
+      "base_problem_id": "max_subarray",
+      "before": "solved",
+      "seed": 43
+    },
+    {
+      "after": "solved",
+      "base_problem_id": "interval_union",
+      "before": "solved",
+      "seed": 17
+    },
+    {
+      "after": "unresolved",
+      "base_problem_id": "interval_union",
+      "before": "unresolved",
+      "seed": 29
+    },
+    {
+      "after": "unresolved",
+      "base_problem_id": "interval_union",
+      "before": "unresolved",
+      "seed": 43
+    },
+    {
+      "after": "wrong_accepted",
+      "base_problem_id": "three_sum_unique",
+      "before": "unresolved",
+      "seed": 17
+    },
+    {
+      "after": "unresolved",
+      "base_problem_id": "three_sum_unique",
+      "before": "wrong_accepted",
+      "seed": 29
+    },
+    {
+      "after": "wrong_accepted",
+      "base_problem_id": "three_sum_unique",
+      "before": "wrong_accepted",
+      "seed": 43
+    },
+    {
+      "after": "unresolved",
+      "base_problem_id": "grid_paths",
+      "before": "unresolved",
+      "seed": 17
+    },
+    {
+      "after": "unresolved",
+      "base_problem_id": "grid_paths",
+      "before": "unresolved",
+      "seed": 29
+    },
+    {
+      "after": "unresolved",
+      "base_problem_id": "grid_paths",
+      "before": "unresolved",
+      "seed": 43
+    }
+  ],
+  "adoption": {
+    "status": "not_adopted",
+    "active_view_version": "stage2.views.v1",
+    "existing_weights_retained": true
+  },
+  "protocol": {
+    "automatic_default_switch": false,
+    "base_problem_ids": [
+      "balanced_parentheses",
+      "transpose_ragged",
+      "chunk_list",
+      "interleave_unequal",
+      "sliding_window_sums",
+      "word_frequencies",
+      "bracket_types",
+      "edit_distance",
+      "max_subarray",
+      "interval_union",
+      "three_sum_unique",
+      "grid_paths"
+    ],
+    "baseline_results_sha256": "5b9f2017243fa83791c3880ad3ca5821fde9d60b580806bcbcb9b3f98ea19719",
+    "fixer_a_weights_changed": false,
+    "seeds": [
+      17,
+      29,
+      43
+    ],
+    "selected_registry_hash": "37e7f30fff74d1cea45e4a86fdc34e32b361ca38e85c4201eb3113846d397714",
+    "selection_sha256": "f1b0ecfdd29cc79beeac00d735bc0b59dc32f81eb90f8d020b96666d73787f85",
+    "source_hashes": {
+      "/Users/ajay_macm5/Desktop/CodeJury/backend/src/codejury/stage2_core/candidates/__init__.py": "f12e4c145a43d878283f86bc12a78bf24bb1a7113a3a8c0bff71a8bd2d021c28",
+      "/Users/ajay_macm5/Desktop/CodeJury/backend/src/codejury/stage2_core/controller/learned.py": "124a4b4e02397e11081a2d729620f19384228d5f4496387f04f03d2f8b586bd8",
+      "/Users/ajay_macm5/Desktop/CodeJury/backend/src/codejury/stage2_core/model_worker/native.py": "d22ab91a1b3e441fe7e3a81d020fc3e9b3c709de0a07d44cb23d18c4905279c6",
+      "/Users/ajay_macm5/Desktop/CodeJury/backend/src/codejury/stage2_core/views/__init__.py": "bd067385f6a6e51e29131590c832ab839e343171b624a4d67923f25952f23be2",
+      "/Users/ajay_macm5/Desktop/CodeJury/backend/src/codejury/stage2_core/views/failures.py": "23cd795392152b3e0c7f9ce1794a1c3b0a1d0d58bd1039f65687888be0ebb18b"
+    },
+    "version": "stage2.logic-diagnostic.v1",
+    "view_version": "stage2.views.v2-concrete-failure"
+  },
+  "result_files": {
+    "commitments.jsonl": "fcd6ee1c319379e43ad70c6c2372fc5fd0f755929969b86d264f381363090d6a",
+    "results.jsonl": "47f9350de99d67be6ef3109872751bb14cd505699786c149ae72028e2ac6665a",
+    "comparison.json": "34a719561a1f08aaa4d3b7c5dc3ee80720fa9e8574d2867561d30cb81f124d17"
+  }
+}

@@ -138,7 +138,9 @@ Baseline-related tests pass. The latest full check before this baseline complete
 was 634 backend tests passed / 9 skipped and 80 frontend tests passed; the eight
 paired-diagnostic tests are included. No tests call Groq or download weights.
 
-Quick case and the actual conversation display are prepared. Their live repair
-acceptance awaits native compute. The local A refresh trial starts only after this
-baseline is documented and committed. Minimal-input accuracy, a full after-change
+After this baseline was documented and committed, the bounded local A refresh
+trial and 36-run revision diagnostic completed. Neither passed its adoption gate;
+see [trial results](local-logic-trial.md). Reviewed Quick case and the actual
+conversation display passed genuine local mechanics checks; see
+[UI evidence](quick-case-conversation.md). Minimal-input accuracy, a full after-change
 100-base comparison, model bake-offs and the other deferred phases remain unmeasured.

@@ -1,0 +1,156 @@
+--- a/backend/src/codejury/stage2_core/views/__init__.py
++++ b/backend/src/codejury/stage2_core/views/__init__.py
+@@ -5,7 +5,9 @@
+
+ from codejury.stage2_core.contracts import canonical_json, checked, json_hash
+
+-VIEW_VERSION = "stage2.views.v1"
++from .failures import REVISION_INSTRUCTION, first_failure
++
++VIEW_VERSION = "stage2.views.v2-concrete-failure"
+ REPAIR_FORMAT = {
+     "source": "complete Python target/helper bundle",
+     "diagnosis": "brief diagnosis",
+@@ -137,13 +139,23 @@
+         raise ValueError("Revision role/parent mismatch")
+     if any(e["candidate_id"] != candidate["candidate_id"] for e in executions):
+         raise ValueError("Revision evidence must concern this exact parent")
++    facts = evidence(executions, tests, [candidate], trace_reader=trace_reader)
++    failure = first_failure(facts)
+     return prompt(
+         role,
+         {
+             "problem": visible_problem(problem),
+             "tests": visible_tests(tests),
+             "parent": candidate,
+-            "evidence": evidence(executions, tests, [candidate], trace_reader=trace_reader),
++            "evidence": facts,
++            "first_failure": failure,
++            "revision_instruction": REVISION_INSTRUCTION
++            if failure
++            else (
++                "No approved concrete execution failure has been established. "
++                "Address any registered static error, preserve all interfaces, and do not "
++                "repeat the parent source. An observation is not an expected value."
++            ),
+             **({"static_check": {"valid": False, "error": static_check}} if static_check else {}),
+         },
+     )
+@@ -236,14 +248,17 @@
+         "omitted_gap_ids": max(0, len(state["audit_gap_ids"]) - 12),
+     }
+     result = prompt("judge", payload)
+-    result += "\nResponse constraints: " + canonical_json(
+-        {
+-            "state_id": state["state_id"],
+-            "allowed_action_option_ids": [o["option_id"] for o in state["available_actions"]],
+-            "instruction": "Copy this state_id and exactly one allowed action_option_id. "
+-            "Use evidence_ids=[] if no visible evidence is needed. Never invent an identifier.",
+-        }
+-    ).decode()
++    result += (
++        "\nResponse constraints: "
++        + canonical_json(
++            {
++                "state_id": state["state_id"],
++                "allowed_action_option_ids": [o["option_id"] for o in state["available_actions"]],
++                "instruction": "Copy this state_id and exactly one allowed action_option_id. "
++                "Use evidence_ids=[] if no visible evidence is needed. Never invent an identifier.",
++            }
++        ).decode()
++    )
+     if len(result.encode()) > 64000:
+         raise ValueError("Judge view exceeds bound; reduce visible summaries explicitly")
+     return result
+--- a/backend/src/codejury/stage2_core/candidates/__init__.py
++++ b/backend/src/codejury/stage2_core/candidates/__init__.py
+@@ -394,6 +394,14 @@
+                 # Repeat only the same allowed view, never feed prose/other-role content back.
+                 prompt += "\nFormat retry: return one JSON object with the exact requested fields."
+                 continue
++            if revise and repair["source"] == parent["source"]:
++                self.ledger.append_event(
++                    self.run_id,
++                    "action_refused",
++                    f"Refused byte-identical {role} revision of {parent['candidate_id']}; "
++                    f"response {response_ref}; model attempt and tokens remain charged",
++                )
++                return None
+             problem = self.ledger.snapshot(self.run_id)["problem"]
+             try:
+                 interfaces(repair["source"], problem["function_name"])
+--- a/backend/tests/stage2_core/test_candidates.py
++++ b/backend/tests/stage2_core/test_candidates.py
+@@ -251,3 +251,42 @@
+     store.add_test("fixture-run", {**test, "test_id": "late"})
+     with pytest.raises(ValueError, match="stale"):
+         pool.initial_pair(seed=1, cancel=Event())
++
++
++def test_byte_identical_revision_is_refused_but_model_cost_stays_charged(store):
++    from codejury.stage2_core.views import revision
++
++    valid = json.dumps(fixture("repair-draft"))
++    model = FixtureModel([valid, valid])
++    pool = CandidatePool(store, "fixture-run", model, IDENTITIES)
++    parent = pool.generate("fixer_a", pool.views.a, parent=pool.original(), seed=1, cancel=Event())
++    snapshot = store.snapshot("fixture-run")
++    prompt = revision("fixer_a", snapshot["problem"], snapshot["tests"], parent, [])
++    assert (
++        pool.generate("fixer_a", prompt, parent=parent, seed=2, cancel=Event(), revise=True) is None
++    )
++    assert len(model.requests) == 2  # a valid no-op does not receive a schema retry
++    assert len(store.records("fixture-run", "candidates")) == 2
++    usage = store.accounts["fixture-run"].usage()
++    assert usage["learned_candidates"] == 2 and usage["output_tokens"] == 10
++    assert any(
++        "byte-identical" in event["payload"].get("message", "")
++        for event in store.events("fixture-run")
++    )
++
++
++def test_changed_revision_preserves_parent_provenance(store):
++    from codejury.stage2_core.views import revision
++
++    repair = fixture("repair-draft")
++    changed = copy.deepcopy(repair)
++    changed["source"] += "\n# changed source bytes\n"
++    model = FixtureModel([json.dumps(repair), json.dumps(changed)])
++    pool = CandidatePool(store, "fixture-run", model, IDENTITIES)
++    parent = pool.generate("fixer_a", pool.views.a, parent=pool.original(), seed=1, cancel=Event())
++    snapshot = store.snapshot("fixture-run")
++    prompt = revision("fixer_a", snapshot["problem"], snapshot["tests"], parent, [])
++    candidate = pool.generate("fixer_a", prompt, parent=parent, seed=2, cancel=Event(), revise=True)
++    assert candidate["parent_id"] == parent["candidate_id"]
++    assert candidate["source"] == changed["source"]
++    assert candidate["origin"] == "fixer_a_revision"
+--- a/backend/tests/stage2_core/test_revision_failures.py
++++ b/backend/tests/stage2_core/test_revision_failures.py
+@@ -74,3 +74,27 @@
+     failure = first_failure(rows)
+     assert failure["input_effects"] == execution["input_effects"]
+     assert failure["expected"] == 5
++
++
++def test_revision_promotes_only_registered_failure_and_honest_no_failure_instruction():
++    from codejury.stage2_core.views import revision
++
++    snapshot = json.loads(
++        (REPO_ROOT / "contracts/stage2-fixtures/snapshot-running.json").read_text()
++    )
++    candidate = next(c for c in snapshot["candidates"] if c["candidate_id"] == "c-a")
++    execution = copy.deepcopy(snapshot["executions"][0])
++    execution.update(candidate_id=candidate["candidate_id"], outcome="fail", actual_output=99)
++    text = revision("fixer_a", snapshot["problem"], snapshot["tests"], candidate, [execution])
++    payload = json.loads(text.split("Runtime-visible facts:\n")[1])
++    assert payload["first_failure"]["expected"] == 5
++    assert payload["first_failure"]["actual"] == 99
++    assert "must change behavior" in payload["revision_instruction"]
++    tests = copy.deepcopy(snapshot["tests"])
++    tests[0]["oracle_status"] = "observation_only"
++    # Use the registered observation fixture status without inventing an expectation.
++    tests[0]["oracle_spec"] = {"kind": "observation", "hypothesis": "Compare observed behavior"}
++    text = revision("fixer_a", snapshot["problem"], tests, candidate, [execution])
++    payload = json.loads(text.split("Runtime-visible facts:\n")[1])
++    assert payload["first_failure"] is None
++    assert "No approved concrete execution failure" in payload["revision_instruction"]

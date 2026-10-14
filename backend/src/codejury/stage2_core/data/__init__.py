@@ -142,12 +142,13 @@ def runtime_example(row):
     """Convert allowed runtime facts. Reference targets/offline tests are absent."""
     if row["split"] not in {"train", "validation"}:
         raise ValueError("Only authorized learning pools can construct these views")
-    args = ast.parse(row["buggy_source"]).body[0].args.args
+    target = ast.parse(row["buggy_source"]).body[0]
+    args = target.args.args
     requirement_id = "r-" + row["base_problem_id"]
     create = {
         "schema_version": "stage2.v1",
         "source": row["buggy_source"],
-        "function_name": "solve",
+        "function_name": target.name,
         "contract_text": row["contract"],
         "domain_schema": [
             {"name": arg.arg, "domain": domain(d)}
