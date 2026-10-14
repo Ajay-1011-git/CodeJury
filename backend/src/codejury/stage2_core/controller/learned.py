@@ -1,11 +1,41 @@
 """Learned menu selection; every decision remains subject to the canonical core guards."""
 
+import json
+
 from jsonschema import ValidationError
 
 from ..candidates import parse_draft
 from ..contracts import CheckedModelPort, checked
 from ..views import judge
 from . import FixedController, ident, record
+
+DRAFT_KEYS = {"action_option_id", "evidence_ids", "rationale"}
+
+
+def parse_judge(text, state_id):
+    """Parse a Judge/General draft, restoring only an omitted state_id.
+
+    The state_id is an echo of a value the controller already holds, so omitting it carries no
+    information. A present-but-wrong id, any other missing or extra key, or malformed JSON stays a
+    refusal, and `choice` still verifies the id against the current state. Returns (draft, filled).
+    """
+    try:
+        return parse_draft(text, "JudgeDraft"), False
+    except ValidationError:
+        pass
+
+    def unique(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("Duplicate JSON key")
+            result[key] = value
+        return result
+
+    value = json.loads(text, object_pairs_hook=unique)
+    if not isinstance(value, dict) or set(value) != DRAFT_KEYS:
+        raise ValueError("Judge draft is not a state_id-only omission")
+    return checked({**value, "state_id": state_id}, "JudgeDraft"), True
 
 
 def choice(draft, state, visible_execution_ids):
@@ -72,7 +102,7 @@ class LearnedController(FixedController):
             ):
                 raise ValueError("Judge response identity differs from frozen adapter")
             try:
-                draft = parse_draft(response["text"], "JudgeDraft")
+                draft, filled = parse_judge(response["text"], state["state_id"])
                 option = choice(draft, view_state, shown)
                 # Judge generation consumes resources; recheck that the chosen semantic
                 # action is still offered at the current remaining budget.
@@ -96,6 +126,7 @@ class LearnedController(FixedController):
                         "request_id": request["request_id"],
                         "attempt": attempt,
                         "mode": "learned",
+                        "state_id_filled": filled,
                     },
                 )
                 return option

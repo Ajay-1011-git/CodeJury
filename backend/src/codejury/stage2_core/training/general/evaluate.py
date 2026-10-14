@@ -80,6 +80,10 @@ def evaluate(registry_path, cfg, out):
                     r["mode"] == "fixed_fallback"
                     for r in records(ledger, snapshot["run_id"], "judge_choice")
                 ),
+                "state_id_filled": sum(
+                    bool(r.get("state_id_filled"))
+                    for r in records(ledger, snapshot["run_id"], "judge_choice")
+                ),
             }
             frozen.append((row, snapshot, selected, ledger, commitment))
             with (out / "commitments.jsonl").open("a") as stream:
@@ -117,6 +121,7 @@ def evaluate(registry_path, cfg, out):
         "valid_decisions": sum(r["valid_decisions"] for r in results),
         "decision_attempts": sum(r["usage"]["judge_decisions"] for r in results),
         "fixed_fallbacks": sum(r["fixed_fallbacks"] for r in results),
+        "state_id_filled": sum(r.get("state_id_filled", 0) for r in results),
         "output_tokens": sum(r["usage"]["output_tokens"] for r in results),
         "input_tokens": sum(r["usage"]["input_tokens"] for r in results),
         "function_executions": sum(r["usage"]["function_executions"] for r in results),
