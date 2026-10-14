@@ -83,7 +83,7 @@ def test_raw_repair_keeps_physical_identity_and_charges_one_malformed_attempt(tm
     assert len(rows) == 1 and json.loads(rows[0]["body"])["role"] == "raw"
 
 
-def test_general_allocates_its_first_action_and_preserves_physical_role(tmp_path):
+def test_general_opens_with_its_own_pair_and_preserves_physical_role(tmp_path):
     from stage2_tools.hostsandbox import FixtureHostSandbox
 
     from codejury.stage2_core.ledger import Ledger
@@ -110,8 +110,12 @@ def test_general_allocates_its_first_action_and_preserves_physical_role(tmp_path
     result = run(control)
     assert result["status"] == "supported_patch"
     assert all(r["role"] == "general" for r in model.requests)
-    assert '"judge-summary.v2"' in model.requests[0]["prompt"]
-    assert result["resource_usage"]["learned_candidates"] == 1
+    # Like the council, the opening repair and reconstruction precede the first decision; both
+    # are written by the General adapter, never by the specialist fixers.
+    assert all('"judge-summary.v2"' not in r["prompt"] for r in model.requests[:2])
+    assert model.requests[0]["prompt"] != model.requests[1]["prompt"]  # distinct A and B views
+    assert '"judge-summary.v2"' in model.requests[2]["prompt"]
+    assert result["resource_usage"]["learned_candidates"] == 2
     assert result["resource_usage"]["judge_decisions"] >= 1
     assert all(
         c["model_config_hash"] == identity["model_config_hash"]
@@ -146,7 +150,7 @@ def test_general_menu_lists_prerequisite_steps_before_extra_allocations(tmp_path
     )
     result = run(control)
     assert result["status"] == "supported_patch"
-    assert result["resource_usage"]["learned_candidates"] <= 2
+    assert result["resource_usage"]["learned_candidates"] == 2
 
 
 class FixtureTaskModel:

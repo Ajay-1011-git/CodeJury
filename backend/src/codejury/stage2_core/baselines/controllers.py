@@ -80,9 +80,11 @@ class SampleBaseline(RepairBaseline):
 class GeneralController(LearnedController):
     decision_role = "general"
 
-    def initial_candidates(self):
-        # The single agent chooses whether to repair, reconstruct or search first.
-        return None
+    # The single agent opens like the council: its own adapter writes one repair-view and one
+    # reconstruction-view candidate before its first decision (the pool binds both fixer roles to
+    # "general"). Starting from zero candidates made every candidate cost a decision; with a
+    # learned bias toward early abstention it stopped after one failed attempt with most of its
+    # budget unused. Further generation, search and the terminal choice remain its own allocation.
 
     def options(self, state, snapshot, candidates):
         offered = super().options(state, snapshot, candidates)
