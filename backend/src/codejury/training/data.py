@@ -118,7 +118,13 @@ def load_records(manifest):
     return data, records
 
 
-def assert_disjoint(records):
+def assert_disjoint(records, *, identity_only=False):
+    """Check split identities; opt-in identity projection supports Stage 2 domains.
+
+    The default retains all Stage 1 record, domain and prompt checks. Development
+    benchmarks use the same base/family/normalized-source check without pretending
+    their nested Stage 2 domains are Stage 1 domains.
+    """
     bases, families, solutions = {}, {}, {}
     required = {
         "base_problem_id",
@@ -135,6 +141,26 @@ def assert_disjoint(records):
         "response_target",
     }
     for row in records:
+        if identity_only:
+            if not {"base_problem_id", "family_id", "split", "correct_source"} <= row.keys():
+                raise ValueError("Missing split identity fields")
+            if row["split"] not in {
+                "train",
+                "validation",
+                "assessment",
+                "stage2_final",
+                "development_benchmark",
+            }:
+                raise ValueError("Unknown split")
+            for table, key in (
+                (bases, row["base_problem_id"]),
+                (families, row["family_id"]),
+                (solutions, normalized(row["correct_source"])),
+            ):
+                if key in table and table[key] != row["split"]:
+                    raise ValueError("Base/family/normalized solution leaks across splits")
+                table[key] = row["split"]
+            continue
         if not required <= row.keys():
             raise ValueError("Dataset record missing required fields")
         split = row["split"]

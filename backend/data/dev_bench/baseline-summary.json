@@ -1,0 +1,848 @@
+{
+  "protocol": {
+    "version": "codejury.dev-bench.protocol.v1",
+    "runtime_sha256": "e17635d4be651613052fd9c70a5d8e2e6d970fdc5a3eda096ae30686df8bb9f3",
+    "scoring_sha256": "a52a8ce18e6d56a75c3284c41a439604d91957616a03496a7e2f79e1f0b66a5d",
+    "model_registry_hash": "37e7f30fff74d1cea45e4a86fdc34e32b361ca38e85c4201eb3113846d397714",
+    "runtime_hash": "c1e25f67d21b65c259f551de98578e1dacd2c297ae4c7b19b0c8b3b83f44fe8f",
+    "runner_sha256": "79b02e25ec6589f033033b3e9a153405c908b17e66341131d37640708097129b",
+    "methods": [
+      "B-base",
+      "B-single",
+      "J-current"
+    ],
+    "seeds": [
+      17,
+      29,
+      43
+    ],
+    "base_problem_ids": [
+      "unordered_pairs",
+      "polygon_diagonals",
+      "handshake_rounds",
+      "square_pyramid",
+      "binary_tree_nodes",
+      "clock_angle",
+      "leap_year",
+      "century",
+      "fahrenheit_tenths",
+      "tax_inclusive_cents",
+      "pipe_fields",
+      "strip_outer_spaces",
+      "uppercase_words",
+      "swap_letter_case",
+      "pad_left",
+      "prefix_match",
+      "nonoverlap_replace",
+      "head_before_colon",
+      "suffix_after_dot",
+      "fibonacci_index",
+      "decimal_digit_sum",
+      "decimal_digit_count",
+      "binary_ones",
+      "radix_representation",
+      "word_frequencies",
+      "group_words_by_initial",
+      "invert_multimap",
+      "dictionary_overlay",
+      "word_positions",
+      "balanced_parentheses",
+      "parenthesis_depth",
+      "split_words",
+      "initials",
+      "longest_word",
+      "vowel_groups",
+      "overlap_occurrences",
+      "subsequence_text",
+      "caesar_lowercase",
+      "transpose_ragged",
+      "diagonal_ragged",
+      "chunk_list",
+      "interleave_unequal",
+      "sliding_window_sums",
+      "second_distinct_largest",
+      "median_lower",
+      "bracket_types",
+      "nested_list_flatten",
+      "pascal_row",
+      "binomial_coefficient",
+      "coin_change_min",
+      "nonadjacent_sum",
+      "longest_increasing_subsequence",
+      "edit_distance",
+      "lcs_length",
+      "longest_unique_substring",
+      "max_subarray",
+      "minimum_cover_window",
+      "interval_union",
+      "interval_covered_length",
+      "interval_concurrency",
+      "binary_lower_bound",
+      "binary_upper_bound",
+      "rotated_minimum",
+      "anagram_groups",
+      "isomorphic_strings",
+      "longest_palindromic_substring",
+      "prefix_common",
+      "version_compare",
+      "path_normalize",
+      "roman_numeral_value",
+      "grid_paths",
+      "flood_fill_count",
+      "spiral_rectangular",
+      "rotate_matrix_clockwise",
+      "pair_sum_indices",
+      "three_sum_unique",
+      "inversion_count",
+      "next_greater_values",
+      "stock_span",
+      "rainwater_volume",
+      "largest_histogram_rectangle",
+      "polynomial_horner",
+      "postfix_arithmetic",
+      "ascii_letters_only",
+      "digit_text_only",
+      "multiplication_table",
+      "rectangular_border",
+      "arithmetic_triplets",
+      "rotate_text_left",
+      "hamming_distance",
+      "top_frequent_words",
+      "zigzag_text_rows",
+      "row_major_coordinates",
+      "punctuation_sentences",
+      "local_peak_indices",
+      "polynomial_derivative",
+      "matrix_zero_rows_columns",
+      "graph_reachable",
+      "graph_shortest_distance",
+      "graph_indegrees"
+    ],
+    "caps": {
+      "output_tokens": 10000,
+      "input_tokens": 100000,
+      "function_executions": 3000,
+      "elapsed_ms": 900000,
+      "learned_candidates": 8,
+      "search_candidates": 48,
+      "audit_mutants": 48,
+      "judge_decisions": 8
+    },
+    "sampler": "v1 greedy, unmodified",
+    "B-single": "trained fixer_a, up to eight blind attempts, no schema retry, supplied-test selector",
+    "B-base": "raw one-shot, unverified prediction; incorrect predictions count unsolved, never wrong accepted",
+    "memory_scope": "per-generation native MLX allocator; total Mac/VM peak unknown",
+    "full_population": true
+  },
+  "summary": [
+    {
+      "method": "B-base",
+      "seed": 17,
+      "tier": "all",
+      "bases": 100,
+      "solved": 0,
+      "solve_rate": 0.0,
+      "wilson_95": [
+        3.469446951953614e-18,
+        0.03699349820698568
+      ],
+      "outcomes": {
+        "invalid": 100
+      }
+    },
+    {
+      "method": "B-base",
+      "seed": 17,
+      "tier": "T1",
+      "bases": 22,
+      "solved": 0,
+      "solve_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.14865487460862087
+      ],
+      "outcomes": {
+        "invalid": 22
+      }
+    },
+    {
+      "method": "B-base",
+      "seed": 17,
+      "tier": "T2",
+      "bases": 33,
+      "solved": 0,
+      "solve_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.10426999754245206
+      ],
+      "outcomes": {
+        "invalid": 33
+      }
+    },
+    {
+      "method": "B-base",
+      "seed": 17,
+      "tier": "T3",
+      "bases": 45,
+      "solved": 0,
+      "solve_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.07865159873288836
+      ],
+      "outcomes": {
+        "invalid": 45
+      }
+    },
+    {
+      "method": "B-base",
+      "seed": 29,
+      "tier": "all",
+      "bases": 100,
+      "solved": 0,
+      "solve_rate": 0.0,
+      "wilson_95": [
+        3.469446951953614e-18,
+        0.03699349820698568
+      ],
+      "outcomes": {
+        "invalid": 100
+      }
+    },
+    {
+      "method": "B-base",
+      "seed": 29,
+      "tier": "T1",
+      "bases": 22,
+      "solved": 0,
+      "solve_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.14865487460862087
+      ],
+      "outcomes": {
+        "invalid": 22
+      }
+    },
+    {
+      "method": "B-base",
+      "seed": 29,
+      "tier": "T2",
+      "bases": 33,
+      "solved": 0,
+      "solve_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.10426999754245206
+      ],
+      "outcomes": {
+        "invalid": 33
+      }
+    },
+    {
+      "method": "B-base",
+      "seed": 29,
+      "tier": "T3",
+      "bases": 45,
+      "solved": 0,
+      "solve_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.07865159873288836
+      ],
+      "outcomes": {
+        "invalid": 45
+      }
+    },
+    {
+      "method": "B-base",
+      "seed": 43,
+      "tier": "all",
+      "bases": 100,
+      "solved": 0,
+      "solve_rate": 0.0,
+      "wilson_95": [
+        3.469446951953614e-18,
+        0.03699349820698568
+      ],
+      "outcomes": {
+        "invalid": 100
+      }
+    },
+    {
+      "method": "B-base",
+      "seed": 43,
+      "tier": "T1",
+      "bases": 22,
+      "solved": 0,
+      "solve_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.14865487460862087
+      ],
+      "outcomes": {
+        "invalid": 22
+      }
+    },
+    {
+      "method": "B-base",
+      "seed": 43,
+      "tier": "T2",
+      "bases": 33,
+      "solved": 0,
+      "solve_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.10426999754245206
+      ],
+      "outcomes": {
+        "invalid": 33
+      }
+    },
+    {
+      "method": "B-base",
+      "seed": 43,
+      "tier": "T3",
+      "bases": 45,
+      "solved": 0,
+      "solve_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.07865159873288836
+      ],
+      "outcomes": {
+        "invalid": 45
+      }
+    },
+    {
+      "method": "B-single",
+      "seed": 17,
+      "tier": "all",
+      "bases": 100,
+      "solved": 1,
+      "solve_rate": 0.01,
+      "wilson_95": [
+        0.0017674320641406505,
+        0.054486196178705315
+      ],
+      "outcomes": {
+        "unresolved": 87,
+        "wrong_accepted": 4,
+        "invalid": 8,
+        "solved": 1
+      }
+    },
+    {
+      "method": "B-single",
+      "seed": 17,
+      "tier": "T1",
+      "bases": 22,
+      "solved": 0,
+      "solve_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.14865487460862087
+      ],
+      "outcomes": {
+        "unresolved": 21,
+        "wrong_accepted": 1
+      }
+    },
+    {
+      "method": "B-single",
+      "seed": 17,
+      "tier": "T2",
+      "bases": 33,
+      "solved": 1,
+      "solve_rate": 0.030303030303030304,
+      "wilson_95": [
+        0.00536941053687183,
+        0.1531872538211892
+      ],
+      "outcomes": {
+        "unresolved": 30,
+        "invalid": 1,
+        "solved": 1,
+        "wrong_accepted": 1
+      }
+    },
+    {
+      "method": "B-single",
+      "seed": 17,
+      "tier": "T3",
+      "bases": 45,
+      "solved": 0,
+      "solve_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.07865159873288836
+      ],
+      "outcomes": {
+        "invalid": 7,
+        "unresolved": 36,
+        "wrong_accepted": 2
+      }
+    },
+    {
+      "method": "B-single",
+      "seed": 29,
+      "tier": "all",
+      "bases": 100,
+      "solved": 3,
+      "solve_rate": 0.03,
+      "wilson_95": [
+        0.010254524024038925,
+        0.0845193642905276
+      ],
+      "outcomes": {
+        "unresolved": 83,
+        "wrong_accepted": 3,
+        "invalid": 11,
+        "solved": 3
+      }
+    },
+    {
+      "method": "B-single",
+      "seed": 29,
+      "tier": "T1",
+      "bases": 22,
+      "solved": 0,
+      "solve_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.14865487460862087
+      ],
+      "outcomes": {
+        "unresolved": 21,
+        "wrong_accepted": 1
+      }
+    },
+    {
+      "method": "B-single",
+      "seed": 29,
+      "tier": "T2",
+      "bases": 33,
+      "solved": 3,
+      "solve_rate": 0.09090909090909091,
+      "wilson_95": [
+        0.03140394152458165,
+        0.2357260564646973
+      ],
+      "outcomes": {
+        "unresolved": 28,
+        "invalid": 1,
+        "solved": 3,
+        "wrong_accepted": 1
+      }
+    },
+    {
+      "method": "B-single",
+      "seed": 29,
+      "tier": "T3",
+      "bases": 45,
+      "solved": 0,
+      "solve_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.07865159873288836
+      ],
+      "outcomes": {
+        "invalid": 10,
+        "unresolved": 34,
+        "wrong_accepted": 1
+      }
+    },
+    {
+      "method": "B-single",
+      "seed": 43,
+      "tier": "all",
+      "bases": 100,
+      "solved": 3,
+      "solve_rate": 0.03,
+      "wilson_95": [
+        0.010254524024038925,
+        0.0845193642905276
+      ],
+      "outcomes": {
+        "unresolved": 86,
+        "wrong_accepted": 3,
+        "invalid": 8,
+        "solved": 3
+      }
+    },
+    {
+      "method": "B-single",
+      "seed": 43,
+      "tier": "T1",
+      "bases": 22,
+      "solved": 0,
+      "solve_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.14865487460862087
+      ],
+      "outcomes": {
+        "unresolved": 21,
+        "wrong_accepted": 1
+      }
+    },
+    {
+      "method": "B-single",
+      "seed": 43,
+      "tier": "T2",
+      "bases": 33,
+      "solved": 3,
+      "solve_rate": 0.09090909090909091,
+      "wilson_95": [
+        0.03140394152458165,
+        0.2357260564646973
+      ],
+      "outcomes": {
+        "unresolved": 28,
+        "invalid": 1,
+        "solved": 3,
+        "wrong_accepted": 1
+      }
+    },
+    {
+      "method": "B-single",
+      "seed": 43,
+      "tier": "T3",
+      "bases": 45,
+      "solved": 0,
+      "solve_rate": 0.0,
+      "wilson_95": [
+        0,
+        0.07865159873288836
+      ],
+      "outcomes": {
+        "invalid": 7,
+        "unresolved": 37,
+        "wrong_accepted": 1
+      }
+    },
+    {
+      "method": "J-current",
+      "seed": 17,
+      "tier": "all",
+      "bases": 100,
+      "solved": 30,
+      "solve_rate": 0.3,
+      "wilson_95": [
+        0.2189488529493276,
+        0.3958485463334666
+      ],
+      "outcomes": {
+        "solved": 30,
+        "unresolved": 64,
+        "wrong_accepted": 6
+      }
+    },
+    {
+      "method": "J-current",
+      "seed": 17,
+      "tier": "T1",
+      "bases": 22,
+      "solved": 10,
+      "solve_rate": 0.45454545454545453,
+      "wilson_95": [
+        0.2692029418081331,
+        0.6534020467926505
+      ],
+      "outcomes": {
+        "solved": 10,
+        "unresolved": 11,
+        "wrong_accepted": 1
+      }
+    },
+    {
+      "method": "J-current",
+      "seed": 17,
+      "tier": "T2",
+      "bases": 33,
+      "solved": 10,
+      "solve_rate": 0.30303030303030304,
+      "wilson_95": [
+        0.17375531424053606,
+        0.47338135145800575
+      ],
+      "outcomes": {
+        "unresolved": 22,
+        "solved": 10,
+        "wrong_accepted": 1
+      }
+    },
+    {
+      "method": "J-current",
+      "seed": 17,
+      "tier": "T3",
+      "bases": 45,
+      "solved": 10,
+      "solve_rate": 0.2222222222222222,
+      "wilson_95": [
+        0.12544685532626396,
+        0.36269292174756296
+      ],
+      "outcomes": {
+        "unresolved": 31,
+        "solved": 10,
+        "wrong_accepted": 4
+      }
+    },
+    {
+      "method": "J-current",
+      "seed": 29,
+      "tier": "all",
+      "bases": 100,
+      "solved": 35,
+      "solve_rate": 0.35,
+      "wilson_95": [
+        0.26364248243097527,
+        0.44745556703112027
+      ],
+      "outcomes": {
+        "solved": 35,
+        "unresolved": 57,
+        "wrong_accepted": 8
+      }
+    },
+    {
+      "method": "J-current",
+      "seed": 29,
+      "tier": "T1",
+      "bases": 22,
+      "solved": 9,
+      "solve_rate": 0.4090909090909091,
+      "wilson_95": [
+        0.2325581619647187,
+        0.6126518152368488
+      ],
+      "outcomes": {
+        "solved": 9,
+        "unresolved": 12,
+        "wrong_accepted": 1
+      }
+    },
+    {
+      "method": "J-current",
+      "seed": 29,
+      "tier": "T2",
+      "bases": 33,
+      "solved": 15,
+      "solve_rate": 0.45454545454545453,
+      "wilson_95": [
+        0.29842938513876116,
+        0.6201406146378254
+      ],
+      "outcomes": {
+        "solved": 15,
+        "unresolved": 17,
+        "wrong_accepted": 1
+      }
+    },
+    {
+      "method": "J-current",
+      "seed": 29,
+      "tier": "T3",
+      "bases": 45,
+      "solved": 11,
+      "solve_rate": 0.24444444444444444,
+      "wilson_95": [
+        0.1423547943377172,
+        0.3867338005702035
+      ],
+      "outcomes": {
+        "unresolved": 28,
+        "solved": 11,
+        "wrong_accepted": 6
+      }
+    },
+    {
+      "method": "J-current",
+      "seed": 43,
+      "tier": "all",
+      "bases": 100,
+      "solved": 30,
+      "solve_rate": 0.3,
+      "wilson_95": [
+        0.2189488529493276,
+        0.3958485463334666
+      ],
+      "outcomes": {
+        "solved": 30,
+        "unresolved": 60,
+        "wrong_accepted": 10
+      }
+    },
+    {
+      "method": "J-current",
+      "seed": 43,
+      "tier": "T1",
+      "bases": 22,
+      "solved": 9,
+      "solve_rate": 0.4090909090909091,
+      "wilson_95": [
+        0.2325581619647187,
+        0.6126518152368488
+      ],
+      "outcomes": {
+        "solved": 9,
+        "unresolved": 12,
+        "wrong_accepted": 1
+      }
+    },
+    {
+      "method": "J-current",
+      "seed": 43,
+      "tier": "T2",
+      "bases": 33,
+      "solved": 12,
+      "solve_rate": 0.36363636363636365,
+      "wilson_95": [
+        0.2218717823524236,
+        0.5338382169773361
+      ],
+      "outcomes": {
+        "unresolved": 17,
+        "solved": 12,
+        "wrong_accepted": 4
+      }
+    },
+    {
+      "method": "J-current",
+      "seed": 43,
+      "tier": "T3",
+      "bases": 45,
+      "solved": 9,
+      "solve_rate": 0.2,
+      "wilson_95": [
+        0.1089612680783129,
+        0.3382296911614202
+      ],
+      "outcomes": {
+        "unresolved": 31,
+        "solved": 9,
+        "wrong_accepted": 5
+      }
+    }
+  ],
+  "commitments_sha256": "b46d9c899fc8d4a7d78ae3f495a3a625466509ef16fb80704197fe4cc1b429d5",
+  "results_sha256": "5b9f2017243fa83791c3880ad3ca5821fde9d60b580806bcbcb9b3f98ea19719",
+  "resource_summary": [
+    {
+      "method": "B-base",
+      "runs": 300,
+      "outcomes": {
+        "invalid": 300
+      },
+      "input_tokens": 146982,
+      "output_tokens": 44730,
+      "repair_executions": 0,
+      "scoring_executions": 0,
+      "wall_clock_s_sum": 1025.6312571584713,
+      "wall_clock_s_median": 3.2425690833479166,
+      "mlx_allocator_peak_mb_max": 2981.526246,
+      "candidate_proposals": 0,
+      "unique_source_proposals_per_run_sum": 0,
+      "runs_with_repeated_candidates": 0
+    },
+    {
+      "method": "B-single",
+      "runs": 300,
+      "outcomes": {
+        "unresolved": 256,
+        "wrong_accepted": 10,
+        "invalid": 27,
+        "solved": 7
+      },
+      "input_tokens": 1175912,
+      "output_tokens": 422272,
+      "repair_executions": 4666,
+      "scoring_executions": 54,
+      "wall_clock_s_sum": 10485.563408672111,
+      "wall_clock_s_median": 20.851284916512668,
+      "mlx_allocator_peak_mb_max": 3025.500894,
+      "candidate_proposals": 2040,
+      "unique_source_proposals_per_run_sum": 255,
+      "runs_with_repeated_candidates": 255
+    },
+    {
+      "method": "J-current",
+      "runs": 300,
+      "outcomes": {
+        "solved": 95,
+        "unresolved": 181,
+        "wrong_accepted": 24
+      },
+      "input_tokens": 5207167,
+      "output_tokens": 272568,
+      "repair_executions": 11156,
+      "scoring_executions": 362,
+      "wall_clock_s_sum": 10891.567017705878,
+      "wall_clock_s_median": 32.85119987500366,
+      "mlx_allocator_peak_mb_max": 3945.146846,
+      "candidate_proposals": 911,
+      "unique_source_proposals_per_run_sum": 625,
+      "runs_with_repeated_candidates": 152
+    }
+  ],
+  "role_output_validity": [
+    {
+      "method": "B-base",
+      "role": "raw",
+      "calls": 300,
+      "malformed": 300,
+      "transport_failures": 0,
+      "malformed_rate": 1.0
+    },
+    {
+      "method": "B-single",
+      "role": "fixer_a",
+      "calls": 2400,
+      "malformed": 216,
+      "transport_failures": 0,
+      "malformed_rate": 0.09
+    },
+    {
+      "method": "J-current",
+      "role": "critic",
+      "calls": 300,
+      "malformed": 1,
+      "transport_failures": 25,
+      "malformed_rate": 0.0033333333333333335
+    },
+    {
+      "method": "J-current",
+      "role": "fixer_a",
+      "calls": 496,
+      "malformed": 84,
+      "transport_failures": 0,
+      "malformed_rate": 0.1693548387096774
+    },
+    {
+      "method": "J-current",
+      "role": "fixer_b",
+      "calls": 684,
+      "malformed": 208,
+      "transport_failures": 0,
+      "malformed_rate": 0.30409356725146197
+    },
+    {
+      "method": "J-current",
+      "role": "judge",
+      "calls": 1555,
+      "malformed": 1,
+      "transport_failures": 0,
+      "malformed_rate": 0.0006430868167202572
+    }
+  ],
+  "summary_sha256": "508179d39352f164f724d106db2640fe374c481d14c01d58a1e89ec1c74113f0",
+  "limitations": [
+    "Development set, not sealed final.",
+    "Wilson intervals per seed, not a pooled 300-base denominator.",
+    "MLX allocator only; total system and Docker VM peak not measured.",
+    "Interrupted partial-method ledgers are retained but excluded from completed-run resource totals; abandoned-attempt overhead is not fully measured.",
+    "No separate training or minimal-input accuracy result."
+  ]
+}

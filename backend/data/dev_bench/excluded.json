@@ -1,0 +1,19 @@
+{
+  "factorial": "training/validation base, family or normalized-source overlap",
+  "euclidean_gcd": "training/validation base, family or normalized-source overlap",
+  "least_common_multiple": "training/validation base, family or normalized-source overlap",
+  "prime_check": "training/validation base, family or normalized-source overlap",
+  "divisor_list": "training/validation base, family or normalized-source overlap",
+  "integer_square_root": "training/validation base, family or normalized-source overlap",
+  "prime_factorization": "training/validation base, family or normalized-source overlap",
+  "run_lengths": "training/validation base, family or normalized-source overlap",
+  "substring_membership": "training/validation base, family or normalized-source overlap",
+  "checkerboard_black": "semantic training-family overlap or conservative AST near-duplicate gate",
+  "full_weeks": "semantic training-family overlap or conservative AST near-duplicate gate",
+  "colon_seconds": "semantic training-family overlap or conservative AST near-duplicate gate",
+  "word_join": "semantic training-family overlap or conservative AST near-duplicate gate",
+  "repeat_text": "semantic training-family overlap or conservative AST near-duplicate gate",
+  "run_value_pairs": "semantic training-family overlap or conservative AST near-duplicate gate",
+  "text_run_collapse": "semantic training-family overlap or conservative AST near-duplicate gate",
+  "longest_same_run": "semantic training-family overlap or conservative AST near-duplicate gate"
+}

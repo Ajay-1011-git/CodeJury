@@ -67,6 +67,26 @@ See `docs/stage1-integration.md` for merge/acceptance evidence and `web/docs/pro
 
 The frontend follows the root `DESIGN.md` with local fonts, original pixel sprites, accessible tabs, and responsive paper-window layouts. See `docs/frontend-design.md` for implementation and verification notes.
 
+## Development benchmark (next phase)
+
+The new development benchmark contains 100 independently authored problems and
+separate runtime/scoring files. It uses the existing local models and Docker runner;
+no cloud call or download is needed. The sealed final assessment stays unopened.
+
+```sh
+export CODEJURY_STAGE2_RUNNER_IMAGE=sha256:3a0eda85cef3c470ee50838c2d4c0d5208ad0debc2c9578e90ae91677227d61f
+backend/.venv/bin/python backend/tools/dev_bench_run.py run --out backend/artifacts/dev_bench/baselines-v1
+```
+
+Use a new output directory for a new experiment, or add `--resume` for an interrupted
+job with the same protocol. The full default experiment is 100 bases, three methods
+and seeds 17, 29, 43; it runs sequentially and can take several hours. See the
+[benchmark protocol](backend/data/dev_bench/README.md) and
+[baseline results](docs/dev-bench-baselines.md). All 900 baseline runs are complete
+and scored: the current jury solves 30–35/100 per seed, with 6–10 wrong acceptances;
+the trained single-model comparator solves 1–3/100. Raw responses all fail the
+required format. These are development results, with intervals reported per seed.
+
 ## Checks and development
 
 ```sh

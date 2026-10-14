@@ -1,0 +1,32 @@
+{
+  "version": "codejury.dev-bench.validation.v1",
+  "runtime_sha256": "e17635d4be651613052fd9c70a5d8e2e6d970fdc5a3eda096ae30686df8bb9f3",
+  "scoring_sha256": "a52a8ce18e6d56a75c3284c41a439604d91957616a03496a7e2f79e1f0b66a5d",
+  "bases": 100,
+  "tiers": {
+    "T1": 22,
+    "T2": 33,
+    "T3": 45
+  },
+  "executions": 1006,
+  "runtime_hash": "c1e25f67d21b65c259f551de98578e1dacd2c297ae4c7b19b0c8b3b83f44fe8f",
+  "disjointness": {
+    "inventory": [
+      {
+        "path": "train_source/train.jsonl",
+        "sha256": "1f82d16714ab401be7429869566c7a76e9e29eff5f5f4f85be3c70d98b8ad81f",
+        "records": 80
+      },
+      {
+        "path": "private/validation.jsonl",
+        "sha256": "1e97d84d9f9cf87c635bdc0cbb4e11206a59e2da393d03308d72128d9f4a159f",
+        "records": 20
+      }
+    ],
+    "training_base_problems": 50,
+    "near_duplicate_threshold": 0.9,
+    "near_duplicates": [],
+    "sealed_assessment_read": false
+  },
+  "rejected": []
+}
