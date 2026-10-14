@@ -96,6 +96,26 @@ def validated_tests(ledger, run_id, source, signature, tests):
     return supported
 
 
+def static_error(ledger, run_id, source, signature):
+    """The registered static-validation error for a source, or None if none was recorded."""
+    with ledger.connection() as db:
+        receipts = db.execute(
+            "SELECT body,response FROM requests WHERE run_id=? AND definition='ToolRequest' "
+            "AND status='settled'",
+            (run_id,),
+        ).fetchall()
+    error = None
+    for row in receipts:
+        request, response = json.loads(row["body"]), json.loads(row["response"])
+        params, receipt = request["parameters"], response["validation"]
+        if params["operation"] != "validate" or params["source"] != source or not receipt:
+            continue
+        if receipt["valid"] and receipt["error"] is None and receipt["signature"] == signature:
+            return None
+        error = receipt["error"] or "Signature differs from the required interface"
+    return error
+
+
 def qualification(ledger, run_id, *, runtime_hash):
     """Projection over immutable, registered evidence; no candidate rows are overwritten."""
     snapshot = ledger.snapshot(run_id)
@@ -303,6 +323,9 @@ class CandidatePool:
                 parent,
                 [e for e in snapshot["executions"] if e["candidate_id"] == parent["candidate_id"]],
                 trace_reader=self.ledger.read_object,
+                static_check=static_error(
+                    self.ledger, self.run_id, parent["source"], snapshot["problem"]["signature"]
+                ),
             )
         else:
             if parent["origin"] != "original":

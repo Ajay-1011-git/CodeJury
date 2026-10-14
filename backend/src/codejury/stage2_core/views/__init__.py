@@ -127,7 +127,7 @@ def freeze_initial(problem, tests, *, original_evidence=()):
     )
 
 
-def revision(role, problem, tests, candidate, executions, *, trace_reader=None):
+def revision(role, problem, tests, candidate, executions, *, trace_reader=None, static_check=None):
     candidate = checked(candidate, "Candidate")
     if (
         role not in {"fixer_a", "fixer_b"}
@@ -144,6 +144,7 @@ def revision(role, problem, tests, candidate, executions, *, trace_reader=None):
             "tests": visible_tests(tests),
             "parent": candidate,
             "evidence": evidence(executions, tests, [candidate], trace_reader=trace_reader),
+            **({"static_check": {"valid": False, "error": static_check}} if static_check else {}),
         },
     )
 

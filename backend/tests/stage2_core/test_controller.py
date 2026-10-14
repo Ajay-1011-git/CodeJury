@@ -139,15 +139,54 @@ def test_new_counterexample_revises_responsible_parent(tmp_path):
     assert result["decision"]["selected_candidate_id"] != a["candidate_id"]
 
 
-def test_no_eligible_search_then_one_resample_and_abstain(tmp_path):
+class AlwaysBadModel(ScriptedModel):
+    """Every repair, including revisions, returns the same source."""
+
+    def __init__(self, source):
+        super().__init__({"fixer_a": source, "fixer_b": source})
+        self.bad = source
+
+    def generate(self, request, cancel):
+        response = super().generate(request, cancel)
+        if request["role"] in {"fixer_a", "fixer_b"}:
+            repair = fixture("repair-draft")
+            repair["source"] = self.bad
+            response["text"] = json.dumps(repair)
+        return response
+
+
+def test_failed_fixer_candidates_get_one_feedback_revision_each(tmp_path):
     source = "def sum_values(values):\n    return 999\n"
     control = controller(tmp_path, ScriptedModel({"fixer_a": source, "fixer_b": source}))
     result = run(control, source=source)
     kinds = [a["kind"] for a in result["actions"]]
-    assert kinds[:3] == ["search", "search", "search"]
-    assert kinds.count("generate") == 1
-    assert kinds[-1] == "abstain"
+    assert kinds[0] == "revise" and kinds.count("revise") == 2
+    revisions = [r for r in control.model.requests if r["purpose"] == "revise"]
+    assert all('"evidence"' in r["prompt"] and "999" in r["prompt"] for r in revisions)
+    assert result["status"] == "supported_patch"
+
+
+def test_no_eligible_after_revisions_searches_until_the_cap_and_abstains(tmp_path):
+    source = "def sum_values(values):\n    return 999\n"
+    control = controller(tmp_path, AlwaysBadModel(source))
+    result = run(control, source=source)
+    kinds = [a["kind"] for a in result["actions"]]
+    assert kinds[:2] == ["revise", "revise"]  # one per first-generation fixer, never chained
+    assert "search" in kinds and kinds.count("generate") <= 1
+    assert kinds[-1] == "abstain" and len(kinds) <= 8
     assert result["status"] == "unresolved"
+
+
+def test_static_validation_error_is_shown_to_the_revising_fixer(tmp_path):
+    invalid = "def sum_values(values):\n    return total_of(values)\n"
+    control = controller(tmp_path, AlwaysBadModel(invalid))
+    result = run(control)
+    revisions = [r for r in control.model.requests if r["purpose"] == "revise"]
+    assert revisions and all('"static_check"' in r["prompt"] for r in revisions)
+    assert any(
+        c["origin"] in {"fixer_a", "fixer_b"} and c["eligibility"] == "pending"
+        for c in result["candidates"]
+    )
 
 
 def test_cancel_before_dispatch_never_generates(tmp_path):

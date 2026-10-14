@@ -13,6 +13,7 @@ from ..candidates import (
     incumbent,
     parse_draft,
     qualification,
+    static_error,
     validated_tests,
 )
 from ..contracts import (
@@ -437,6 +438,36 @@ class FixedController:
                 ):
                     add("revise", [c["candidate_id"]], {"role": role}, "New hard counterexample")
             if not eligible:
+                # Feedback revision: a learned candidate rejected by hard evidence (supplied tests
+                # included) or never executable because static validation failed gets one revision
+                # that shows the fixer its own failing outputs or the validator's message.
+                offered = {
+                    o["action"]["target_ids"][0] for o in options if o["action"]["kind"] == "revise"
+                }
+                for c in candidates:
+                    role = c["origin"]  # first-generation fixer candidates only; no chains
+                    if (
+                        role not in {"fixer_a", "fixer_b"}
+                        or c["candidate_id"] in self.revised
+                        or c["candidate_id"] in offered
+                        or budget["learned_candidates"] < 1
+                        or budget["output_tokens"] < 1024
+                    ):
+                        continue
+                    rejected = c["eligibility"] == "rejected"
+                    invalid = c["eligibility"] == "pending" and static_error(
+                        self.ledger, self.run_id, c["source"], self.problem["signature"]
+                    )
+                    if rejected or invalid:
+                        add(
+                            "revise",
+                            [c["candidate_id"]],
+                            {"role": role},
+                            "Revise from own failing evidence"
+                            if rejected
+                            else "Revise from static validation error",
+                        )
+            if not eligible:
                 for c in candidates:
                     supported = validated_tests(
                         self.ledger,
@@ -746,6 +777,9 @@ class FixedController:
                         if e["candidate_id"] == parent["candidate_id"]
                     ],
                     trace_reader=self.ledger.read_object,
+                    static_check=static_error(
+                        self.ledger, self.run_id, parent["source"], self.problem["signature"]
+                    ),
                 )
             else:
                 self.resampled = True
