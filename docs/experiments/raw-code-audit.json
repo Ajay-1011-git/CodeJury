@@ -1,0 +1,245 @@
+{
+  "commitments_sha256": "3146ce6de3da0de3ed8e8ae7113b9c30fa3c5b79a5a482f0792c7fb297ecff82",
+  "docker_function_calls": 534,
+  "extraction_failures": 22,
+  "paired": [
+    {
+      "jury_only_solved": 25,
+      "raw_only_solved": 4,
+      "seed": 17
+    },
+    {
+      "jury_only_solved": 31,
+      "raw_only_solved": 4,
+      "seed": 29
+    },
+    {
+      "jury_only_solved": 27,
+      "raw_only_solved": 6,
+      "seed": 43
+    }
+  ],
+  "protocol": {
+    "baseline_results_sha256": "5b9f2017243fa83791c3880ad3ca5821fde9d60b580806bcbcb9b3f98ea19719",
+    "cache": "Identical source bytes for the same deterministic base execute once; reuse outcomes for repeated seed records, disclosed in summary.",
+    "extraction": "One optional outer json/unlabelled Markdown fence; parse JSON; take source string verbatim. Ignore metadata schema failures. No source edits, new sampling or hidden-outcome selection.",
+    "runner_runtime_hash": "c1e25f67d21b65c259f551de98578e1dacd2c297ae4c7b19b0c8b3b83f44fe8f",
+    "runtime_sha256": "e17635d4be651613052fd9c70a5d8e2e6d970fdc5a3eda096ae30686df8bb9f3",
+    "scope": "Post-hoc code-only audit, not a replacement preregistered baseline. Raw remains one-shot; jury uses multiple roles, tools and more compute.",
+    "scoring_sha256": "a52a8ce18e6d56a75c3284c41a439604d91957616a03496a7e2f79e1f0b66a5d",
+    "script_sha256": "e60e3c1f9686d7604e91256c6612a2d670632ea7943f0d0c17a9a620b99e8b51",
+    "sealed_assessment_opened": false,
+    "version": "codejury.raw-code-audit.v1"
+  },
+  "results_sha256": "ae66970d25b0af1df33409f3ab4ccd3ebccbbe53df8ce17b2c339125d5adbd97",
+  "reused_records": 178,
+  "runs": 300,
+  "status": "complete",
+  "summary": [
+    {
+      "bases": 100,
+      "method": "B-base-code-only-audit",
+      "outcomes": {
+        "incorrect": 85,
+        "invalid": 6,
+        "solved": 9
+      },
+      "seed": 17,
+      "solve_rate": 0.09,
+      "solved": 9,
+      "tier": "all",
+      "wilson_95": [
+        0.04807254000256516,
+        0.1622621285271631
+      ]
+    },
+    {
+      "bases": 22,
+      "method": "B-base-code-only-audit",
+      "outcomes": {
+        "incorrect": 16,
+        "invalid": 2,
+        "solved": 4
+      },
+      "seed": 17,
+      "solve_rate": 0.18181818181818182,
+      "solved": 4,
+      "tier": "T1",
+      "wilson_95": [
+        0.07306884583422052,
+        0.38516607437126543
+      ]
+    },
+    {
+      "bases": 33,
+      "method": "B-base-code-only-audit",
+      "outcomes": {
+        "incorrect": 32,
+        "solved": 1
+      },
+      "seed": 17,
+      "solve_rate": 0.030303030303030304,
+      "solved": 1,
+      "tier": "T2",
+      "wilson_95": [
+        0.00536941053687183,
+        0.1531872538211892
+      ]
+    },
+    {
+      "bases": 45,
+      "method": "B-base-code-only-audit",
+      "outcomes": {
+        "incorrect": 37,
+        "invalid": 4,
+        "solved": 4
+      },
+      "seed": 17,
+      "solve_rate": 0.08888888888888889,
+      "solved": 4,
+      "tier": "T3",
+      "wilson_95": [
+        0.035111116726370226,
+        0.20733575334289356
+      ]
+    },
+    {
+      "bases": 100,
+      "method": "B-base-code-only-audit",
+      "outcomes": {
+        "incorrect": 84,
+        "invalid": 8,
+        "solved": 8
+      },
+      "seed": 29,
+      "solve_rate": 0.08,
+      "solved": 8,
+      "tier": "all",
+      "wilson_95": [
+        0.041093461484380624,
+        0.14998107700948735
+      ]
+    },
+    {
+      "bases": 22,
+      "method": "B-base-code-only-audit",
+      "outcomes": {
+        "incorrect": 16,
+        "invalid": 3,
+        "solved": 3
+      },
+      "seed": 29,
+      "solve_rate": 0.13636363636363635,
+      "solved": 3,
+      "tier": "T1",
+      "wilson_95": [
+        0.04749003714055253,
+        0.33334987166571717
+      ]
+    },
+    {
+      "bases": 33,
+      "method": "B-base-code-only-audit",
+      "outcomes": {
+        "incorrect": 30,
+        "invalid": 1,
+        "solved": 2
+      },
+      "seed": 29,
+      "solve_rate": 0.06060606060606061,
+      "solved": 2,
+      "tier": "T2",
+      "wilson_95": [
+        0.016780883087191875,
+        0.1960624480864781
+      ]
+    },
+    {
+      "bases": 45,
+      "method": "B-base-code-only-audit",
+      "outcomes": {
+        "incorrect": 38,
+        "invalid": 4,
+        "solved": 3
+      },
+      "seed": 29,
+      "solve_rate": 0.06666666666666667,
+      "solved": 3,
+      "tier": "T3",
+      "wilson_95": [
+        0.022932032599250987,
+        0.17856601963591895
+      ]
+    },
+    {
+      "bases": 100,
+      "method": "B-base-code-only-audit",
+      "outcomes": {
+        "incorrect": 83,
+        "invalid": 8,
+        "solved": 9
+      },
+      "seed": 43,
+      "solve_rate": 0.09,
+      "solved": 9,
+      "tier": "all",
+      "wilson_95": [
+        0.04807254000256516,
+        0.1622621285271631
+      ]
+    },
+    {
+      "bases": 22,
+      "method": "B-base-code-only-audit",
+      "outcomes": {
+        "incorrect": 17,
+        "invalid": 1,
+        "solved": 4
+      },
+      "seed": 43,
+      "solve_rate": 0.18181818181818182,
+      "solved": 4,
+      "tier": "T1",
+      "wilson_95": [
+        0.07306884583422052,
+        0.38516607437126543
+      ]
+    },
+    {
+      "bases": 33,
+      "method": "B-base-code-only-audit",
+      "outcomes": {
+        "incorrect": 29,
+        "invalid": 3,
+        "solved": 1
+      },
+      "seed": 43,
+      "solve_rate": 0.030303030303030304,
+      "solved": 1,
+      "tier": "T2",
+      "wilson_95": [
+        0.00536941053687183,
+        0.1531872538211892
+      ]
+    },
+    {
+      "bases": 45,
+      "method": "B-base-code-only-audit",
+      "outcomes": {
+        "incorrect": 37,
+        "invalid": 4,
+        "solved": 4
+      },
+      "seed": 43,
+      "solve_rate": 0.08888888888888889,
+      "solved": 4,
+      "tier": "T3",
+      "wilson_95": [
+        0.035111116726370226,
+        0.20733575334289356
+      ]
+    }
+  ],
+  "unique_base_source_pairs": 122,
+  "version": "codejury.raw-code-audit.v1"
+}

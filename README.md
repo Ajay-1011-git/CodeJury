@@ -115,7 +115,10 @@ and seeds 17, 29, 43; it runs sequentially and can take several hours. See the
 [baseline results](docs/dev-bench-baselines.md). All 900 baseline runs are complete
 and scored: the current jury solves 30–35/100 per seed, with 6–10 wrong acceptances;
 the trained single-model comparator solves 1–3/100. Raw responses all fail the
-required format. These are development results, with intervals reported per seed.
+required format. A subsequent code-only audit of the saved raw replies recovers
+8–9/100 correct repairs after removing outer Markdown fences, without changing
+the code. See [current limitations and the comparison audit](docs/current-limitations-and-baseline-audit.md).
+These are development results, with intervals reported per seed.
 
 ## Checks and development
 

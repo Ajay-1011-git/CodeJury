@@ -12,6 +12,13 @@ jury wrongly accepts **6–10/100 per seed** against private tests. It has not m
 the roadmap's zero-wrong-acceptance goal. T2 solve rates are 30.3%, 45.5% and 36.4%
 for seeds 17, 29 and 43; a consistently achieved 40% T2 rate is not established.
 
+A subsequent [code-only audit](current-limitations-and-baseline-audit.md) recovered
+saved raw replies by removing one outer Markdown fence and reading their JSON
+`source` field unchanged. Raw Phi-4-mini then solves **9, 8 and 9/100** for seeds
+17, 29 and 43. The strict-protocol zero above remains a format-compliance result;
+it should not be presented as the model's underlying repair ability. No new model
+calls were made. The original baseline files and scores are unchanged.
+
 ## Benchmark and boundaries
 
 - Inherited dashboard checkpoint: `1c4ba52`, branch `codex/next-phase`.
