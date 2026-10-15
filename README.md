@@ -67,6 +67,14 @@ counterexamples, parent diffs and token counts. Expand an evidence chip to inspe
 the input and observed output, or open its execution cell. The clickable timeline
 remains available. No dialogue is generated for display.
 
+After a finished jury result, **Compare with base Phi-4-mini** opens a small
+comparison page. Click **Run Phi-4-mini without fine-tuning** for one actual local
+attempt without CodeJury adapters. It sees the original bug and approved
+specification, without the jury's proposed fix or debate. The page shows both
+outputs, the actual base-model reply, recorded token/time usage, and checks on the
+same original supplied examples. Saved results reopen without another model call.
+See [comparison details](docs/live-base-comparison.md).
+
 Quick case uses additional `/s2x/intake` draft/approval endpoints beside the frozen
 Stage 2 contract. The [bounded local route](docs/bounded-local-route.md) records
 the user's time limit, local training choice, and unmeasured acceptance checks.

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#e3f1fe">
+  <title>CodeJury — Phi-4-mini comparison</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-header"><div class="nav-inner">
+    <a class="brand" href="/#evidence"><img src="assets/sprites/gavel.svg" alt="" width="32" height="32"><span>codejury<span class="brand-dot">.</span></span></a>
+    <span class="text-dim">A second opinion</span>
+    <a href="/#evidence">Back to the workbench ↗</a>
+  </div></header>
+  <main class="comparison-page">
+    <div class="panel-intro"><span class="eyebrow">SAME BUG / BASE MODEL</span><h1>What did Phi do?</h1><p>CodeJury beside Phi-4-mini without CodeJury fine-tuning.</p></div>
+    <div id="comparison-root" aria-live="polite"><p>Loading this case…</p></div>
+  </main>
+  <script type="module" src="src/comparison.mjs"></script>
+</body>
+</html>

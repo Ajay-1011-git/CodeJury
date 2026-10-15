@@ -12,6 +12,7 @@ import { renderConversation, candidateLabel, hardRecord, lineDiff } from './stag
 import { DEMO_CASES } from './stage2-demos.mjs';
 import { mountQuickCase } from './quick-case.mjs';
 import { TranscriptFeed } from './transcript-feed.mjs';
+import { comparisonUrl } from './comparison.mjs';
 
 const ACTIVE = ['queued', 'running'];
 
@@ -101,6 +102,12 @@ function renderVerdict(root, state, onDownloadSlot) {
     }
   }
   root.appendChild(usage);
+  const compareUrl = comparisonUrl(snap.run_id);
+  if (compareUrl && ['supported_patch', 'unresolved'].includes(snap.status)) {
+    const compare = el('a', 'btn comparison-link', 'Compare with base Phi-4-mini ↗');
+    compare.href = compareUrl; compare.target = '_blank'; compare.rel = 'noopener';
+    root.appendChild(compare);
+  }
 }
 
 // ------------------------------------------------------------------ proposals

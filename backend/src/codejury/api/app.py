@@ -81,6 +81,7 @@ def create_app(store=None, worker=None, *, web_dir=None, stage2=None, intake_sto
     store = store or Store()
     repository = Repository(store)
     worker = worker or LocalWorker(store)
+    comparison_service = None
 
     @asynccontextmanager
     async def lifespan(_app):
@@ -88,9 +89,13 @@ def create_app(store=None, worker=None, *, web_dir=None, stage2=None, intake_sto
         if stage2 is not None:
             try:
                 stage2.state.worker.recover()
+                if comparison_service is not None:
+                    comparison_service.recover()
             except Exception:  # e.g. a standalone Stage 2 server already owns the ledger
                 app.state.stage2_error = "Stage 2 is unavailable: another server owns its ledger"
         yield
+        if comparison_service is not None:
+            comparison_service.close()
         worker.close()
         if stage2 is not None and app.state.stage2_error is None:
             stage2.state.worker.close()
@@ -156,7 +161,6 @@ def create_app(store=None, worker=None, *, web_dir=None, stage2=None, intake_sto
         return response
 
     if stage2 is not None:
-
         @app.middleware("http")
         async def stage2_gate(request: Request, call_next):
             path = request.url.path
@@ -303,6 +307,8 @@ def create_app(store=None, worker=None, *, web_dir=None, stage2=None, intake_sto
     if stage2 is not None:
         from ..intake.interpreter import Interpreter
         from ..intake.store import DraftStore
+        from .comparison import ComparisonService
+        from .comparison import router as comparison_router
         from .intake import local_request
         from .intake import router as intake_router
 
@@ -311,6 +317,9 @@ def create_app(store=None, worker=None, *, web_dir=None, stage2=None, intake_sto
         )
         app.state.intake_store = intake_store
         app.include_router(intake_router(intake_store, stage2, app, repository))
+        comparison_service = ComparisonService(stage2, provenance=intake_store.provenance_for_run)
+        app.state.comparison_service = comparison_service
+        app.include_router(comparison_router(comparison_service, app, repository))
 
         @app.get(STAGE2_PREFIX + "/runs/{run_id}/transcript")
         def stage2_run_transcript(run_id: str, request: Request):

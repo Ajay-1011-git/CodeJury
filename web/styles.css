@@ -493,3 +493,22 @@ textarea.form-control { line-height: 1.7; }
 .evidence-chip { font-size: .85rem; }
 .quick-item-summary { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; margin: .7rem 0; }
 .quick-item-rejected .quick-item-summary { opacity: .45; text-decoration: line-through; }
+/* A compact, separate page preserves the original repair desk while comparing. */
+.comparison-page { max-width: 1180px; margin: 48px auto; padding: 0 24px; }
+.comparison-page h1 { font-family: var(--font-display); font-size: clamp(48px, 7vw, 76px); line-height: 1; margin: 16px 0; }
+.comparison-page h2 { font-family: var(--font-family); font-size: 21px; line-height: 1.35; margin: 14px 0; }
+.comparison-page h3 { font-size: 14px; margin: 20px 0 10px; }
+.comparison-intro, .comparison-output, .comparison-tests, .comparison-input { padding: 24px; margin: 20px 0; }
+.comparison-run { color: var(--color-slate-pencil, #5c6066); font-size: 13px; }
+.comparison-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.comparison-grid .card { margin: 0; min-width: 0; }
+.comparison-output > p { margin: 8px 0; overflow-wrap: anywhere; }
+.comparison-raw { border-top: 3px solid var(--color-signal-orange, #ff5e24); }
+.comparison-source { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 480px; overflow: auto; background: #f6f8fa; padding: 16px; border: 1px solid #e1e6eb; border-radius: 8px; font-size: 12px; line-height: 1.65; tab-size: 4; }
+.comparison-checks { font-weight: 700; }
+.comparison-link { display: inline-block; margin-top: 20px; }
+.comparison-table-wrap { overflow-x: auto; }
+.comparison-tests table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.comparison-tests td, .comparison-tests th { padding: 12px; text-align: left; border-bottom: 1px solid #e1e6eb; overflow-wrap: anywhere; min-width: 100px; }
+.comparison-input summary, .comparison-output summary { cursor: pointer; font-size: 14px; font-weight: 700; }
+@media (max-width: 760px) { .comparison-grid { grid-template-columns: 1fr; } .comparison-page { margin: 28px auto; padding: 0 14px; } .comparison-intro, .comparison-output, .comparison-tests, .comparison-input { padding: 18px; } }
